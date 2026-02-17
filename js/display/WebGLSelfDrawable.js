@@ -3,7 +3,7 @@
 /**
  * Supertype for WebGL drawables that display a specific Node.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  * @author Sam Reid (PhET Interactive Simulations)
  */
 

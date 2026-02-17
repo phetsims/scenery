@@ -154,7 +154,7 @@
  * Pointer events spec draft: https://dvcs.w3.org/hg/pointerevents/raw-file/tip/pointerEvents.html
  *                            http://msdn.microsoft.com/en-us/library/ie/hh673557(v=vs.85).aspx
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  * @author Sam Reid (PhET Interactive Simulations)
  */
 

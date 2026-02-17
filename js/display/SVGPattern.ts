@@ -3,7 +3,7 @@
 /**
  * Creates an SVG pattern element for a given pattern.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Pool, { TPoolable } from '../../../phet-core/js/Pool.js';

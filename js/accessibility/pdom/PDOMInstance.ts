@@ -24,7 +24,7 @@
  *        ABCDEG
  *      ABCDFH
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import dotRandom from '../../../../dot/js/dotRandom.js';

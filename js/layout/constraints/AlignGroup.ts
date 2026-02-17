@@ -16,7 +16,7 @@
  *       to a Scenery display, its bounds will update when Display.updateDisplay() will called, so this will guarantee
  *       that the layout will be applied before it is displayed.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Disposable, { DisposableOptions } from '../../../../axon/js/Disposable.js';

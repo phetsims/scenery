@@ -4,7 +4,7 @@
  * "definition" type for generalized color paints (anything that can be given to a fill/stroke that represents just a
  * solid color). Does NOT include any type of gradient or pattern.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Property from '../../../axon/js/Property.js';

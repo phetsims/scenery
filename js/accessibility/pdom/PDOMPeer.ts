@@ -4,7 +4,7 @@
  * An accessible peer controls the appearance of an accessible Node's instance in the parallel DOM. A PDOMPeer can
  * have up to four window.Elements displayed in the PDOM, see constructor for details.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  * @author Jesse Greenberg
  */
 

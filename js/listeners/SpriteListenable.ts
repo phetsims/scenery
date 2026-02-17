@@ -4,7 +4,7 @@
  * A trait to be mixed into PressListeners for identifying which SpriteInstance of a given Sprites node was interacted
  * with, AND will prevent interactions that are NOT over any SpriteInstances.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import inheritance from '../../../phet-core/js/inheritance.js';

@@ -47,7 +47,7 @@
  *     - disposed backbone instances will only remove drawables if they weren't marked for removal previously (e.g. in
  *         case we are from a removed instance)
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Emitter from '../../../axon/js/Emitter.js';

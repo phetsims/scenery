@@ -4,7 +4,7 @@
  * A MultiListener that is designed to pan and zoom a target Node, where you can provide limiting and
  * describing bounds so that the targetNode is limited to a region.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 

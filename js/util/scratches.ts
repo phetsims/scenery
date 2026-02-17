@@ -5,7 +5,7 @@
  * This is useful for performance reasons, as it avoids creating and destroying
  * elements repeatedly.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import scenery from '../scenery.js';

@@ -4,7 +4,7 @@
  * Supertype for LayoutConstraints that are based on an actual Node where the layout takes place. Generally used with
  * layout containers that are subtypes of LayoutNode.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Property from '../../../../axon/js/Property.js';

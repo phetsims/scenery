@@ -3,7 +3,7 @@
 /**
  * Runs PDOM-tree-related scenery operations randomly (with assertions) to try to find any bugs.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Permutation from '../../../../dot/js/Permutation.js';

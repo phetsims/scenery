@@ -7,7 +7,7 @@
  *
  * TODO: preventFit OR handle bounds increase (or both) https://github.com/phetsims/scenery/issues/1581
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import toSVGNumber from '../../../dot/js/util/toSVGNumber.js';

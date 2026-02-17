@@ -14,7 +14,7 @@
  * in the previous frame (using oldNextDrawable for iteration across the drawable linked-list), or the "new" one that
  * will be displayed in the next frame (using nextDrawable for iteration).
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Poolable from '../../../phet-core/js/Poolable.js';

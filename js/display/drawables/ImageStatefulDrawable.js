@@ -6,7 +6,7 @@
  * necessary for an attribute that changed back to its original/currently-displayed value). Generally, this is used
  * for DOM and SVG drawables.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import inheritance from '../../../../phet-core/js/inheritance.js';

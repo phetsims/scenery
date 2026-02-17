@@ -7,7 +7,7 @@
  *
  * Extracted to reduce circular dependencies.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 export const richTextContentToString = ( content: string, isLTR?: boolean ): string => {

@@ -10,7 +10,7 @@
  * Shortcut to create:
  *    var context = new phet.scenery.DebugContext( document.createElement( 'canvas' ).getContext( '2d' ) );
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import scenery from '../scenery.js';

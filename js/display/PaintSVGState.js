@@ -3,7 +3,7 @@
 /**
  * Handles SVG <defs> and fill/stroke style for SVG elements (by composition, not a trait or for inheritance).
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import scenery from '../scenery.js';

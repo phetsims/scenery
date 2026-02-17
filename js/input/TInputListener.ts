@@ -5,7 +5,7 @@
  *
  * Refer to Input.ts for documentation on the event types.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import type Bounds2 from '../../../dot/js/Bounds2.js';

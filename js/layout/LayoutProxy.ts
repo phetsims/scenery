@@ -9,7 +9,7 @@
  * LayoutConstraint. This is not the same as the "global" coordinates for a Scenery Node in general (as most of the root
  * nodes of the trails provided to LayoutProxy will have parents!)
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';

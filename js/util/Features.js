@@ -3,7 +3,7 @@
 /**
  * Feature detection
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import detectPrefix from '../../../phet-core/js/detectPrefix.js';

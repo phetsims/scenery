@@ -3,7 +3,7 @@
 /**
  * Hooks up listeners to a paint (fill or stroke) to determine when its represented value has changed.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';

@@ -5,7 +5,7 @@
  * It also provides fast computation of that global matrix, NOT recomputing every matrix, even on most transform
  * changes.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  * @author Jesse Greenberg
  */
 

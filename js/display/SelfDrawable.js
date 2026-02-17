@@ -4,7 +4,7 @@
 /**
  * A drawable that will paint a single instance.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Drawable from '../display/Drawable.js';

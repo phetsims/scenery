@@ -13,7 +13,7 @@
  * // REVIEW: can you describe this a bit more. Do you mean any Node in a trail? What about if the provided Node is disposed?
  * NOTE: If a Node is disposed, it will be removed from the trails.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import TinyProperty from '../../../axon/js/TinyProperty.js';

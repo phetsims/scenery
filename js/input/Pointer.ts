@@ -19,7 +19,7 @@
  * A listener may have an interrupt() method that will attemp to interrupt its behavior. If it is added as an attached
  * listener, then it must have an interrupt() method.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';

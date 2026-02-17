@@ -3,7 +3,7 @@
 /**
  * A rectangular node that inherits Path, and allows for optimized drawing and improved rectangle handling.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { TReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';

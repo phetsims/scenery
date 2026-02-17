@@ -3,7 +3,7 @@
 /**
  * Associate with all accessible content related to this peer
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  * @author Jesse Greenberg
  */
 

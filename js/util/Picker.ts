@@ -6,7 +6,7 @@
  * A "listener equivalent" is either the existence of at least one input listener, or pickable:true. Nodes with
  * listener equivalents will basically try to hit-test ALL descendants that aren't invisible or pickable:false.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';

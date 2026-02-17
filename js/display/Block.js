@@ -5,7 +5,7 @@
  * element, or some type of DOM container). Doesn't strictly have to have its DOM element used directly (Canvas block
  * used for caches).  This type is abstract, and meant to be subclassed.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import cleanArray from '../../../phet-core/js/cleanArray.js';

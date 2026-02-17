@@ -3,7 +3,7 @@
 /*
  * An HTMLImageElement that is backed by a scene. Call update() on this SceneImage to update the image from the scene.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import scenery from '../scenery.js';

@@ -3,7 +3,7 @@
 /**
  * Interface specifically for SelfDrawables for a Rectangle Node.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import type TPathDrawable from '../../display/drawables/TPathDrawable.js';

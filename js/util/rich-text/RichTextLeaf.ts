@@ -3,7 +3,7 @@
 /**
  * A leaf (text) element in the RichText, which will display a snippet of Text.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 import Pool, { TPoolable } from '../../../../phet-core/js/Pool.js';
 import Font from '../../util/Font.js';

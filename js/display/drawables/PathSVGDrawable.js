@@ -3,7 +3,7 @@
 /**
  * SVG drawable for Path nodes.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import platform from '../../../../phet-core/js/platform.js';

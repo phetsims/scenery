@@ -4,7 +4,7 @@
  * TODO docs https://github.com/phetsims/scenery/issues/1581
  *   note paintCanvas() required, and other implementation-specific details
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import scenery from '../scenery.js';

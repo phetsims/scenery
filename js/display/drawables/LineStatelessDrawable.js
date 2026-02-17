@@ -3,7 +3,7 @@
 /**
  * A trait for drawables for Line that does not store the line's state, as it just needs to track dirtyness overall.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import inheritance from '../../../../phet-core/js/inheritance.js';

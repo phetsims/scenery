@@ -3,7 +3,7 @@
 /**
  * Base type for controllers that create and keep an SVG gradient element up-to-date with a Scenery gradient.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import cleanArray from '../../../phet-core/js/cleanArray.js';

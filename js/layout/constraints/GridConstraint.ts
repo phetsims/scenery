@@ -7,7 +7,7 @@
  * Throughout the documentation for grid-related items, the term "line" refers to either a row or column (depending on
  * the orientation).
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import TProperty from '../../../../axon/js/TProperty.js';

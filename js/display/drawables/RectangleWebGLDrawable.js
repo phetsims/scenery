@@ -3,7 +3,7 @@
 /**
  * WebGL drawable for Rectangle nodes.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { isTReadOnlyProperty } from '../../../../axon/js/TReadOnlyProperty.js';

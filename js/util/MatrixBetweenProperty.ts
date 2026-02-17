@@ -6,7 +6,7 @@
  *
  * If there is no unique path, the value will be null.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import TinyProperty from '../../../axon/js/TinyProperty.js';

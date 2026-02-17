@@ -6,7 +6,7 @@
  * NOTE: This does not call abort(), so listeners that are added to the same Node as this listener will still fire
  *       normally.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import scenery from '../scenery.js';

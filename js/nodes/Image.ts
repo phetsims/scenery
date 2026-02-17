@@ -4,7 +4,7 @@
  * A node that displays a single image either from an actual HTMLImageElement, a URL, a Canvas element, or a mipmap
  * data structure described in the constructor.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { TReadOnlyProperty, isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';

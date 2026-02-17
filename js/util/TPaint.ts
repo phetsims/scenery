@@ -3,7 +3,7 @@
 /**
  * Type representing a PaintDef
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Paint from '../util/Paint.js';

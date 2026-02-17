@@ -3,7 +3,7 @@
 /**
  * Whether links should be openable
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import Tandem from '../../../tandem/js/Tandem.js';

@@ -3,7 +3,7 @@
 /**
  * A collection of information about an event and the environment when it was fired
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';

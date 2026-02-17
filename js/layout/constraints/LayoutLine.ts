@@ -3,7 +3,7 @@
 /**
  * An internal representation of a row/column for grid/flow handling in constraints (set up for pooling)
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import scenery from '../../scenery.js';

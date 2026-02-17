@@ -3,7 +3,7 @@
 /**
  * A configurable cell containing a Node used for more permanent layouts
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Orientation from '../../../../phet-core/js/Orientation.js';

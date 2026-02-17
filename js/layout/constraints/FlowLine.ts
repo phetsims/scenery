@@ -3,7 +3,7 @@
 /**
  * A poolable internal representation of a line for layout handling in FlowConstraint
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Orientation from '../../../../phet-core/js/Orientation.js';

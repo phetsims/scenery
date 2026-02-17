@@ -3,7 +3,7 @@
 /**
  * Trait for Nodes that support a standard fill and/or stroke (e.g. Text, Path and Path subtypes).
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';

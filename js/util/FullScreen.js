@@ -4,7 +4,7 @@
  * Utilities for full-screen support
  * Used to live at '/joist/js/FullScreen'. Moved to '/scenery/js/util/FullScreen' on 4/10/2018
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Property from '../../../axon/js/Property.js';

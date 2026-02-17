@@ -20,7 +20,7 @@
  * Useful specs:
  * http://www.w3.org/TR/css3-fonts/
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';

@@ -3,7 +3,7 @@
 /**
  * The main type interface for Node's layoutOptions (for use with Grid/Flow based layouts)
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import type { FlowCellOptions } from '../layout/constraints/FlowCell.js';

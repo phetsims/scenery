@@ -31,7 +31,7 @@
  * NOTE: Stitcher instances may be reused many times, even with different backbones. It should always release any
  * object references that it held after usage.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import cleanArray from '../../../phet-core/js/cleanArray.js';

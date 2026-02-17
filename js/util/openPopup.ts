@@ -3,7 +3,7 @@
 /**
  * Opens a URL in a popup window or tab if possible.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import allowLinksProperty from '../util/allowLinksProperty.js';

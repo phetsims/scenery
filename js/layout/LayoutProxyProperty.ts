@@ -14,7 +14,7 @@
  * would be ambiguous). E.g. for ManualConstraint, if a Node isn't connected to the root, there's nothing the constraint
  * can do.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { DerivedProperty1 } from '../../../axon/js/DerivedProperty.js';

@@ -3,7 +3,7 @@
 /**
  * Utilities and globals to support RichText
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 import scenery from '../../scenery.js';
 import Text from '../../nodes/Text.js';

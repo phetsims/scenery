@@ -3,7 +3,7 @@
 /**
  * For generating random mouse/touch input to a Display, to hopefully discover bugs in an automated fashion.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Random from '../../../dot/js/Random.js';

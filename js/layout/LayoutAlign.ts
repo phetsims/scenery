@@ -6,7 +6,7 @@
  * NOTE: This is orientation-agnostic for a reason, so that it's natural with GridBox, and FlowBox can switch
  * orientation
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Enumeration from '../../../phet-core/js/Enumeration.js';

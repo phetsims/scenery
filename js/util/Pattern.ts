@@ -6,7 +6,7 @@
  * TODO: future support for repeat-x, repeat-y or no-repeat (needs SVG support) https://github.com/phetsims/scenery/issues/1581
  * TODO: support scene or other various content (SVG is flexible, can backport to canvas)
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Paint from '../util/Paint.js';

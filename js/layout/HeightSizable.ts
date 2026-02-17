@@ -5,7 +5,7 @@
  * so that layout containers could know how "small" the component can be made. The preferred height is set by the
  * layout container, and the component should adjust its size so that it takes up that height.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import TinyProperty from '../../../axon/js/TinyProperty.js';

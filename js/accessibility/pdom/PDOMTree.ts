@@ -3,7 +3,7 @@
 /**
  * The main logic for maintaining the PDOM instance tree (see https://github.com/phetsims/scenery-phet/issues/365)
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import arrayDifference from '../../../../phet-core/js/arrayDifference.js';

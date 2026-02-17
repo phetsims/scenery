@@ -3,7 +3,7 @@
 /**
  * Utility functions for pixel comparison tests.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  * @author Sam Reid (PhET Interactive Simulations)
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */

@@ -3,7 +3,7 @@
 /**
  * WebGL drawable for Sprites.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import animationFrameTimer from '../../../../axon/js/animationFrameTimer.js';

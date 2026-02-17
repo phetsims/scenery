@@ -6,7 +6,7 @@
  * general scenery accessibility doc for more details). Acts like a multimap
  * (duplicates allowed) to indicate how many times we appear in a pdom display.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import type Node from '../../nodes/Node.js';

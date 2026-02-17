@@ -3,7 +3,7 @@
 /**
  * A configurable cell containing a Node used for GridConstraint layout
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import optionize from '../../../../phet-core/js/optionize.js';

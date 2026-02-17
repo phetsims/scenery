@@ -15,7 +15,7 @@
  * 1. Check specific dirty flags (e.g. if the fill changed, update the fill of our SVG element).
  * 2. Call setToCleanState() once done, to clear the dirty flags.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import inheritance from '../../../../phet-core/js/inheritance.js';

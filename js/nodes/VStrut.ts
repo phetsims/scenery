@@ -4,7 +4,7 @@
  * A Node meant to just take up vertical space (usually for layout purposes).
  * It is never displayed, and cannot have children.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import scenery from '../scenery.js';

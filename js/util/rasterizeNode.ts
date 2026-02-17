@@ -3,7 +3,7 @@
 /**
  * Rasterization utilities for arbitrary Nodes.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Image, { ImageOptions } from '../nodes/Image.js';

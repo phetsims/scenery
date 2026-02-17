@@ -29,7 +29,7 @@
  * and what Node has focus. See that class for information about how hotkeys work.
  *
  * @author Jesse Greenberg (PhET Interactive Simulations)
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';

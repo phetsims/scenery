@@ -25,7 +25,7 @@
  *
  * new SomeNode( { someOption: something } )
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { combineOptions } from '../../../phet-core/js/optionize.js';

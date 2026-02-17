@@ -20,7 +20,7 @@
  * ctrl/alt/meta/shift, which are always included).
  *
  * @author Jesse Greenberg (PhET Interactive Simulations)
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import DerivedProperty, { UnknownDerivedProperty } from '../../../axon/js/DerivedProperty.js';

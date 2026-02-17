@@ -4,7 +4,7 @@
  * Sizable is a trait that provides a minimum and preferred width/height (both WidthSizable and HeightSizable,
  * but with added features that allow convenience of working with both dimensions at once).
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Dimension2 from '../../../dot/js/Dimension2.js';

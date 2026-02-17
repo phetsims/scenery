@@ -29,7 +29,7 @@
  *
  * See https://scenerystack.org/learn/scenery-layout/#AlignBox for details
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Multilink from '../../../../axon/js/Multilink.js';

@@ -3,7 +3,7 @@
 /**
  * A leaf node element in the RichText, which will display a Node (e.g. with the `nodes` or `tags` feature)
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 import Pool, { TPoolable } from '../../../../phet-core/js/Pool.js';
 import Node from '../../nodes/Node.js';

@@ -19,7 +19,7 @@
  *
  * See https://scenerystack.org/learn/scenery-layout/#ManualConstraint for details
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';

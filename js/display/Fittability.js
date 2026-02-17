@@ -5,7 +5,7 @@
  * We mostly mark our own drawables as fittable, and track whether our subtree is all fittable (so that common-ancestor
  * fits can determine if their bounds will change).
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';

@@ -4,7 +4,7 @@
  * Type representing a ColorDef
  * Please see Color.toColor() for a way to transform these colors.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { TReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';

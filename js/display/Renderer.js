@@ -7,7 +7,7 @@
  * We use a bitmask to represent renderers currently, in a way that can be logically-ANDed in order to obtain
  * information about "what renderer can support all of these Nodes?"
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import scenery from '../scenery.js';

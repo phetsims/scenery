@@ -4,7 +4,7 @@
  * Poolable wrapper for SVG <group> elements. We store state and add listeners directly to the corresponding Node,
  * so that we can set dirty flags and smartly update only things that have changed. This takes a load off of SVGBlock.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import toSVGNumber from '../../../dot/js/util/toSVGNumber.js';

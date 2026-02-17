@@ -3,7 +3,7 @@
 /**
  * Interface specifically for SelfDrawables for a Paintable Node.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 type TPaintableDrawable = {

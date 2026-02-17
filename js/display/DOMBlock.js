@@ -4,7 +4,7 @@
  * DOM Drawable wrapper for another DOM Drawable. Used so that we can have our own independent siblings, generally as part
  * of a Backbone's layers/blocks.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Poolable from '../../../phet-core/js/Poolable.js';

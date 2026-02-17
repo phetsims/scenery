@@ -3,7 +3,7 @@
 /**
  * To avoid circular dependencies, this file contains type checks for the Sizable type hierarchy.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import type { TWidthSizable } from './WidthSizable.js';

@@ -3,7 +3,7 @@
 /**
  * The main type interface for input listeners
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import TInputListener from '../input/TInputListener.js';

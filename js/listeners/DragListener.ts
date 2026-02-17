@@ -65,7 +65,7 @@
  * be fine). Doing things based on modelPoint/modelDelta/etc. should be completely fine using one listener with
  * multiple nodes. The typical pattern IS creating one DragListener per draggable view Node.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Property from '../../../axon/js/Property.js';

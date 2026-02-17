@@ -4,7 +4,7 @@
  * Represents an image with a specific center "offset". Considered immutable (with an immutable image, the Canvas if
  * provided should not change).
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { TReadOnlyProperty, isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';

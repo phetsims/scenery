@@ -4,7 +4,7 @@
  * Main flow-layout logic. Usually used indirectly through FlowBox, but can also be used directly (say, if nodes don't
  * have the same parent, or a FlowBox can't be used).
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import TProperty from '../../../../axon/js/TProperty.js';

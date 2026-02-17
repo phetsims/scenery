@@ -94,7 +94,7 @@
  * (with notePendingMove). For performance, please consider which "end" should keep its drawables (the other end's
  * drawables will ALL have to be added/removed, which can be a major performance loss if we choose the wrong one).
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import cleanArray from '../../../phet-core/js/cleanArray.js';

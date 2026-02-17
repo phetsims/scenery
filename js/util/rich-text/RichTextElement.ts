@@ -4,7 +4,7 @@
  * Represents an element in the RichText hierarchy that has child content (renders nothing on its own, but has its own
  * scale, positioning, style, etc.). <span> or <b> are examples of something that would create this.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 import Pool, { TPoolable } from '../../../../phet-core/js/Pool.js';
 import Node from '../../nodes/Node.js';

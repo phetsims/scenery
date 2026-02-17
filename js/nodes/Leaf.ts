@@ -3,7 +3,7 @@
 /**
  * A trait for subtypes of Node, used to prevent children being added/removed to that subtype of Node.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import memoize from '../../../phet-core/js/memoize.js';

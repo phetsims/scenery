@@ -3,7 +3,7 @@
 /**
  * X-link namespace, used for SVG image URLs (xlink:href)
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import scenery from '../scenery.js';

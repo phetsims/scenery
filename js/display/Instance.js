@@ -17,7 +17,7 @@
  * While Instances are considered 'stateful', they will have listeners added to their Node which records actions taken
  * in-between Display.updateDisplay().
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';

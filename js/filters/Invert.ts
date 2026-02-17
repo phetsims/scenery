@@ -3,7 +3,7 @@
 /**
  * Invert filter
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import toSVGNumber from '../../../dot/js/util/toSVGNumber.js';

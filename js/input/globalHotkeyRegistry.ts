@@ -4,7 +4,7 @@
  * Stores a record of all global hotkeys (Hotkey instances that should be available regardless of focus).
  *
  * @author Jesse Greenberg (PhET Interactive Simulations)
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import TinyProperty from '../../../axon/js/TinyProperty.js';

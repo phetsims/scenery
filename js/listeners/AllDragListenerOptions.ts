@@ -3,7 +3,7 @@
 /**
  * Options used by many drag listeners in scenery. At this time, that includes DragListener and KeyboardDragListener.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  * @author Michael Kauzmann (PhET Interactive Simulations)
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */

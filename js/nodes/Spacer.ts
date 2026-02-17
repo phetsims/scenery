@@ -3,7 +3,7 @@
 /**
  * A Node meant to just take up certain bounds. It is never displayed, and cannot have children.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';

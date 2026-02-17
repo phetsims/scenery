@@ -13,7 +13,7 @@
  * NOTE: This can still trigger infinite loops nominally (if every layout call triggers another layout call), but we
  * have a practical assertion limit that will stop this and flag it as an error.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import TEmitter from '../../../../axon/js/TEmitter.js';

@@ -3,7 +3,7 @@
 /**
  * Renders a visual layer of WebGL drawables.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  * @author Sam Reid (PhET Interactive Simulations)
  * @author Sharfudeen Ashraf (For Ghent University)
  */

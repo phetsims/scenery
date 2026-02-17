@@ -24,7 +24,7 @@
  *
  * Some filters may have slightly different appearances depending on the browser/platform/renderer.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import CanvasContextWrapper from '../util/CanvasContextWrapper.js';

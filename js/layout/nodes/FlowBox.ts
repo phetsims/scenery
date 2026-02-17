@@ -33,7 +33,7 @@
  *   - maxContentWidth (see https://scenerystack.org/learn/scenery-layout/#FlowBox-maxContent)
  *   - maxContentHeight (see https://scenerystack.org/learn/scenery-layout/#FlowBox-maxContent)
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import TinyForwardingProperty from '../../../../axon/js/TinyForwardingProperty.js';

@@ -4,7 +4,7 @@
  * A link node in RichText - NOTE: This is NOT embedded for layout. Instead, link content will be added as children to this node,
  * and this will exist solely for the link functionality.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Pool, { TPoolable } from '../../../../phet-core/js/Pool.js';

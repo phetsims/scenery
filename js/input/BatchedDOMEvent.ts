@@ -4,7 +4,7 @@
  * Pooled structure to record batched events efficiently. How it calls the callback is based on the type
  * (pointer/mspointer/touch/mouse). There is one BatchedDOMEvent for each DOM Event (not for each touch).
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Enumeration from '../../../phet-core/js/Enumeration.js';

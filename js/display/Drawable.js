@@ -50,7 +50,7 @@
  *   shaderAttributes: {string[]} - names of vertex attributes to be used
  * }
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import TinyProperty from '../../../axon/js/TinyProperty.js';

@@ -43,7 +43,7 @@
  *   - horizontalSpan (see https://scenerystack.org/learn/scenery-layout/#GridBox-layoutOptions-size)
  *   - verticalSpan (see https://scenerystack.org/learn/scenery-layout/#GridBox-layoutOptions-size)
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import assertMutuallyExclusiveOptions from '../../../../phet-core/js/assertMutuallyExclusiveOptions.js';

@@ -6,7 +6,7 @@
  *
  * Assumes existence of the markPaintDirty method.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import inheritance from '../../../../phet-core/js/inheritance.js';

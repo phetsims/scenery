@@ -3,7 +3,7 @@
 /**
  * A property that is true when the node appears on the given display. See DisplayedTrailsProperty for additional options
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { DerivedProperty1, DerivedPropertyOptions } from '../../../axon/js/DerivedProperty.js';

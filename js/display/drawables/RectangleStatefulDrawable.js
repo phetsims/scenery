@@ -8,7 +8,7 @@
  *
  * This will also mix in PaintableStatefulDrawable
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import inheritance from '../../../../phet-core/js/inheritance.js';

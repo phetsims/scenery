@@ -3,7 +3,7 @@
 /**
  * The main type interface for Display overlays
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 type TOverlay = {

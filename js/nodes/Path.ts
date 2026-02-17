@@ -3,7 +3,7 @@
 /**
  * A Path draws a Shape with a specific type of fill and stroke. Mixes in Paintable.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';

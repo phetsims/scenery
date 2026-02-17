@@ -3,7 +3,7 @@
 /**
  * Represents a single sprite for the Sprites node, whose image can change over time (if it gets regenerated, etc.).
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Property from '../../../axon/js/Property.js';

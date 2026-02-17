@@ -4,7 +4,7 @@
  * Canvas drawable for CanvasNode. A generated CanvasSelfDrawable whose purpose will be drawing our CanvasNode.
  * One of these drawables will be created for each displayed instance of a CanvasNode.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Poolable from '../../../../phet-core/js/Poolable.js';

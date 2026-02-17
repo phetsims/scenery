@@ -4,7 +4,7 @@
  * Returns where possible line breaks can exist in a given string, according to the
  * Unicode Line Breaking Algorithm (UAX #14). Uses https://github.com/foliojs/linebreak.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Range from '../../../dot/js/Range.js';

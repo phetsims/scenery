@@ -3,7 +3,7 @@
 /**
  * Mixin for RichText elements in the hierarchy that should be pooled with a clean() method.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 import Matrix3 from '../../../../dot/js/Matrix3.js';
 import inheritance from '../../../../phet-core/js/inheritance.js';

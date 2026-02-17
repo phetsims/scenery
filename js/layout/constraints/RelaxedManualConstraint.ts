@@ -3,7 +3,7 @@
 /**
  * Like ManualConstraint, but permits layout when not all the nodes are connected (null will be passed through).
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';

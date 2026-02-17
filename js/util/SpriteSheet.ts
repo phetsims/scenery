@@ -10,7 +10,7 @@
  *
  * TODO: How to use custom mipmap levels? https://github.com/phetsims/scenery/issues/1581
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  * @author Sam Reid (PhET Interactive Simulations)
  */
 

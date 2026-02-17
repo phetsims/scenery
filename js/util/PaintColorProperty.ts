@@ -32,7 +32,7 @@
  * This is particularly helpful to create paints that are either lighter or darker than an original paint (where it
  * will update its color value when the original is updated).
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Property, { PropertyOptions } from '../../../axon/js/Property.js';

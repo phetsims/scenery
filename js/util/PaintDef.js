@@ -3,7 +3,7 @@
 /**
  * "definition" type for generalized paints (anything that can be passed in as a fill or stroke to a Path)
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';

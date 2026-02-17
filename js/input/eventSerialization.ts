@@ -5,7 +5,7 @@
  * and playback of events.
  *
  * @author Michael Kauzmann (PhET Interactive Simulations)
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';

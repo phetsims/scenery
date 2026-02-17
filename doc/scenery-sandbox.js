@@ -13,7 +13,7 @@
  *
  * AND the scenery-sandbox.css
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 ( () => {

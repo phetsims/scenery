@@ -7,7 +7,7 @@
  * @param trail - trail of the PDOMInstance, which can containe "gaps"
  * @param rootNode - root of a Display
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  * @author Jesse Greenberg
  */
 

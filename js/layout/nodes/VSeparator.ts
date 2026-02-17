@@ -3,7 +3,7 @@
 /**
  * A vertical line for separating items in a horizontal layout container.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { EmptySelfOptions } from '../../../../phet-core/js/optionize.js';

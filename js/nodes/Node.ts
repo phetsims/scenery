@@ -166,7 +166,7 @@
  * The trails above are in order from bottom to top (visually), due to the order of children. Thus since A's children
  * are [B,C] in that order, F with the trail [A,B,D,F] is displayed below [A,C,D,F], because C is after B.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import BooleanProperty, { BooleanPropertyOptions } from '../../../axon/js/BooleanProperty.js';

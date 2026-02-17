@@ -3,7 +3,7 @@
 /**
  * String union enumeration for orientation
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 export const LayoutOrientationValues = [ 'horizontal', 'vertical' ] as const;

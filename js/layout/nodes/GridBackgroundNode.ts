@@ -6,7 +6,7 @@
  * NOTE: If there are "holes" in the GridBox/GridConstraint (where there is no cell content for an x/y position), then
  * there will be no background for where those cells (if added) would have been.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import assertMutuallyExclusiveOptions from '../../../../phet-core/js/assertMutuallyExclusiveOptions.js';

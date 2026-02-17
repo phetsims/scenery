@@ -4,7 +4,7 @@
  * A Property that will synchronously contain all Trails between two nodes (in a root-leaf direction).
  * Listens from the child to the parent (since we tend to branch much less that way).
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import TinyProperty from '../../../axon/js/TinyProperty.js';

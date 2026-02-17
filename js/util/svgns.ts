@@ -3,7 +3,7 @@
 /**
  * SVG namespace, used for document.createElementNS( svgns, name );
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import scenery from '../scenery.js';

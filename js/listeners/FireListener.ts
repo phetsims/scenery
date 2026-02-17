@@ -6,7 +6,7 @@
  *
  * For example usage, see scenery/examples/input.html. Usually you can just pass a fire callback and things work.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import CallbackTimer from '../../../axon/js/CallbackTimer.js';

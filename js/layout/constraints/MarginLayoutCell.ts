@@ -3,7 +3,7 @@
 /**
  * A LayoutCell that has margins, and can be positioned and sized relative to those. Used for Flow/Grid layouts
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Bounds2 from '../../../../dot/js/Bounds2.js';

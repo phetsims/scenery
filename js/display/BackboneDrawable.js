@@ -4,7 +4,7 @@
  * A DOM drawable (div element) that contains child blocks (and is placed in the main DOM tree when visible). It should
  * use z-index for properly ordering its blocks in the correct stacking order.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import toSVGNumber from '../../../dot/js/util/toSVGNumber.js';

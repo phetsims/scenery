@@ -3,7 +3,7 @@
 /**
  * Isolates Image handling with HTML/Canvas images, with mipmaps and general support.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import TEmitter from '../../../axon/js/TEmitter.js';

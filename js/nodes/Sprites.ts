@@ -4,7 +4,7 @@
  * Meant for displaying a large amount of high-performance instances of sprites.
  * See https://github.com/phetsims/scenery/issues/990 for more information.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';

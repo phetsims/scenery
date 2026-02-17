@@ -4,7 +4,7 @@
  * Serializes a generalized object
  * @deprecated
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import ReadOnlyProperty from '../../../axon/js/ReadOnlyProperty.js';

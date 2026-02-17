@@ -12,7 +12,7 @@
  *
  * Subtypes should also implement drawable.svgElement, as the actual SVG element to be used.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import arrayDifference from '../../../phet-core/js/arrayDifference.js';

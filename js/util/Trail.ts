@@ -12,7 +12,7 @@
  * can have their indices updated with reindex(). It's designed to be as fast as possible
  * on Trails that are already indexed accurately.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';

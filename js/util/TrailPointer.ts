@@ -9,7 +9,7 @@
  *
  * TODO: more seamless handling of the orders. or just exclusively use the nesting order https://github.com/phetsims/scenery/issues/1581
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import WithoutNull from '../../../phet-core/js/types/WithoutNull.js';

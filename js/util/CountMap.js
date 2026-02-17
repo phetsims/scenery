@@ -3,7 +3,7 @@
 /**
  * Data structure that handles creating/destroying related objects that need to exist when something's count is >=1
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Poolable from '../../../phet-core/js/Poolable.js';

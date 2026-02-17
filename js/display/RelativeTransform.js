@@ -81,7 +81,7 @@
  *                                                                             relativeTransformListeners.length)
  **********************
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Matrix3 from '../../../dot/js/Matrix3.js';

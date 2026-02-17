@@ -3,7 +3,7 @@
 /**
  * Displays a (stroked) line. Inherits Path, and allows for optimized drawing and improved parameter handling.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { TReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';

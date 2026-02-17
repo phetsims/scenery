@@ -3,7 +3,7 @@
 /**
  * Creates and references a stylesheet that can be built up while Scenery is loading.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import scenery from '../scenery.js';

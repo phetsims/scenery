@@ -7,7 +7,7 @@
  * Any regions outside of the canvasBounds will not be guaranteed to be drawn. This can be set with canvasBounds in the
  * constructor, or later with node.canvasBounds = bounds or setCanvasBounds( bounds ).
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';

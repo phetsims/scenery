@@ -3,7 +3,7 @@
 /**
  * A poolable internal representation of a row/column for grid handling in GridConstraint
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Pool from '../../../../phet-core/js/Pool.js';

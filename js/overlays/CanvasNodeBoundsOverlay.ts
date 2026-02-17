@@ -3,7 +3,7 @@
 /**
  * Displays CanvasNode bounds.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Shape from '../../../kite/js/Shape.js';

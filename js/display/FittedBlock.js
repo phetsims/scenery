@@ -5,7 +5,7 @@
  * usage and can make graphical operations in the browser faster, yet if the fit is rapidly changing could cause
  * performance degradation.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';

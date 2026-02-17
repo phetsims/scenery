@@ -6,7 +6,7 @@
  * Kept for now as a run-time comparison and baseline for the GreedyStitcher or any other more advanced (but
  * more error-prone) stitching process.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Renderer from '../display/Renderer.js';

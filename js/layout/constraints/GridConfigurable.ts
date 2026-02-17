@@ -14,7 +14,7 @@
  * NOTE: This is a mixin meant to be used internally only by Scenery (for the constraint and cell), and should not be
  * used by outside code.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import assertMutuallyExclusiveOptions from '../../../../phet-core/js/assertMutuallyExclusiveOptions.js';

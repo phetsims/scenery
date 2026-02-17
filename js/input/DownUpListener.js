@@ -3,7 +3,7 @@
 /**
  * Basic down/up pointer handling for a Node, so that it's easy to handle buttons
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import deprecationWarning from '../../../phet-core/js/deprecationWarning.js';
