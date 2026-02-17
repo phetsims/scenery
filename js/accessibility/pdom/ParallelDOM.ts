@@ -389,7 +389,7 @@ type RemovePDOMClassOptions = {
   elementName?: string;
 };
 
-type DescriptionResponseOptions = {
+export type DescriptionResponseOptions = {
 
   // If true, the description will be spoken even if the Node is invisible or not attached to
   // a Display. Default is false.
