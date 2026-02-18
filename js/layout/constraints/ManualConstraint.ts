@@ -1,4 +1,4 @@
-// Copyright 2021-2025, University of Colorado Boulder
+// Copyright 2021-2026, University of Colorado Boulder
 
 /**
  * ManualConstraint exists for cases where imperative-based positioning code (e.g. `node.left = otherNode.right + 5`)

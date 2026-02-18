@@ -1,4 +1,4 @@
-// Copyright 2022-2025, University of Colorado Boulder
+// Copyright 2022-2026, University of Colorado Boulder
 
 /**
  * A Property that will synchronously contain all Trails between two nodes (in a root-leaf direction).

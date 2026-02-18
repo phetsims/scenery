@@ -1,4 +1,4 @@
-// Copyright 2019-2025, University of Colorado Boulder
+// Copyright 2019-2026, University of Colorado Boulder
 
 /**
  * Represents a single instance on the screen of a given Sprite object. It can have its own transformation matrix, and

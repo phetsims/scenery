@@ -1,4 +1,4 @@
-// Copyright 2016-2025, University of Colorado Boulder
+// Copyright 2016-2026, University of Colorado Boulder
 
 /**
  * Handles SVG <defs> and fill/stroke style for SVG elements (by composition, not a trait or for inheritance).

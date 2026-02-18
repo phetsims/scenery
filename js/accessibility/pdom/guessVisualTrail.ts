@@ -1,4 +1,4 @@
-// Copyright 2025, University of Colorado Boulder
+// Copyright 2025-2026, University of Colorado Boulder
 
 /**
  * Since a "Trail" on PDOMInstance can have discontinuous jumps (due to pdomOrder), this finds the best

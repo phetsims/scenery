@@ -1,4 +1,4 @@
-// Copyright 2021-2025, University of Colorado Boulder
+// Copyright 2021-2026, University of Colorado Boulder
 
 /**
  * WidthSizable is a trait that provides a minimum and preferred width. The minimum width is set by the component,

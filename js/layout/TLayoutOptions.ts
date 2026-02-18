@@ -1,4 +1,4 @@
-// Copyright 2021-2025, University of Colorado Boulder
+// Copyright 2021-2026, University of Colorado Boulder
 
 /**
  * The main type interface for Node's layoutOptions (for use with Grid/Flow based layouts)

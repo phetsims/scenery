@@ -1,4 +1,4 @@
-// Copyright 2022-2025, University of Colorado Boulder
+// Copyright 2022-2026, University of Colorado Boulder
 
 /**
  * Supertype for LayoutConstraints that are based on an actual Node where the layout takes place. Generally used with

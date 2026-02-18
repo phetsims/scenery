@@ -1,4 +1,4 @@
-// Copyright 2018-2025, University of Colorado Boulder
+// Copyright 2018-2026, University of Colorado Boulder
 
 /**
  * "definition" type for generalized color paints (anything that can be given to a fill/stroke that represents just a

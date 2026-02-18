@@ -1,4 +1,4 @@
-// Copyright 2022-2025, University of Colorado Boulder
+// Copyright 2022-2026, University of Colorado Boulder
 
 /**
  * Tricks Safari into forcing SVG rendering, see https://github.com/phetsims/geometric-optics-basics/issues/31

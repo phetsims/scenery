@@ -1,4 +1,4 @@
-// Copyright 2022-2024, University of Colorado Boulder
+// Copyright 2022-2026, University of Colorado Boulder
 
 /**
  * String union enumeration for orientation

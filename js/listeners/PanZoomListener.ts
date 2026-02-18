@@ -1,4 +1,4 @@
-// Copyright 2017-2025, University of Colorado Boulder
+// Copyright 2017-2026, University of Colorado Boulder
 
 /**
  * A MultiListener that is designed to pan and zoom a target Node, where you can provide limiting and

@@ -1,4 +1,4 @@
-// Copyright 2025, University of Colorado Boulder
+// Copyright 2025-2026, University of Colorado Boulder
 
 /**
  * Takes the element.content from himalaya, unescapes HTML entities, and applies the proper directional tags.

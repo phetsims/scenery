@@ -1,4 +1,4 @@
-// Copyright 2012-2025, University of Colorado Boulder
+// Copyright 2012-2026, University of Colorado Boulder
 
 /**
  * A Node for the Scenery scene graph. Supports general directed acyclic graphics (DAGs).

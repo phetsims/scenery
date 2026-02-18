@@ -1,4 +1,4 @@
-// Copyright 2023-2025, University of Colorado Boulder
+// Copyright 2023-2026, University of Colorado Boulder
 
 /**
  * A link node in RichText - NOTE: This is NOT embedded for layout. Instead, link content will be added as children to this node,
