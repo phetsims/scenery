@@ -8,6 +8,8 @@
  * @author Jesse Greenberg
  */
 
+import { render as litRender } from '../../../../sherpa/lib/lit-core.min.js';
+import type { AccessibleTemplateType } from './ParallelDOM.js';
 import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
 import merge from '../../../../phet-core/js/merge.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
@@ -78,6 +80,9 @@ class PDOMPeer {
   // Optional paragraph element for the "high level" API.
   private _accessibleParagraphSibling!: HTMLElement | null;
 
+  // Optional template sibling for rendering lit-html templates into a dedicated element.
+  private _templateSibling!: HTMLElement | null;
+
   // A parent element that can contain this primarySibling and other siblings, usually
   // the label and description content.
   private _containerParent!: HTMLElement | null;
@@ -136,6 +141,7 @@ class PDOMPeer {
     this._descriptionSibling = null;
 
     this._accessibleParagraphSibling = null;
+    this._templateSibling = null;
     this._containerParent = null;
     this.topLevelElements = [];
 
@@ -242,14 +248,20 @@ class PDOMPeer {
       this.setAccessibleParagraphContent( options.accessibleParagraphContent );
     }
 
+    // If there is a accessibleTemplate, create a dedicated template sibling element.
+    if ( this.node!._accessibleTemplate !== null ) {
+      this._templateSibling = createElement( PDOMUtils.TAGS.DIV, false );
+    }
+
     // accessibleHeading and accessibleParagraph can be used without a tagName, and that it enables PDOM for the Node.
     // If there is no tagName, create one so that children are placed under it by default.
     // This is done in PDOMPeer instead of on the ParallelDOM, so that we do not alter public state.
-    // NOTE: It is posssible that the children check is enough. But there are assumptions in this file that
+    // NOTE: It is possible that the children check is enough. But there are assumptions in this file that
     // a component using accessibleHeading always has a tagName for children (like getPlaceableSibling).
     const headingRequiresContainer = options.accessibleHeading && !options.tagName;
     const paragraphRequiresContainer = this.pdomInstance.children.length > 0 && !options.tagName;
-    if ( headingRequiresContainer || paragraphRequiresContainer ) {
+    const accessibleTemplateRequiresContainer = this.node!._accessibleTemplate !== null && !options.tagName;
+    if ( headingRequiresContainer || paragraphRequiresContainer || accessibleTemplateRequiresContainer ) {
       options.tagName = PDOMUtils.TAGS.DIV;
     }
 
@@ -361,6 +373,12 @@ class PDOMPeer {
       this.node!.updateOtherNodesActiveDescendant();
     }
 
+    // Render accessibleTemplate if set. This is outside the primarySibling guard because
+    // a accessibleTemplate can provide PDOM content without requiring a tagName/primarySibling.
+    if ( this.node!._accessibleTemplate !== null && this._templateSibling ) {
+      this.renderAccessibleTemplate( this.node!._accessibleTemplate );
+    }
+
     callbacksForOtherNodes.forEach( callback => callback() );
   }
 
@@ -380,7 +398,7 @@ class PDOMPeer {
     else {
 
       // Wean out any null siblings
-      this.topLevelElements = [ this._headingSibling, this._labelSibling, this._descriptionSibling, this._primarySibling, this._accessibleParagraphSibling ].filter( _.identity ) as HTMLElement[];
+      this.topLevelElements = [ this._headingSibling, this._labelSibling, this._descriptionSibling, this._primarySibling, this._accessibleParagraphSibling, this._templateSibling ].filter( _.identity ) as HTMLElement[];
     }
 
     // insert the heading/label/description elements in the correct location if they exist
@@ -390,6 +408,7 @@ class PDOMPeer {
     this._labelSibling && this.arrangeContentElement( this._labelSibling, config.appendLabel );
     this._descriptionSibling && this.arrangeContentElement( this._descriptionSibling, config.appendDescription );
     this._accessibleParagraphSibling && this.arrangeContentElement( this._accessibleParagraphSibling, true );
+    this._templateSibling && this.arrangeContentElement( this._templateSibling, true );
   }
 
   /**
@@ -399,7 +418,7 @@ class PDOMPeer {
    * If other elements can be placed without the primary sibling, they could be added to this function.
    */
   public getPlaceableSibling(): IntentionalAny {
-    const placeable = this._primarySibling || this._accessibleParagraphSibling;
+    const placeable = this._primarySibling || this._accessibleParagraphSibling || this._templateSibling;
     assert && assert( placeable, 'No placeable sibling found!' );
 
     return placeable;
@@ -694,6 +713,7 @@ class PDOMPeer {
     this._labelSibling && this._labelSibling.removeAttribute( attribute );
     this._descriptionSibling && this._descriptionSibling.removeAttribute( attribute );
     this._accessibleParagraphSibling && this._accessibleParagraphSibling.removeAttribute( attribute );
+    this._templateSibling && this._templateSibling.removeAttribute( attribute );
     this._containerParent && this._containerParent.removeAttribute( attribute );
   }
 
@@ -994,6 +1014,22 @@ class PDOMPeer {
     PDOMUtils.setTextContent( this._primarySibling, content );
   }
 
+  /**
+   * Render a lit-html template into the dedicated template sibling element.
+   */
+  public renderAccessibleTemplate( accessibleTemplate: AccessibleTemplateType ): void {
+    if ( !this._templateSibling ) {
+      return;
+    }
+
+    if ( accessibleTemplate === null ) {
+      this._templateSibling.innerHTML = '';
+      return;
+    }
+
+    litRender( accessibleTemplate.value, this._templateSibling );
+  }
+
   private getElementId( siblingName: string, stringId: string ): string {
     return `display${this.display.id}-${siblingName}-${stringId}`;
   }
@@ -1027,6 +1063,10 @@ class PDOMPeer {
     if ( this._accessibleParagraphSibling ) {
       this._accessibleParagraphSibling.setAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID, indices );
       this._accessibleParagraphSibling.id = this.getElementId( 'paragraph', indices );
+    }
+    if ( this._templateSibling ) {
+      this._templateSibling.setAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID, indices );
+      this._templateSibling.id = this.getElementId( 'template', indices );
     }
     if ( this._containerParent ) {
       this._containerParent.setAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID, indices );
@@ -1089,6 +1129,7 @@ class PDOMPeer {
     this._descriptionSibling = null;
     this._headingSibling = null;
     this._accessibleParagraphSibling = null;
+    this._templateSibling = null;
     this._containerParent = null;
     this.focusable = null;
 

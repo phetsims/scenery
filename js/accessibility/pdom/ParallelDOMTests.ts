@@ -6,8 +6,11 @@
  * @author Sam Reid (PhET Interactive Simulations)
  */
 
+import DerivedProperty from '../../../../axon/js/DerivedProperty.js';
+import Property from '../../../../axon/js/Property.js';
 import StringProperty from '../../../../axon/js/StringProperty.js';
 import Utterance from '../../../../utterance-queue/js/Utterance.js';
+import { html } from '../../../../sherpa/lib/lit-core.min.js';
 import Display from '../../display/Display.js';
 import Circle from '../../nodes/Circle.js';
 import Node from '../../nodes/Node.js';
@@ -2787,6 +2790,149 @@ QUnit.test( 'interruptible response behaviors', assert => {
   }
 } );
 
+
+QUnit.test( 'accessibleTemplate - static template', assert => {
+  const rootNode = new Node( { tagName: 'div' } );
+  const display = new Display( rootNode );
+  document.body.appendChild( display.domElement );
+
+  const a = new Node( {
+    accessibleTemplate: new Property( html`<p>Paragraph A</p><p>Paragraph B</p>` )
+  } );
+  rootNode.addChild( a );
+
+  // Template renders into a dedicated sibling, not the primary sibling
+  const peer = getPDOMPeerByNode( a );
+  const topLevelElements = peer.topLevelElements;
+  assert.ok( topLevelElements.length >= 1, 'at least one top-level element' );
+
+  // Find the template sibling (the element containing the rendered template)
+  const templateSibling = topLevelElements.find( el => el.querySelectorAll( 'p' ).length === 2 )!;
+  assert.ok( templateSibling, 'template sibling exists with rendered content' );
+  assert.ok( templateSibling.tagName === 'DIV', 'template sibling is a div' );
+  assert.ok( templateSibling.querySelectorAll( 'p' )[ 0 ].textContent === 'Paragraph A', 'first p content correct' );
+  assert.ok( templateSibling.querySelectorAll( 'p' )[ 1 ].textContent === 'Paragraph B', 'second p content correct' );
+
+  display.dispose();
+  document.body.removeChild( display.domElement );
+} );
+
+QUnit.test( 'accessibleTemplate - reactive dependencies', assert => {
+  const rootNode = new Node( { tagName: 'div' } );
+  const display = new Display( rootNode );
+  document.body.appendChild( display.domElement );
+
+  const textProperty = new StringProperty( 'Initial' );
+  const a = new Node( {
+    accessibleTemplate: new DerivedProperty( [ textProperty ], text => html`<p>${text}</p>` )
+  } );
+  rootNode.addChild( a );
+
+  let peer = getPDOMPeerByNode( a );
+  let templateSibling = peer.topLevelElements.find( el => el.querySelectorAll( 'p' ).length > 0 )!;
+  assert.ok( templateSibling.querySelectorAll( 'p' )[ 0 ].textContent === 'Initial', 'initial content correct' );
+
+  // Update the dependency - should use fast path (direct peer update), not full tree rebuild
+  textProperty.value = 'Updated';
+
+  peer = getPDOMPeerByNode( a );
+  templateSibling = peer.topLevelElements.find( el => el.querySelectorAll( 'p' ).length > 0 )!;
+  assert.ok( templateSibling.querySelectorAll( 'p' )[ 0 ].textContent === 'Updated', 'content updated after dependency change' );
+
+  display.dispose();
+  document.body.removeChild( display.domElement );
+} );
+
+QUnit.test( 'accessibleTemplate - template sibling is separate from primarySibling', assert => {
+  const rootNode = new Node( { tagName: 'div' } );
+  const display = new Display( rootNode );
+  document.body.appendChild( display.domElement );
+
+  const a = new Node( {
+    tagName: 'div',
+    innerContent: 'Primary content',
+    accessibleTemplate: new Property( html`<p>Template content</p>` )
+  } );
+  rootNode.addChild( a );
+
+  const peer = getPDOMPeerByNode( a );
+  const primarySibling = peer.primarySibling!;
+  assert.ok( primarySibling.textContent === 'Primary content', 'primary sibling has innerContent' );
+
+  // Template content should be in a separate element
+  const templateSibling = peer.topLevelElements.find( el => el !== primarySibling && el.querySelectorAll( 'p' ).length > 0 )!;
+  assert.ok( templateSibling, 'template sibling is a separate element from primarySibling' );
+  assert.ok( templateSibling.querySelectorAll( 'p' )[ 0 ].textContent === 'Template content', 'template sibling has correct content' );
+
+  display.dispose();
+  document.body.removeChild( display.domElement );
+} );
+
+QUnit.test( 'accessibleTemplate - disposal and unlinking', assert => {
+  const rootNode = new Node( { tagName: 'div' } );
+  const display = new Display( rootNode );
+  document.body.appendChild( display.domElement );
+
+  const textProperty = new StringProperty( 'Content' );
+  const templateProperty = new DerivedProperty( [ textProperty ], text => html`<p>${text}</p>` );
+  const a = new Node( {
+    accessibleTemplate: templateProperty
+  } );
+  rootNode.addChild( a );
+
+  let peer = getPDOMPeerByNode( a );
+  let templateSibling = peer.topLevelElements.find( el => el.querySelectorAll( 'p' ).length > 0 )!;
+  assert.ok( templateSibling.querySelectorAll( 'p' )[ 0 ].textContent === 'Content', 'initial content rendered' );
+
+  // Setting to null should unlink the Property listener
+  a.accessibleTemplate = null;
+
+  // After unlinking, Property changes should not affect the node
+  textProperty.value = 'Should not appear';
+  // Node should have lost its PDOM content since accessibleTemplate was its only source
+  assert.ok( a.pdomInstances.length === 0 || !a.hasPDOMContent, 'no PDOM content after clearing accessibleTemplate' );
+
+  // Re-set and then dispose the node
+  a.accessibleTemplate = templateProperty;
+  peer = getPDOMPeerByNode( a );
+  templateSibling = peer.topLevelElements.find( el => el.querySelectorAll( 'p' ).length > 0 )!;
+  assert.ok( templateSibling.querySelectorAll( 'p' )[ 0 ].textContent === 'Should not appear', 'Property value reflected after re-linking' );
+
+  a.dispose();
+
+  // After dispose, Property changes should not cause errors
+  textProperty.value = 'After dispose';
+  assert.ok( true, 'no error when changing Property after node disposal' );
+
+  display.dispose();
+  document.body.removeChild( display.domElement );
+} );
+
+QUnit.test( 'accessibleTemplate - switch to innerContent', assert => {
+  const rootNode = new Node( { tagName: 'div' } );
+  const display = new Display( rootNode );
+  document.body.appendChild( display.domElement );
+
+  const a = new Node( {
+    tagName: 'div',
+    accessibleTemplate: new Property( html`<p>Template content</p>` )
+  } );
+  rootNode.addChild( a );
+
+  const peer = getPDOMPeerByNode( a );
+  const templateSibling = peer.topLevelElements.find( el => el.querySelectorAll( 'p' ).length > 0 )!;
+  assert.ok( templateSibling, 'template rendered' );
+
+  // Clear template, then set innerContent
+  a.accessibleTemplate = null;
+  a.innerContent = 'Plain text';
+
+  const aElement = getPrimarySiblingElementByNode( a );
+  assert.ok( aElement.textContent === 'Plain text', 'innerContent works after clearing accessibleTemplate' );
+
+  display.dispose();
+  document.body.removeChild( display.domElement );
+} );
 
 // these fuzzers take time, so it is nice when they are last
 QUnit.test( 'PDOMFuzzer with 3 nodes', assert => {

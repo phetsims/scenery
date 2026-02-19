@@ -158,6 +158,7 @@ import type UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.j
 import type Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
 import Trail from '../../util/Trail.js';
+import type { TemplateResult } from '../../../../sherpa/lib/lit-core.min.js';
 
 import { Highlight } from '../Highlight.js';
 import globalDescriptionQueue from './globalDescriptionQueue.js';
@@ -188,6 +189,8 @@ const unwrapProperty = ( valueOrProperty: PDOMValueType ): string | null => {
 
   return result;
 };
+
+export type AccessibleTemplateType = TReadOnlyProperty<TemplateResult> | null;
 
 // Scratch objects that are used in various places to avoid allocations in hot code paths.
 const scratchOptions: ParallelDOMOptions = {};
@@ -238,6 +241,7 @@ const ACCESSIBILITY_OPTION_KEYS = [
   'containerAriaRole',
 
   'innerContent',
+  'accessibleTemplate',
   'inputType',
   'inputValue',
   'pdomChecked',
@@ -297,6 +301,7 @@ type ParallelDOMSelfOptions = {
   containerAriaRole?: string | null; // Sets the ARIA role for the container parent DOM element
 
   innerContent?: PDOMValueType; // Sets the inner text or HTML for a Node's primary sibling
+  accessibleTemplate?: AccessibleTemplateType; // Sets a Property<TemplateResult> for arbitrary PDOM structure rendered into a dedicated sibling
   inputType?: string | null; // Sets the input type for the primary sibling, only relevant if tagName is 'input'
   inputValue?: PDOMValueType | number; // Sets the input value for the primary sibling, only relevant if tagName is 'input'
   pdomChecked?: boolean; // Sets the 'checked' state for inputs of type 'radio' and 'checkbox'
@@ -497,6 +502,10 @@ export default class ParallelDOM extends PhetioObject {
   // or text content of the actual DOM element. If this is used, the Node should not have children.
   private _innerContent: PDOMValueType = null;
 
+  // A lit-html template for rendering arbitrary HTML structure into a dedicated template sibling.
+  // (scenery-internal)
+  public _accessibleTemplate: AccessibleTemplateType = null;
+
   // The description content for this Node's DOM element.
   private _descriptionContent: PDOMValueType = null;
 
@@ -668,6 +677,7 @@ export default class ParallelDOM extends PhetioObject {
   protected _onDescriptionContentChangeListener: () => void;
   protected _onAccessibleParagraphContentChangeListener: () => void;
   protected _onInnerContentChangeListener: () => void;
+  protected _onAccessibleTemplateChangeListener: () => void;
 
   protected constructor( options?: PhetioObjectOptions ) {
 
@@ -681,6 +691,7 @@ export default class ParallelDOM extends PhetioObject {
     this._onDescriptionContentChangeListener = this.invalidatePeerDescriptionSiblingContent.bind( this );
     this._onAccessibleParagraphContentChangeListener = this.invalidatePeerParagraphSiblingContent.bind( this );
     this._onInnerContentChangeListener = this.onInnerContentPropertyChange.bind( this );
+    this._onAccessibleTemplateChangeListener = this.invalidatePeerAccessibleTemplate.bind( this );
     this._onAccessibleRoleDescriptionChangeListener = this.onAccessibleRoleDescriptionChange.bind( this );
 
     this._tagName = null;
@@ -774,6 +785,11 @@ export default class ParallelDOM extends PhetioObject {
     if ( isTReadOnlyProperty( this._innerContent ) && !this._innerContent.isDisposed ) {
       this._innerContent.unlink( this._onInnerContentChangeListener );
     }
+
+    if ( this._accessibleTemplate !== null && !this._accessibleTemplate.isDisposed ) {
+      this._accessibleTemplate.unlink( this._onAccessibleTemplateChangeListener );
+    }
+    this._accessibleTemplate = null;
 
     if ( isTReadOnlyProperty( this._labelContent ) && !this._labelContent.isDisposed ) {
       this._labelContent.unlink( this._onLabelContentChangeListener );
@@ -1616,6 +1632,13 @@ export default class ParallelDOM extends PhetioObject {
     }
   }
 
+  private invalidatePeerAccessibleTemplate(): void {
+    for ( let i = 0; i < this._pdomInstances.length; i++ ) {
+      const peer = this._pdomInstances[ i ].peer!;
+      peer.renderAccessibleTemplate( this._accessibleTemplate );
+    }
+  }
+
   /**
    * Set the inner content for the primary sibling of the PDOMPeers of this Node. Will be set as textContent
    * unless content is html which uses exclusively formatting tags. A Node with inner content cannot
@@ -1623,6 +1646,7 @@ export default class ParallelDOM extends PhetioObject {
    */
   public setInnerContent( innerContent: PDOMValueType ): void {
     if ( innerContent !== this._innerContent ) {
+
       if ( isTReadOnlyProperty( this._innerContent ) && !this._innerContent.isDisposed ) {
         this._innerContent.unlink( this._onInnerContentChangeListener );
       }
@@ -1647,6 +1671,47 @@ export default class ParallelDOM extends PhetioObject {
   public getInnerContent(): string | null {
     return unwrapProperty( this._innerContent );
   }
+
+  public setAccessibleTemplate( accessibleTemplate: AccessibleTemplateType ): void {
+
+    // accessibleTemplate is a self-contained PDOM strategy — it cannot be combined with properties
+    // that depend on the traditional PDOM sibling structure.
+    if ( accessibleTemplate !== null ) {
+      assert && assert( this._tagName === null, 'accessibleTemplate cannot be combined with tagName' );
+      assert && assert( this._innerContent === null, 'accessibleTemplate cannot be combined with innerContent' );
+      assert && assert( this._accessibleName === null, 'accessibleTemplate cannot be combined with accessibleName' );
+      assert && assert( this._accessibleHelpText === null, 'accessibleTemplate cannot be combined with accessibleHelpText' );
+      assert && assert( this._labelContent === null, 'accessibleTemplate cannot be combined with labelContent' );
+      assert && assert( this._descriptionContent === null, 'accessibleTemplate cannot be combined with descriptionContent' );
+    }
+
+    if ( accessibleTemplate !== this._accessibleTemplate ) {
+
+      // Unlink old Property
+      if ( this._accessibleTemplate !== null && !this._accessibleTemplate.isDisposed ) {
+        this._accessibleTemplate.unlink( this._onAccessibleTemplateChangeListener );
+      }
+
+      const hadTemplate = this._accessibleTemplate !== null;
+      this._accessibleTemplate = accessibleTemplate;
+
+      // Link new Property
+      if ( accessibleTemplate !== null ) {
+        accessibleTemplate.lazyLink( this._onAccessibleTemplateChangeListener );
+      }
+
+      // Structural change (null <-> non-null) needs full rebuild; content change uses fast path
+      if ( hadTemplate !== ( accessibleTemplate !== null ) ) {
+        this.onPDOMContentChange();
+      }
+      else {
+        this.invalidatePeerAccessibleTemplate();
+      }
+    }
+  }
+
+  public set accessibleTemplate( accessibleTemplate: AccessibleTemplateType ) { this.setAccessibleTemplate( accessibleTemplate ); }
+  public get accessibleTemplate(): AccessibleTemplateType { return this._accessibleTemplate; }
 
   private invalidatePeerDescriptionSiblingContent(): void {
     const descriptionContent = this.descriptionContent;
@@ -3460,7 +3525,7 @@ export default class ParallelDOM extends PhetioObject {
    * Note this is still true if the content is accessibleVisible=false or is otherwise hidden.
    */
   public get hasPDOMContent(): boolean {
-    return !!this._tagName || !!this._accessibleParagraph || !!this._accessibleHeading;
+    return !!this._tagName || !!this._accessibleParagraph || !!this._accessibleHeading || !!this._accessibleTemplate;
   }
 
   /**
