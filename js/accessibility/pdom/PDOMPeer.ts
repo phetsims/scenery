@@ -384,12 +384,21 @@ class PDOMPeer {
     }
 
     // insert the heading/label/description elements in the correct location if they exist
-    // NOTE: Important for arrangeContentElement to be called on the heading sibling, then the label sibling first for
-    // correct order. This should ensure that the heading sibling is first (if present)
+    // NOTE: Important for arrangeContentElement to be called in this order. This should ensure that the
+    // heading sibling is first (if present)
     this._headingSibling && this.arrangeContentElement( this._headingSibling, false );
+    if ( this._accessibleParagraphSibling ) {
+      let appendAccessibleParagraph = config.appendAccessibleParagraph;
+
+      // Without a primary sibling, prepend would assert. Always append in that case.
+      if ( !this._primarySibling ) {
+        appendAccessibleParagraph = true;
+      }
+
+      this.arrangeContentElement( this._accessibleParagraphSibling, appendAccessibleParagraph );
+    }
     this._labelSibling && this.arrangeContentElement( this._labelSibling, config.appendLabel );
     this._descriptionSibling && this.arrangeContentElement( this._descriptionSibling, config.appendDescription );
-    this._accessibleParagraphSibling && this.arrangeContentElement( this._accessibleParagraphSibling, true );
   }
 
   /**

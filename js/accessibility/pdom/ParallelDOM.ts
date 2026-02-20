@@ -253,6 +253,7 @@ const ACCESSIBILITY_OPTION_KEYS = [
   'descriptionContent',
   'appendDescription',
 
+  'appendAccessibleParagraph',
   'accessibleParagraphContent',
 
   'focusHighlight',
@@ -313,6 +314,7 @@ type ParallelDOMSelfOptions = {
   descriptionContent?: PDOMValueType; // Sets the description content for the Node
   appendDescription?: boolean; // Sets the description sibling to come after the primary sibling
 
+  appendAccessibleParagraph?: boolean; // Sets the accessible paragraph to come after the primary sibling
   accessibleParagraphContent?: PDOMValueType; // Sets the accessible paragraph content for the Node
 
   focusHighlight?: Highlight; // Sets the focus highlight for the Node
@@ -472,6 +474,10 @@ export default class ParallelDOM extends PhetioObject {
   // (1) primary sibling, (2) label sibling, (3) description sibling. All siblings will be placed within the
   // containerParent.
   private _appendDescription: boolean;
+
+  // By default the accessible paragraph will be appended after the primary sibling. If false, it will be
+  // inserted before the primary sibling (but still after heading/label/description).
+  private _appendAccessibleParagraph: boolean;
 
   // Array of attributes that are on the Node's DOM element.  Objects will have the
   // form { attribute:{string}, value:{*}, namespace:{string|null} }
@@ -691,6 +697,7 @@ export default class ParallelDOM extends PhetioObject {
     this._pdomChecked = false;
     this._appendLabel = false;
     this._appendDescription = false;
+    this._appendAccessibleParagraph = false;
     this._pdomAttributes = [];
     this._pdomClasses = [];
 
@@ -1056,6 +1063,7 @@ export default class ParallelDOM extends PhetioObject {
 
         // Only the accessibleParagraphContent is changing and that can be updated efficiently. This function
         // will also link to the StringProperty if necessary.
+        console.log( 'fast path' );
         this.setAccessibleParagraphContent( behaviorOptions.accessibleParagraphContent ?? null );
       }
     }
@@ -1519,6 +1527,32 @@ export default class ParallelDOM extends PhetioObject {
    */
   public getAppendDescription(): boolean {
     return this._appendDescription;
+  }
+
+  /**
+   * By default, the accessible paragraph will be appended after the primary sibling in the PDOM. This
+   * option allows you to instead have the paragraph added before the primary sibling.
+   *
+   * Note that the paragraph will still be after heading/label/description siblings.
+   */
+  public setAppendAccessibleParagraph( appendAccessibleParagraph: boolean ): void {
+
+    if ( this._appendAccessibleParagraph !== appendAccessibleParagraph ) {
+      this._appendAccessibleParagraph = appendAccessibleParagraph;
+
+      this.onPDOMContentChange();
+    }
+  }
+
+  public set appendAccessibleParagraph( appendAccessibleParagraph: boolean ) { this.setAppendAccessibleParagraph( appendAccessibleParagraph ); }
+
+  public get appendAccessibleParagraph(): boolean { return this.getAppendAccessibleParagraph(); }
+
+  /**
+   * Get whether the accessible paragraph sibling should be appended after the primary sibling.
+   */
+  public getAppendAccessibleParagraph(): boolean {
+    return this._appendAccessibleParagraph;
   }
 
   /**
