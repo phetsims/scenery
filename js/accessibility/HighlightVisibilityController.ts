@@ -111,7 +111,7 @@ class HighlightVisibilityController {
       }
     );
 
-    const displayDownListenr = {
+    const displayDownListener = {
 
       // Whenever we receive a down event focus highlights are made invisible. We may also blur the active element in
       // some cases, but not always as is necessary for iOS VoiceOver. See documentation details in the function.
@@ -139,12 +139,12 @@ class HighlightVisibilityController {
         }
       }
     };
-    this.display.addInputListener( displayDownListenr );
+    this.display.addInputListener( displayDownListener );
 
     this.disposeHighlightVisibilityController = () => {
       this.display.removeInputListener( focusHighlightVisibleListener );
       globalKeyStateTracker.keyupEmitter.removeListener( globalKeyUpListener );
-      this.display.removeInputListener( displayDownListenr );
+      this.display.removeInputListener( displayDownListener );
 
       interactiveHighlightsEnabledListener && options.interactiveHighlightsEnabledProperty.unlink( interactiveHighlightsEnabledListener );
       swapVisibilityMultilink && swapVisibilityMultilink.dispose();
