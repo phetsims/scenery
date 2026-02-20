@@ -1063,7 +1063,6 @@ export default class ParallelDOM extends PhetioObject {
 
         // Only the accessibleParagraphContent is changing and that can be updated efficiently. This function
         // will also link to the StringProperty if necessary.
-        console.log( 'fast path' );
         this.setAccessibleParagraphContent( behaviorOptions.accessibleParagraphContent ?? null );
       }
     }
