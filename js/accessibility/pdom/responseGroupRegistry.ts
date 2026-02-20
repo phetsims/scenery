@@ -32,7 +32,10 @@ class ResponseGroupRegistry {
 
     let utterance = this.groupMap.get( group );
     if ( !utterance ) {
-      utterance = new Utterance( { interruptible: defaultInterruptible } );
+      utterance = new Utterance( {
+        interruptible: defaultInterruptible,
+        alertStableDelay: 1000
+      } );
       this.groupMap.set( group, utterance );
 
       assert && assert(
