@@ -1706,18 +1706,6 @@ export default class ParallelDOM extends PhetioObject {
   }
 
   public setAccessibleTemplate( accessibleTemplate: AccessibleTemplateType ): void {
-
-    // accessibleTemplate is a self-contained PDOM strategy — it cannot be combined with properties
-    // that depend on the traditional PDOM sibling structure.
-    if ( accessibleTemplate !== null ) {
-      assert && assert( this._tagName === null, 'accessibleTemplate cannot be combined with tagName' );
-      assert && assert( this._innerContent === null, 'accessibleTemplate cannot be combined with innerContent' );
-      assert && assert( this._accessibleName === null, 'accessibleTemplate cannot be combined with accessibleName' );
-      assert && assert( this._accessibleHelpText === null, 'accessibleTemplate cannot be combined with accessibleHelpText' );
-      assert && assert( this._labelContent === null, 'accessibleTemplate cannot be combined with labelContent' );
-      assert && assert( this._descriptionContent === null, 'accessibleTemplate cannot be combined with descriptionContent' );
-    }
-
     if ( accessibleTemplate !== this._accessibleTemplate ) {
 
       // Unlink old Property
