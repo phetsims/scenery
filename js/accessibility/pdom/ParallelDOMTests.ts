@@ -2309,21 +2309,100 @@ QUnit.test( 'accessibleParagraph', assert => {
   let bRenderedElements = bPeer.topLevelElements;
   assert.ok( !!bRenderedElements, 'A peer should be created from tagName and accessibleParagraph' );
 
-  assert.ok( bRenderedElements[ 0 ].tagName === bLabelTagName, 'b label element is in the DOM and before the paragraph' );
-  assert.ok( bRenderedElements[ 1 ].tagName === bDescriptionTagName, 'b description element is in the DOM and after the focusable element' );
-  assert.ok( bRenderedElements[ 2 ].tagName === bTagName, 'b primary element is in the DOM' );
-  assert.ok( bRenderedElements[ 3 ].tagName === bParagraphTagName, 'b paragraph is in the DOM and after the primary element' );
+  assert.ok( bRenderedElements[ 0 ].tagName === bParagraphTagName, 'b paragraph is in the DOM and after the primary element' );
+  assert.ok( bRenderedElements[ 1 ].tagName === bLabelTagName, 'b label element is in the DOM and before the paragraph' );
+  assert.ok( bRenderedElements[ 2 ].tagName === bDescriptionTagName, 'b description element is in the DOM and after the focusable element' );
+  assert.ok( bRenderedElements[ 3 ].tagName === bTagName, 'b primary element is in the DOM' );
 
   // Update order with appendLabel and appendDescription
   b.appendLabel = true;
   b.appendDescription = true;
+  b.appendAccessibleParagraph = true;
   display.updateDisplay(); // required as the reorder happens in display update
 
   bRenderedElements = bPeer.topLevelElements!;
   assert.ok( bRenderedElements[ 0 ].tagName === bTagName, 'b label element is in the DOM and before the paragraph' );
-  assert.ok( bRenderedElements[ 1 ].tagName === bLabelTagName, 'b description element is in the DOM and after the focusable element' );
-  assert.ok( bRenderedElements[ 2 ].tagName === bDescriptionTagName, 'b primary element is in the DOM' );
-  assert.ok( bRenderedElements[ 3 ].tagName === bParagraphTagName, 'b paragraph is in the DOM and after the primary element' );
+  assert.ok( bRenderedElements[ 1 ].tagName === bParagraphTagName, 'b paragraph is in the DOM and after the primary element' );
+  assert.ok( bRenderedElements[ 2 ].tagName === bLabelTagName, 'b description element is in the DOM and after the focusable element' );
+  assert.ok( bRenderedElements[ 3 ].tagName === bDescriptionTagName, 'b primary element is in the DOM' );
+
+  // A Node with all siblings ordered
+  // container
+  //   Heading
+  //   accessibleParagraph
+  //   Label
+  //   Description
+  //   tagName
+  const b2 = new Node( {
+    tagName: 'button',
+    accessibleHeading: 'Test Heading',
+
+    containerTagName: 'div',
+
+    labelTagName: 'label',
+    labelContent: 'Test label',
+
+    descriptionTagName: 'span',
+    descriptionContent: 'Test Description',
+
+    accessibleParagraph: paragraphContent
+  } );
+
+  rootNode.addChild( b2 );
+  display.updateDisplay();
+  let b2RenderedParentContainer = getPDOMPeerByNode( b2 ).topLevelElements;
+  let b2RenderedChildren = b2RenderedParentContainer[ 0 ].children;
+
+  assert.ok( b2RenderedParentContainer[ 0 ].tagName === 'DIV', 'b2 container is in the DOM' );
+  assert.ok( b2RenderedChildren[ 0 ].tagName === 'H1', 'b2 heading is in the DOM and before all siblings' );
+  assert.ok( b2RenderedChildren[ 1 ].tagName === 'P', 'b2 paragraph is in the DOM and after the heading' );
+  assert.ok( b2RenderedChildren[ 2 ].tagName === 'LABEL', 'b2 label element is in the DOM and after the paragraph' );
+  assert.ok( b2RenderedChildren[ 3 ].tagName === 'SPAN', 'b2 description element is in the DOM and after the label' );
+  assert.ok( b2RenderedChildren[ 4 ].tagName === 'BUTTON', 'b2 primary element is in the DOM' );
+
+  // Change to a typical ordering:
+  // container
+  //   Heading
+  //   accessibleParagraph
+  //   Label
+  //   tagName
+  //   Description
+  b2.appendLabel = false;
+  b2.appendDescription = true;
+  b2.appendAccessibleParagraph = false;
+  display.updateDisplay();
+
+  b2RenderedParentContainer = getPDOMPeerByNode( b2 ).topLevelElements;
+  b2RenderedChildren = b2RenderedParentContainer[ 0 ].children;
+
+  assert.ok( b2RenderedParentContainer[ 0 ].tagName === 'DIV', 'b2 container is in the DOM (after append description)' );
+  assert.ok( b2RenderedChildren[ 0 ].tagName === 'H1', 'b2 heading is in the DOM and before all siblings (after append description)' );
+  assert.ok( b2RenderedChildren[ 1 ].tagName === 'P', 'b2 paragraph is in the DOM and after the heading (after append description)' );
+  assert.ok( b2RenderedChildren[ 2 ].tagName === 'LABEL', 'b2 label element is in the DOM and after the paragraph (after append description)' );
+  assert.ok( b2RenderedChildren[ 3 ].tagName === 'BUTTON', 'b2 primary element is in the DOM (after append description)' );
+  assert.ok( b2RenderedChildren[ 4 ].tagName === 'SPAN', 'b2 description element is in the DOM and after the label (after append description)' );
+
+  // Change to make the accessibleParagraph come after the tagName:
+  // container
+  //   Heading
+  //   Label
+  //   tagName
+  //   accessibleParagraph
+  //   Description
+  b2.appendLabel = false;
+  b2.appendDescription = true;
+  b2.appendAccessibleParagraph = true;
+  display.updateDisplay();
+
+  b2RenderedParentContainer = getPDOMPeerByNode( b2 ).topLevelElements;
+  b2RenderedChildren = b2RenderedParentContainer[ 0 ].children;
+
+  assert.ok( b2RenderedParentContainer[ 0 ].tagName === 'DIV', 'b2 container is in the DOM (after append paragraph)' );
+  assert.ok( b2RenderedChildren[ 0 ].tagName === 'H1', 'b2 heading is in the DOM and before all siblings (after append paragraph)' );
+  assert.ok( b2RenderedChildren[ 1 ].tagName === 'LABEL', 'b2 label element is in the DOM and after the paragraph (after append paragraph)' );
+  assert.ok( b2RenderedChildren[ 2 ].tagName === 'BUTTON', 'b2 primary element is in the DOM (after append paragraph)' );
+  assert.ok( b2RenderedChildren[ 3 ].tagName === 'P', 'b2 paragraph is in the DOM and after the heading (after append paragraph)' );
+  assert.ok( b2RenderedChildren[ 4 ].tagName === 'SPAN', 'b2 description element is in the DOM and after the label (after append paragraph)' );
 
   //-------------------------------------------------------------------------
   // Using behavior functions to forward to another Node

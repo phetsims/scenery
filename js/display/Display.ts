@@ -869,6 +869,14 @@ export default class Display {
   public get pointers(): Pointer[] { return this.getPointers(); }
 
   /**
+   * From a DOM Event, get its relatedTarget and map that to a Scenery Trail.
+   * Returns null if relatedTarget is not provided, not under PDOM, or there is no associated Node trail.
+   */
+  public getRelatedTargetTrail( domEvent: FocusEvent | MouseEvent ): Trail | null {
+    return this._input ? this._input.getRelatedTargetTrail( domEvent ) : null;
+  }
+
+  /**
    * Changes the size that the Display's DOM element will be after the next updateDisplay()
    */
   public setSize( size: Dimension2 ): void {

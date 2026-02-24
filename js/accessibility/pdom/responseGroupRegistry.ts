@@ -32,7 +32,13 @@ class ResponseGroupRegistry {
 
     let utterance = this.groupMap.get( group );
     if ( !utterance ) {
-      utterance = new Utterance( { interruptible: defaultInterruptible } );
+      utterance = new Utterance( {
+        interruptible: defaultInterruptible,
+
+        // A delay to allow grouped information to collect in the queue for fast interactions. But not too
+        // long to cause a sluggish delay for the user. See https://github.com/phetsims/scenery/issues/1777
+        alertStableDelay: 1000
+      } );
       this.groupMap.set( group, utterance );
 
       assert && assert(
