@@ -9,7 +9,7 @@
  */
 
 import { render as litRender } from '../../../../sherpa/lib/lit-core.min.js';
-import type { AccessibleTemplateType } from './ParallelDOM.js';
+import type { TemplateResult } from '../../../../sherpa/lib/lit-core.min.js';
 import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
 import merge from '../../../../phet-core/js/merge.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
@@ -248,8 +248,10 @@ class PDOMPeer {
       this.setAccessibleParagraphContent( options.accessibleParagraphContent );
     }
 
+    const hasAccessibleTemplate = this.node!._accessibleTemplate !== null;
+
     // If there is a accessibleTemplate, create a dedicated template sibling element.
-    if ( this.node!._accessibleTemplate !== null ) {
+    if ( hasAccessibleTemplate ) {
       this._templateSibling = createElement( PDOMUtils.TAGS.DIV, false );
     }
 
@@ -260,7 +262,7 @@ class PDOMPeer {
     // a component using accessibleHeading always has a tagName for children (like getPlaceableSibling).
     const headingRequiresContainer = options.accessibleHeading && !options.tagName;
     const paragraphRequiresContainer = this.pdomInstance.children.length > 0 && !options.tagName;
-    const accessibleTemplateRequiresContainer = this.node!._accessibleTemplate !== null && !options.tagName;
+    const accessibleTemplateRequiresContainer = hasAccessibleTemplate && !options.tagName;
     if ( headingRequiresContainer || paragraphRequiresContainer || accessibleTemplateRequiresContainer ) {
       options.tagName = PDOMUtils.TAGS.DIV;
     }
@@ -375,8 +377,8 @@ class PDOMPeer {
 
     // Render accessibleTemplate if set. This is outside the primarySibling guard because
     // a accessibleTemplate can provide PDOM content without requiring a tagName/primarySibling.
-    if ( this.node!._accessibleTemplate !== null && this._templateSibling ) {
-      this.renderAccessibleTemplate( this.node!._accessibleTemplate );
+    if ( this._templateSibling ) {
+      this.renderAccessibleTemplate( this.node!.accessibleTemplate );
     }
 
     callbacksForOtherNodes.forEach( callback => callback() );
@@ -1030,7 +1032,7 @@ class PDOMPeer {
   /**
    * Render a lit-html template into the dedicated template sibling element.
    */
-  public renderAccessibleTemplate( accessibleTemplate: AccessibleTemplateType ): void {
+  public renderAccessibleTemplate( accessibleTemplate: TemplateResult | null ): void {
     if ( !this._templateSibling ) {
       return;
     }
@@ -1040,7 +1042,7 @@ class PDOMPeer {
       return;
     }
 
-    litRender( accessibleTemplate.value, this._templateSibling );
+    litRender( accessibleTemplate, this._templateSibling );
     assert && assert( !PDOMUtils.hasDisallowedTemplateDescendant( this._templateSibling ),
       'accessibleTemplate cannot contain disallowed elements or attributes (e.g., interactive tags or tabindex)' );
   }

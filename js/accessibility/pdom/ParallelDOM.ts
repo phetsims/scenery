@@ -180,17 +180,27 @@ const DEFAULT_DESCRIPTION_TAG_NAME = P_TAG;
 const DEFAULT_LABEL_TAG_NAME = P_TAG;
 
 export type PDOMValueType = string | TReadOnlyProperty<string> | null;
+export type AccessibleTemplateType = TemplateResult | TReadOnlyProperty<TemplateResult> | null;
 export type LimitPanDirection = 'horizontal' | 'vertical';
 
-const unwrapProperty = ( valueOrProperty: PDOMValueType ): string | null => {
+/**
+ * Unwraps a PDOMValueType, returning the current string or null.
+ */
+const unwrapPDOMValueTypeProperty = ( valueOrProperty: PDOMValueType ): string | null => {
   const result = valueOrProperty === null ? null : ( typeof valueOrProperty === 'string' ? valueOrProperty : valueOrProperty.value );
-
   assert && assert( result === null || typeof result === 'string' );
-
   return result;
 };
 
-export type AccessibleTemplateType = TReadOnlyProperty<TemplateResult> | null;
+/**
+ * Unwraps an AccessibleTemplateType, returning the current TemplateResult or null.
+ */
+const unwrapAccessibleTemplate = ( valueOrProperty: AccessibleTemplateType ): TemplateResult | null => {
+  if ( valueOrProperty === null ) {
+    return null;
+  }
+  return isTReadOnlyProperty( valueOrProperty ) ? valueOrProperty.value : valueOrProperty;
+};
 
 // Scratch objects that are used in various places to avoid allocations in hot code paths.
 const scratchOptions: ParallelDOMOptions = {};
@@ -305,7 +315,7 @@ type ParallelDOMSelfOptions = {
 
   innerContent?: PDOMValueType; // Sets the inner text or HTML for a Node's primary sibling
 
-  accessibleTemplate?: AccessibleTemplateType; // Sets a Property<TemplateResult> for arbitrary PDOM structure rendered into a dedicated sibling.
+  accessibleTemplate?: AccessibleTemplateType; // Sets a TemplateResult or Property<TemplateResult> for arbitrary PDOM structure rendered into a dedicated sibling.
   appendAccessibleTemplate?: boolean; // Sets the accessible template sibling to come after the primary sibling
 
   inputType?: string | null; // Sets the input type for the primary sibling, only relevant if tagName is 'input'
@@ -802,7 +812,7 @@ export default class ParallelDOM extends PhetioObject {
       this._innerContent.unlink( this._onInnerContentChangeListener );
     }
 
-    if ( this._accessibleTemplate !== null && !this._accessibleTemplate.isDisposed ) {
+    if ( isTReadOnlyProperty( this._accessibleTemplate ) && !this._accessibleTemplate.isDisposed ) {
       this._accessibleTemplate.unlink( this._onAccessibleTemplateChangeListener );
     }
     this._accessibleTemplate = null;
@@ -1230,7 +1240,7 @@ export default class ParallelDOM extends PhetioObject {
   public get accessibleParagraphContent(): string | null { return this.getAccessibleParagraphContent(); }
 
   public getAccessibleParagraphContent(): string | null {
-    return unwrapProperty( this._accessibleParagraphContent );
+    return unwrapPDOMValueTypeProperty( this._accessibleParagraphContent );
   }
 
 
@@ -1283,7 +1293,7 @@ export default class ParallelDOM extends PhetioObject {
    * Get the value of this Node's accessibleHeading. See setAccessibleHeading() for more information.
    */
   public getAccessibleHeading(): string | null {
-    return unwrapProperty( this._accessibleHeading );
+    return unwrapPDOMValueTypeProperty( this._accessibleHeading );
   }
 
   /**
@@ -1331,7 +1341,7 @@ export default class ParallelDOM extends PhetioObject {
   private invalidateAccessibleHeadingContent(): void {
     for ( let i = 0; i < this._pdomInstances.length; i++ ) {
       const peer = this._pdomInstances[ i ].peer!;
-      peer.setHeadingContent( unwrapProperty( this._accessibleHeading ) );
+      peer.setHeadingContent( unwrapPDOMValueTypeProperty( this._accessibleHeading ) );
     }
   }
 
@@ -1688,7 +1698,7 @@ export default class ParallelDOM extends PhetioObject {
    * Get the content for this Node's label sibling DOM element.
    */
   public getLabelContent(): string | null {
-    return unwrapProperty( this._labelContent );
+    return unwrapPDOMValueTypeProperty( this._labelContent );
   }
 
   private onInnerContentPropertyChange(): void {
@@ -1701,9 +1711,10 @@ export default class ParallelDOM extends PhetioObject {
   }
 
   private invalidatePeerAccessibleTemplate(): void {
+    const templateResult = this.getAccessibleTemplate();
     for ( let i = 0; i < this._pdomInstances.length; i++ ) {
       const peer = this._pdomInstances[ i ].peer!;
-      peer.renderAccessibleTemplate( this._accessibleTemplate );
+      peer.renderAccessibleTemplate( templateResult );
     }
   }
 
@@ -1737,13 +1748,14 @@ export default class ParallelDOM extends PhetioObject {
    * Get the inner content, the string that is the innerHTML or innerText for the Node's primary sibling.
    */
   public getInnerContent(): string | null {
-    return unwrapProperty( this._innerContent );
+    return unwrapPDOMValueTypeProperty( this._innerContent );
   }
 
   /**
-   * Set a Property<TemplateResult> for arbitrary PDOM structure rendered into a dedicated sibling.
-   * The template sibling is ordered after the accessible paragraph; use appendAccessibleTemplate to control
+   * Set a TemplateResult or Property<TemplateResult> for arbitrary PDOM structure.
+   * The template element is ordered after the accessible paragraph; use appendAccessibleTemplate to control
    * placement relative to the primary sibling.
+   *
    * Templates must not include disallowed interactive tags or attributes
    * (see PDOMUtils.DISALLOWED_TEMPLATE_SELECTOR).
    */
@@ -1751,7 +1763,7 @@ export default class ParallelDOM extends PhetioObject {
     if ( accessibleTemplate !== this._accessibleTemplate ) {
 
       // Unlink old Property
-      if ( this._accessibleTemplate !== null && !this._accessibleTemplate.isDisposed ) {
+      if ( isTReadOnlyProperty( this._accessibleTemplate ) && !this._accessibleTemplate.isDisposed ) {
         this._accessibleTemplate.unlink( this._onAccessibleTemplateChangeListener );
       }
 
@@ -1759,7 +1771,7 @@ export default class ParallelDOM extends PhetioObject {
       this._accessibleTemplate = accessibleTemplate;
 
       // Link new Property
-      if ( accessibleTemplate !== null ) {
+      if ( isTReadOnlyProperty( accessibleTemplate ) ) {
         accessibleTemplate.lazyLink( this._onAccessibleTemplateChangeListener );
       }
 
@@ -1775,7 +1787,14 @@ export default class ParallelDOM extends PhetioObject {
 
   public set accessibleTemplate( accessibleTemplate: AccessibleTemplateType ) { this.setAccessibleTemplate( accessibleTemplate ); }
 
-  public get accessibleTemplate(): AccessibleTemplateType { return this._accessibleTemplate; }
+  public get accessibleTemplate(): TemplateResult | null { return this.getAccessibleTemplate(); }
+
+  /**
+   * Get the accessible template, returning the current TemplateResult if set.
+   */
+  public getAccessibleTemplate(): TemplateResult | null {
+    return unwrapAccessibleTemplate( this._accessibleTemplate );
+  }
 
   private invalidatePeerDescriptionSiblingContent(): void {
     const descriptionContent = this.descriptionContent;
@@ -1831,7 +1850,7 @@ export default class ParallelDOM extends PhetioObject {
    * Get the content for this Node's description sibling DOM Element.
    */
   public getDescriptionContent(): string | null {
-    return unwrapProperty( this._descriptionContent );
+    return unwrapPDOMValueTypeProperty( this._descriptionContent );
   }
 
   /**
@@ -2030,7 +2049,7 @@ export default class ParallelDOM extends PhetioObject {
    * Get the value of the aria-label attribute for this Node's primary sibling.
    */
   public getAriaLabel(): string | null {
-    return unwrapProperty( this._ariaLabel );
+    return unwrapPDOMValueTypeProperty( this._ariaLabel );
   }
 
   /**
@@ -2062,7 +2081,7 @@ export default class ParallelDOM extends PhetioObject {
 
   public get accessibleRoleDescription(): string | null { return this.getAccessibleRoleDescription(); }
 
-  public getAccessibleRoleDescription(): string | null { return unwrapProperty( this._accessibleRoleDescription ); }
+  public getAccessibleRoleDescription(): string | null { return unwrapPDOMValueTypeProperty( this._accessibleRoleDescription ); }
 
   /**
    * Set the focus highlight for this Node. By default, the focus highlight will be a pink rectangle that

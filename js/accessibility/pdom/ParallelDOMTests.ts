@@ -2876,7 +2876,7 @@ QUnit.test( 'accessibleTemplate - static template', assert => {
   document.body.appendChild( display.domElement );
 
   const a = new Node( {
-    accessibleTemplate: new Property( html`<p>Paragraph A</p><p>Paragraph B</p>` )
+    accessibleTemplate: html`<p>Paragraph A</p><p>Paragraph B</p>`
   } );
   rootNode.addChild( a );
 
