@@ -10,7 +10,7 @@ import DerivedProperty from '../../../../axon/js/DerivedProperty.js';
 import Property from '../../../../axon/js/Property.js';
 import StringProperty from '../../../../axon/js/StringProperty.js';
 import Utterance from '../../../../utterance-queue/js/Utterance.js';
-import { html } from '../../../../sherpa/lib/lit-core.min.js';
+import { html } from '../../../../sherpa/lib/lit-core-3.3.1.min.js';
 import Display from '../../display/Display.js';
 import Circle from '../../nodes/Circle.js';
 import Node from '../../nodes/Node.js';

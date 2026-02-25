@@ -8,8 +8,8 @@
  * @author Jesse Greenberg
  */
 
-import { render as litRender } from '../../../../sherpa/lib/lit-core.min.js';
-import type { TemplateResult } from '../../../../sherpa/lib/lit-core.min.js';
+import { render as litRender } from '../../../../sherpa/lib/lit-core-3.3.1.min.js';
+import type { TemplateResult } from '../../../../sherpa/lib/lit-core-3.3.1.min.js';
 import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
 import merge from '../../../../phet-core/js/merge.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';

@@ -149,7 +149,7 @@ import assertMutuallyExclusiveOptions from '../../../../phet-core/js/assertMutua
 import optionize from '../../../../phet-core/js/optionize.js';
 import PickOptional from '../../../../phet-core/js/types/PickOptional.js';
 import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
-import type { TemplateResult } from '../../../../sherpa/lib/lit-core.min.js';
+import type { TemplateResult } from '../../../../sherpa/lib/lit-core-3.3.1.min.js';
 import isSettingPhetioStateProperty from '../../../../tandem/js/isSettingPhetioStateProperty.js';
 import PhetioObject, { PhetioObjectOptions } from '../../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../../tandem/js/Tandem.js';
