@@ -1037,6 +1037,8 @@ class PDOMPeer {
     }
 
     litRender( accessibleTemplate.value, this._templateSibling );
+    assert && assert( !PDOMUtils.hasDisallowedTemplateDescendant( this._templateSibling ),
+      'accessibleTemplate cannot contain disallowed elements or attributes (e.g., interactive tags or tabindex)' );
   }
 
   private getElementId( siblingName: string, stringId: string ): string {

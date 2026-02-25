@@ -62,8 +62,8 @@ const SUB_TAG = 'SUB';
 const SUP_TAG = 'SUP';
 const BR_TAG = 'BR';
 
-// These browser tags are a definition of default focusable elements, converted from Javascript types,
-// see https://stackoverflow.com/questions/1599660/which-html-elements-can-receive-focus
+// These browser tags define which elements are focusable by default. Used by ParallelDOM to decide when
+// to override tabindex on the primary sibling. See https://stackoverflow.com/questions/1599660/which-html-elements-can-receive-focus
 const DEFAULT_FOCUSABLE_TAGS = [ A_TAG, AREA_TAG, INPUT_TAG, SELECT_TAG, TEXTAREA_TAG, BUTTON_TAG, IFRAME_TAG ];
 
 // collection of tags that are used for formatting text
@@ -120,6 +120,11 @@ const ARIA_ACTIVE_DESCENDANT = 'aria-activedescendant';
 // data attribute to flag whether an element is focusable - cannot check tabindex because IE11 and Edge assign
 // tabIndex=0 internally for all HTML elements, including those that should not receive focus
 const DATA_FOCUSABLE = 'data-focusable';
+
+// Elements that are disallowed in accessibleTemplate output. Used to validate template-rendered DOM, primarily
+// to prevent focusable elements from being introduced via templates.
+const DISALLOWED_TEMPLATE_SELECTOR = 'a, area, button, input, select, textarea, summary, details, iframe, audio, video, ' +
+                                     '[tabindex], [contenteditable], [autofocus]';
 
 // data attribute which contains the unique ID of a Trail that allows us to find the PDOMPeer associated
 // with a particular DOM element. This is used in several places in scenery accessibility, mostly PDOMPeer and Input.
@@ -460,6 +465,15 @@ const PDOMUtils = {
     }
 
     return domElement.getAttribute( DATA_FOCUSABLE ) === 'true';
+  },
+
+  /**
+   * Returns true if any element in the subtree is disallowed in accessibleTemplate output.
+   */
+  hasDisallowedTemplateDescendant( domElement: HTMLElement ): boolean {
+
+    // querySelector does not include the root element, so also check matches() on the root
+    return domElement.matches( DISALLOWED_TEMPLATE_SELECTOR ) || !!domElement.querySelector( DISALLOWED_TEMPLATE_SELECTOR );
   },
 
   /**

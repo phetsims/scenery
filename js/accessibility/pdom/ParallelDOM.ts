@@ -302,7 +302,7 @@ type ParallelDOMSelfOptions = {
   containerAriaRole?: string | null; // Sets the ARIA role for the container parent DOM element
 
   innerContent?: PDOMValueType; // Sets the inner text or HTML for a Node's primary sibling
-  accessibleTemplate?: AccessibleTemplateType; // Sets a Property<TemplateResult> for arbitrary PDOM structure rendered into a dedicated sibling
+  accessibleTemplate?: AccessibleTemplateType; // Sets a Property<TemplateResult> for arbitrary PDOM structure rendered into a dedicated sibling.
   inputType?: string | null; // Sets the input type for the primary sibling, only relevant if tagName is 'input'
   inputValue?: PDOMValueType | number; // Sets the input value for the primary sibling, only relevant if tagName is 'input'
   pdomChecked?: boolean; // Sets the 'checked' state for inputs of type 'radio' and 'checkbox'
@@ -1705,6 +1705,10 @@ export default class ParallelDOM extends PhetioObject {
     return unwrapProperty( this._innerContent );
   }
 
+  /**
+   * Set a Property<TemplateResult> for arbitrary PDOM structure rendered into a dedicated sibling.
+   * Templates must not include disallowed interactive tags or attributes (see PDOMUtils.DISALLOWED_TEMPLATE_SELECTOR).
+   */
   public setAccessibleTemplate( accessibleTemplate: AccessibleTemplateType ): void {
     if ( accessibleTemplate !== this._accessibleTemplate ) {
 

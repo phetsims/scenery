@@ -2896,6 +2896,27 @@ QUnit.test( 'accessibleTemplate - static template', assert => {
   document.body.removeChild( display.domElement );
 } );
 
+QUnit.test( 'accessibleTemplate - disallow interactive tags', assert => {
+  const rootNode = new Node( { tagName: 'div' } );
+  const display = new Display( rootNode );
+  document.body.appendChild( display.domElement );
+
+  const a = new Node( {
+    accessibleTemplate: new Property( html`<button>Focusable</button>` )
+  } );
+
+  window.assert && assert.throws( () => {
+    rootNode.addChild( a );
+  }, /.*/, 'accessibleTemplate should not allow interactive tags' );
+
+  if ( !window.assert ) {
+    rootNode.addChild( a );
+  }
+
+  display.dispose();
+  document.body.removeChild( display.domElement );
+} );
+
 QUnit.test( 'accessibleTemplate - reactive dependencies', assert => {
   const rootNode = new Node( { tagName: 'div' } );
   const display = new Display( rootNode );
