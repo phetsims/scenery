@@ -149,6 +149,7 @@ import assertMutuallyExclusiveOptions from '../../../../phet-core/js/assertMutua
 import optionize from '../../../../phet-core/js/optionize.js';
 import PickOptional from '../../../../phet-core/js/types/PickOptional.js';
 import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
+import type { TemplateResult } from '../../../../sherpa/lib/lit-core.min.js';
 import isSettingPhetioStateProperty from '../../../../tandem/js/isSettingPhetioStateProperty.js';
 import PhetioObject, { PhetioObjectOptions } from '../../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../../tandem/js/Tandem.js';
@@ -158,7 +159,6 @@ import type UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.j
 import type Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
 import Trail from '../../util/Trail.js';
-import type { TemplateResult } from '../../../../sherpa/lib/lit-core.min.js';
 
 import { Highlight } from '../Highlight.js';
 import globalDescriptionQueue from './globalDescriptionQueue.js';
@@ -228,20 +228,23 @@ const ACCESSIBILITY_OPTION_KEYS = [
   'accessibleHelpText',
   'accessibleHelpTextBehavior',
   'accessibleParagraph',
+  'appendAccessibleParagraph',
   'accessibleParagraphBehavior',
-
-  /*
-   * Lower Level API Functions
-   */
   'accessibleHeading',
   'accessibleHeadingIncrement',
   'accessibleRoleDescription',
 
+  /*
+   * Lower Level API Functions
+   */
   'containerTagName',
   'containerAriaRole',
 
   'innerContent',
+
   'accessibleTemplate',
+  'appendAccessibleTemplate',
+
   'inputType',
   'inputValue',
   'pdomChecked',
@@ -257,7 +260,6 @@ const ACCESSIBILITY_OPTION_KEYS = [
   'descriptionContent',
   'appendDescription',
 
-  'appendAccessibleParagraph',
   'accessibleParagraphContent',
 
   'focusHighlight',
@@ -302,7 +304,10 @@ type ParallelDOMSelfOptions = {
   containerAriaRole?: string | null; // Sets the ARIA role for the container parent DOM element
 
   innerContent?: PDOMValueType; // Sets the inner text or HTML for a Node's primary sibling
+
   accessibleTemplate?: AccessibleTemplateType; // Sets a Property<TemplateResult> for arbitrary PDOM structure rendered into a dedicated sibling.
+  appendAccessibleTemplate?: boolean; // Sets the accessible template sibling to come after the primary sibling
+
   inputType?: string | null; // Sets the input type for the primary sibling, only relevant if tagName is 'input'
   inputValue?: PDOMValueType | number; // Sets the input value for the primary sibling, only relevant if tagName is 'input'
   pdomChecked?: boolean; // Sets the 'checked' state for inputs of type 'radio' and 'checkbox'
@@ -321,7 +326,6 @@ type ParallelDOMSelfOptions = {
 
   appendAccessibleParagraph?: boolean; // Sets the accessible paragraph to come after the primary sibling
   accessibleParagraphContent?: PDOMValueType; // Sets the accessible paragraph content for the Node
-
   focusHighlight?: Highlight; // Sets the focus highlight for the Node
   focusHighlightLayerable?: boolean; // Flag to determine if the focus highlight Node can be layered in the scene graph
   groupFocusHighlight?: Node | boolean; // Sets the outer focus highlight for this Node when a descendant has focus
@@ -483,6 +487,10 @@ export default class ParallelDOM extends PhetioObject {
   // By default the accessible paragraph will be appended after the primary sibling. If false, it will be
   // inserted before the primary sibling (but still after heading/label/description).
   private _appendAccessibleParagraph: boolean;
+
+  // By default the accessible template will be appended after the primary sibling. If false, it will be
+  // inserted before the primary sibling (but still after the accessible paragraph).
+  private _appendAccessibleTemplate: boolean;
 
   // Array of attributes that are on the Node's DOM element.  Objects will have the
   // form { attribute:{string}, value:{*}, namespace:{string|null} }
@@ -709,6 +717,7 @@ export default class ParallelDOM extends PhetioObject {
     this._appendLabel = false;
     this._appendDescription = false;
     this._appendAccessibleParagraph = false;
+    this._appendAccessibleTemplate = false;
     this._pdomAttributes = [];
     this._pdomClasses = [];
 
@@ -1571,6 +1580,32 @@ export default class ParallelDOM extends PhetioObject {
   }
 
   /**
+   * By default, the accessible template will be placed beforee the primary sibling in the PDOM. This
+   * option allows you to instead have the template appended after.
+   *
+   * Note that the template will still always be placed after the accessibleParagraph.
+   */
+  public setAppendAccessibleTemplate( appendAccessibleTemplate: boolean ): void {
+
+    if ( this._appendAccessibleTemplate !== appendAccessibleTemplate ) {
+      this._appendAccessibleTemplate = appendAccessibleTemplate;
+
+      this.onPDOMContentChange();
+    }
+  }
+
+  public set appendAccessibleTemplate( appendAccessibleTemplate: boolean ) { this.setAppendAccessibleTemplate( appendAccessibleTemplate ); }
+
+  public get appendAccessibleTemplate(): boolean { return this.getAppendAccessibleTemplate(); }
+
+  /**
+   * Get whether the accessible template sibling should be appended after the primary sibling.
+   */
+  public getAppendAccessibleTemplate(): boolean {
+    return this._appendAccessibleTemplate;
+  }
+
+  /**
    * Set the container parent tag name. By specifying this container parent, an element will be created that
    * acts as a container for this Node's primary sibling DOM Element and its label and description siblings.
    * This containerTagName will default to DEFAULT_LABEL_TAG_NAME, and be added to the PDOM automatically if
@@ -1707,7 +1742,10 @@ export default class ParallelDOM extends PhetioObject {
 
   /**
    * Set a Property<TemplateResult> for arbitrary PDOM structure rendered into a dedicated sibling.
-   * Templates must not include disallowed interactive tags or attributes (see PDOMUtils.DISALLOWED_TEMPLATE_SELECTOR).
+   * The template sibling is ordered after the accessible paragraph; use appendAccessibleTemplate to control
+   * placement relative to the primary sibling.
+   * Templates must not include disallowed interactive tags or attributes
+   * (see PDOMUtils.DISALLOWED_TEMPLATE_SELECTOR).
    */
   public setAccessibleTemplate( accessibleTemplate: AccessibleTemplateType ): void {
     if ( accessibleTemplate !== this._accessibleTemplate ) {
@@ -1736,6 +1774,7 @@ export default class ParallelDOM extends PhetioObject {
   }
 
   public set accessibleTemplate( accessibleTemplate: AccessibleTemplateType ) { this.setAccessibleTemplate( accessibleTemplate ); }
+
   public get accessibleTemplate(): AccessibleTemplateType { return this._accessibleTemplate; }
 
   private invalidatePeerDescriptionSiblingContent(): void {

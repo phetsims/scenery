@@ -2896,6 +2896,50 @@ QUnit.test( 'accessibleTemplate - static template', assert => {
   document.body.removeChild( display.domElement );
 } );
 
+QUnit.test( 'accessibleTemplate - ordering relative to accessibleParagraph', assert => {
+  const rootNode = new Node( { tagName: 'div' } );
+  const display = new Display( rootNode );
+  document.body.appendChild( display.domElement );
+
+  const a = new Node( {
+    tagName: 'button',
+    labelTagName: 'label',
+    labelContent: 'Label',
+    descriptionTagName: 'span',
+    descriptionContent: 'Description',
+    accessibleParagraph: 'Paragraph',
+    accessibleTemplate: new Property( html`<div class="template-marker">Template</div>` ),
+    appendAccessibleTemplate: false
+  } );
+
+  rootNode.addChild( a );
+  display.updateDisplay();
+
+  const peer = getPDOMPeerByNode( a );
+  let elements = peer.topLevelElements;
+  let paragraphIndex = elements.findIndex( element => element.tagName === 'P' );
+  let templateIndex = elements.findIndex( element => !!element.querySelector( '.template-marker' ) );
+  let primaryIndex = elements.indexOf( peer.primarySibling! );
+
+  assert.ok( paragraphIndex >= 0, 'accessibleParagraph sibling exists' );
+  assert.ok( templateIndex > paragraphIndex, 'template sibling is ordered after accessibleParagraph' );
+  assert.ok( templateIndex < primaryIndex, 'prepend puts template before primary sibling' );
+
+  a.appendAccessibleTemplate = true;
+  display.updateDisplay();
+
+  elements = peer.topLevelElements;
+  paragraphIndex = elements.findIndex( element => element.tagName === 'P' );
+  templateIndex = elements.findIndex( element => !!element.querySelector( '.template-marker' ) );
+  primaryIndex = elements.indexOf( peer.primarySibling! );
+
+  assert.ok( templateIndex > paragraphIndex, 'template sibling remains after accessibleParagraph when appended' );
+  assert.ok( templateIndex > primaryIndex, 'append puts template after primary sibling' );
+
+  display.dispose();
+  document.body.removeChild( display.domElement );
+} );
+
 QUnit.test( 'accessibleTemplate - disallow interactive tags', assert => {
   const rootNode = new Node( { tagName: 'div' } );
   const display = new Display( rootNode );

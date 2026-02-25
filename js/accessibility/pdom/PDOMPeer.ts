@@ -403,21 +403,25 @@ class PDOMPeer {
 
     // insert the heading/label/description elements in the correct location if they exist
     // NOTE: Important for arrangeContentElement to be called in this order. This should ensure that the
-    // heading sibling is first (if present)
+    // heading sibling is first (if present), and that the template follows the accessible paragraph.
     this._headingSibling && this.arrangeContentElement( this._headingSibling, false );
     if ( this._accessibleParagraphSibling ) {
-      let appendAccessibleParagraph = config.appendAccessibleParagraph;
-
-      // Without a primary sibling, prepend would assert. Always append in that case.
-      if ( !this._primarySibling ) {
-        appendAccessibleParagraph = true;
-      }
-
+      const appendAccessibleParagraph = PDOMPeer.resolveAppendWithPrimarySibling( this._primarySibling, config.appendAccessibleParagraph );
       this.arrangeContentElement( this._accessibleParagraphSibling, appendAccessibleParagraph );
+    }
+    if ( this._templateSibling ) {
+      const appendAccessibleTemplate = PDOMPeer.resolveAppendWithPrimarySibling( this._primarySibling, config.appendAccessibleTemplate );
+      this.arrangeContentElement( this._templateSibling, appendAccessibleTemplate );
     }
     this._labelSibling && this.arrangeContentElement( this._labelSibling, config.appendLabel );
     this._descriptionSibling && this.arrangeContentElement( this._descriptionSibling, config.appendDescription );
-    this._templateSibling && this.arrangeContentElement( this._templateSibling, true );
+  }
+
+  /**
+   * When there is no primary sibling, we always append to avoid assertions when prepending.
+   */
+  private static resolveAppendWithPrimarySibling( primarySibling: HTMLElement | undefined, appendRequested: boolean ): boolean {
+    return primarySibling ? appendRequested : true;
   }
 
   /**
