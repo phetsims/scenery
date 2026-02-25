@@ -2940,6 +2940,109 @@ QUnit.test( 'accessibleTemplate - ordering relative to accessibleParagraph', ass
   document.body.removeChild( display.domElement );
 } );
 
+QUnit.test( 'getPlaceableSibling - paragraph and template without tagName', assert => {
+  const rootNode = new Node( { tagName: 'div' } );
+  const display = new Display( rootNode );
+  document.body.appendChild( display.domElement );
+
+  const a = new Node( {
+    accessibleParagraph: 'Paragraph',
+    accessibleTemplate: html`<div class="template-marker">Template</div>`
+  } );
+  rootNode.addChild( a );
+  display.updateDisplay();
+
+  const peer = getPDOMPeerByNode( a );
+  const elements = peer.topLevelElements;
+  const paragraphIndex = elements.findIndex( element => element.tagName === 'P' );
+  const templateIndex = elements.findIndex( element => !!element.querySelector( '.template-marker' ) );
+
+  assert.ok( paragraphIndex >= 0, 'accessibleParagraph sibling exists' );
+  assert.ok( templateIndex >= 0, 'template sibling exists' );
+  assert.ok( paragraphIndex < templateIndex, 'paragraph is ordered before template' );
+  assert.equal( peer.getPlaceableSibling(), elements[ 0 ], 'placeable sibling is first ordered element' );
+  assert.equal( peer.getPlaceableSibling().tagName, 'P', 'placeable sibling is the paragraph' );
+
+  display.dispose();
+  document.body.removeChild( display.domElement );
+} );
+
+QUnit.test( 'getPlaceableSibling - template only without tagName', assert => {
+  const rootNode = new Node( { tagName: 'div' } );
+  const display = new Display( rootNode );
+  document.body.appendChild( display.domElement );
+
+  const a = new Node( {
+    accessibleTemplate: html`<div class="template-only">Template</div>`
+  } );
+  rootNode.addChild( a );
+  display.updateDisplay();
+
+  const peer = getPDOMPeerByNode( a );
+  const elements = peer.topLevelElements;
+  const templateSibling = elements.find( element => !!element.querySelector( '.template-only' ) );
+
+  assert.ok( templateSibling, 'template sibling exists' );
+  assert.equal( peer.getPlaceableSibling(), elements[ 0 ], 'placeable sibling is first ordered element' );
+  assert.equal( peer.getPlaceableSibling(), templateSibling, 'placeable sibling is the template' );
+
+  display.dispose();
+  document.body.removeChild( display.domElement );
+} );
+
+QUnit.test( 'getPlaceableSibling - container parent anchor', assert => {
+  const rootNode = new Node( { tagName: 'div' } );
+  const display = new Display( rootNode );
+  document.body.appendChild( display.domElement );
+
+  const a = new Node( {
+    tagName: 'button',
+    containerTagName: 'div',
+    labelTagName: 'span',
+    labelContent: 'Label',
+    descriptionTagName: 'span',
+    descriptionContent: 'Description'
+  } );
+  rootNode.addChild( a );
+  display.updateDisplay();
+
+  const peer = getPDOMPeerByNode( a );
+  const containerParent = peer.getContainerParent();
+
+  assert.ok( containerParent, 'container parent exists' );
+  assert.equal( peer.getPlaceableSibling(), containerParent, 'placeable sibling is the container parent' );
+
+  display.dispose();
+  document.body.removeChild( display.domElement );
+} );
+
+QUnit.test( 'getPlaceableSibling - children without tagName create primary sibling', assert => {
+  const rootNode = new Node( { tagName: 'div' } );
+  const display = new Display( rootNode );
+  document.body.appendChild( display.domElement );
+
+  const parent = new Node( {
+    accessibleParagraph: 'Parent paragraph'
+  } );
+  const child = new Node( {
+    tagName: 'button',
+    accessibleName: 'Child'
+  } );
+  parent.addChild( child );
+  rootNode.addChild( parent );
+  display.updateDisplay();
+
+  const parentPeer = getPDOMPeerByNode( parent );
+  const childPeer = getPDOMPeerByNode( child );
+
+  assert.ok( parentPeer.primarySibling, 'primary sibling created for parent with children' );
+  assert.ok( parentPeer.primarySibling!.contains( childPeer.topLevelElements[ 0 ] ),
+    'child peer elements are inserted under the generated primary sibling' );
+
+  display.dispose();
+  document.body.removeChild( display.domElement );
+} );
+
 QUnit.test( 'accessibleTemplate - disallow interactive tags', assert => {
   const rootNode = new Node( { tagName: 'div' } );
   const display = new Display( rootNode );

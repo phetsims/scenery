@@ -427,13 +427,10 @@ class PDOMPeer {
   }
 
   /**
-   * Returns the sibling that can be placed in the PDOM. This is the primary sibling if it exists, otherwise the
-   * accessible paragraph.
-   *
-   * If other elements can be placed without the primary sibling, they could be added to this function.
+   * Returns the first ordered top-level element for this peer, which can be used as an anchor for placement.
    */
   public getPlaceableSibling(): IntentionalAny {
-    const placeable = this._primarySibling || this._accessibleParagraphSibling || this._templateSibling;
+    const placeable = this.topLevelElements[ 0 ];
     assert && assert( placeable, 'No placeable sibling found!' );
 
     return placeable;
