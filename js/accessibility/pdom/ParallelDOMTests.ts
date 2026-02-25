@@ -3078,6 +3078,32 @@ QUnit.test( 'accessibleTemplate - switch to innerContent', assert => {
   document.body.removeChild( display.domElement );
 } );
 
+QUnit.test( 'accessibleTemplate - render teardown clears content', assert => {
+  const rootNode = new Node( { tagName: 'div' } );
+  const display = new Display( rootNode );
+  document.body.appendChild( display.domElement );
+
+  const a = new Node( {
+    accessibleTemplate: new Property( html`<div id="template-marker">Template</div>` )
+  } );
+  rootNode.addChild( a );
+
+  const peer = getPDOMPeerByNode( a );
+  const templateMarker = document.getElementById( 'template-marker' );
+  assert.ok( templateMarker, 'template content exists' );
+
+  // Clear rendered content via the peer API and verify teardown
+  peer.renderAccessibleTemplate( null );
+  assert.ok( !document.getElementById( 'template-marker' ), 'template content cleared after teardown' );
+
+  // Re-render to ensure the container remains usable
+  peer.renderAccessibleTemplate( html`<div id="template-marker">Again</div>` );
+  assert.ok( document.getElementById( 'template-marker' ), 'template content can be re-rendered after teardown' );
+
+  display.dispose();
+  document.body.removeChild( display.domElement );
+} );
+
 // these fuzzers take time, so it is nice when they are last
 QUnit.test( 'PDOMFuzzer with 3 nodes', assert => {
   const fuzzer = new PDOMFuzzer( 3, false );

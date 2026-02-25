@@ -1038,7 +1038,10 @@ class PDOMPeer {
     }
 
     if ( accessibleTemplate === null ) {
-      this._templateSibling.innerHTML = '';
+
+      // Lit's recommended teardown path, though this is rare in Scenery since clearing accessibleTemplate
+      // typically rebuilds PDOM and removes the template sibling entirely.
+      litRender( null, this._templateSibling );
       return;
     }
 
