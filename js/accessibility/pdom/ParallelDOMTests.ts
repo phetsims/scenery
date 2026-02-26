@@ -3044,6 +3044,8 @@ QUnit.test( 'getPlaceableSibling - children without tagName create primary sibli
 } );
 
 QUnit.test( 'accessibleTemplate - disallow interactive tags', assert => {
+  assert.expect( 1 );
+
   const rootNode = new Node( { tagName: 'div' } );
   const display = new Display( rootNode );
   document.body.appendChild( display.domElement );
@@ -3058,6 +3060,7 @@ QUnit.test( 'accessibleTemplate - disallow interactive tags', assert => {
 
   if ( !window.assert ) {
     rootNode.addChild( a );
+    assert.ok( true, 'interactive tag validation only runs when assertions are enabled' );
   }
 
   display.dispose();
