@@ -162,6 +162,7 @@ import stepTimer from '../../../axon/js/stepTimer.js';
 import TEmitter from '../../../axon/js/TEmitter.js';
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import Vector2 from '../../../dot/js/Vector2.js';
+import affirm from '../../../perennial-alias/js/browser-and-node/affirm.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import optionize, { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 import platform from '../../../phet-core/js/platform.js';
@@ -482,7 +483,7 @@ export default class Input extends PhetioObject {
     this.touchEndAction = new PhetioAction( ( id: number, point: Vector2, context: EventContext<TouchEvent | PointerEvent> ) => {
       const touch = this.findPointerById( id ) as Touch | null;
       if ( touch ) {
-        assert && assert( touch instanceof Touch ); // eslint-disable-line phet/no-simple-type-checking-assertions, phet/bad-sim-text
+        affirm( touch instanceof Touch ); // eslint-disable-line phet/bad-sim-text
         this.upEvent<TouchEvent | PointerEvent>( touch, context, point );
         this.removePointer( touch );
       }
@@ -501,7 +502,7 @@ export default class Input extends PhetioObject {
     this.touchMoveAction = new PhetioAction( ( id: number, point: Vector2, context: EventContext<TouchEvent | PointerEvent> ) => {
       const touch = this.findPointerById( id ) as Touch | null;
       if ( touch ) {
-        assert && assert( touch instanceof Touch ); // eslint-disable-line phet/no-simple-type-checking-assertions, phet/bad-sim-text
+        affirm( touch instanceof Touch ); // eslint-disable-line phet/bad-sim-text
         touch.move( point );
         this.moveEvent<TouchEvent | PointerEvent>( touch, context );
       }
@@ -521,7 +522,7 @@ export default class Input extends PhetioObject {
     this.touchCancelAction = new PhetioAction( ( id: number, point: Vector2, context: EventContext<TouchEvent | PointerEvent> ) => {
       const touch = this.findPointerById( id ) as Touch | null;
       if ( touch ) {
-        assert && assert( touch instanceof Touch ); // eslint-disable-line phet/no-simple-type-checking-assertions, phet/bad-sim-text
+        affirm( touch instanceof Touch ); // eslint-disable-line phet/bad-sim-text
         this.cancelEvent<TouchEvent | PointerEvent>( touch, context, point );
         this.removePointer( touch );
       }
@@ -1118,8 +1119,8 @@ export default class Input extends PhetioObject {
       // to targets to support focus events on disabled/non-interactive Nodes.
       const canDispatchToTrail = trail.isPickable() || PDOM_ALWAYS_ACTIVE_EVENTS.includes( eventType );
 
-      assert && assert( this.pdomPointer );
-      this.dispatchEvent<DOMEvent>( trail, eventType, this.pdomPointer!, context, bubbles, PDOM_ALWAYS_ACTIVE_EVENTS.includes( eventType ), canDispatchToTrail );
+      affirm( this.pdomPointer );
+      this.dispatchEvent<DOMEvent>( trail, eventType, this.pdomPointer, context, bubbles, PDOM_ALWAYS_ACTIVE_EVENTS.includes( eventType ), canDispatchToTrail );
     }
   }
 
@@ -1136,11 +1137,11 @@ export default class Input extends PhetioObject {
     if ( relatedTargetElement && this.display.isElementUnderPDOM( relatedTargetElement as HTMLElement, false ) ) {
 
       const relatedTarget = ( domEvent.relatedTarget as unknown as Element );
-      assert && assert( relatedTarget instanceof window.Element );
+      affirm( relatedTarget instanceof window.Element );
       const trailIndices = relatedTarget.getAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID );
-      assert && assert( trailIndices, 'should not be null' );
+      affirm( trailIndices, 'should not be null' );
 
-      return pdomUniqueIdToTrail( this.display, trailIndices! );
+      return pdomUniqueIdToTrail( this.display, trailIndices );
     }
     return null;
   }
@@ -1150,7 +1151,7 @@ export default class Input extends PhetioObject {
    * This is a bit of a misnomer, because the domEvent doesn't have to be under the PDOM. Returns null if not in the PDOM.
    */
   private getTrailFromPDOMEvent( domEvent: TargetSubstitudeAugmentedEvent ): Trail | null {
-    assert && assert( domEvent.target || domEvent[ TARGET_SUBSTITUTE_KEY ], 'need a way to get the target' );
+    affirm( domEvent.target || domEvent[ TARGET_SUBSTITUTE_KEY ], 'need a way to get the target' );
 
     if ( !this.display._accessible ) {
       return null;
@@ -1165,8 +1166,8 @@ export default class Input extends PhetioObject {
       const target = domEvent.target;
       if ( target && target instanceof window.Element && this.display.isElementUnderPDOM( target, false ) ) {
         const trailIndices = target.getAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID );
-        assert && assert( trailIndices, 'should not be null' );
-        return pdomUniqueIdToTrail( this.display, trailIndices! );
+        affirm( trailIndices, 'should not be null' );
+        return pdomUniqueIdToTrail( this.display, trailIndices );
       }
     }
     return null;
@@ -1824,7 +1825,7 @@ export default class Input extends PhetioObject {
       `${type} trail:${trail.toString()} pointer:${pointer.toString()} at ${pointer.point ? pointer.point.toString() : 'null'}` );
     sceneryLog && sceneryLog.EventDispatch && sceneryLog.push();
 
-    assert && assert( trail, 'Falsy trail for dispatchEvent' );
+    affirm( trail, 'Falsy trail for dispatchEvent' );
 
     sceneryLog && sceneryLog.EventPath && sceneryLog.EventPath( `${type} ${trail.toPathString()}` );
 
