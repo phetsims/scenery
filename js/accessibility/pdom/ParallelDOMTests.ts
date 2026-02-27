@@ -6,6 +6,7 @@
  * @author Sam Reid (PhET Interactive Simulations)
  */
 
+import BooleanProperty from '../../../../axon/js/BooleanProperty.js';
 import DerivedProperty from '../../../../axon/js/DerivedProperty.js';
 import Property from '../../../../axon/js/Property.js';
 import StringProperty from '../../../../axon/js/StringProperty.js';
@@ -3088,6 +3089,44 @@ QUnit.test( 'accessibleTemplate - reactive dependencies', assert => {
   peer = getPDOMPeerByNode( a );
   templateSibling = peer.topLevelElements.find( el => el.querySelectorAll( 'p' ).length > 0 )!;
   assert.ok( templateSibling.querySelectorAll( 'p' )[ 0 ].textContent === 'Updated', 'content updated after dependency change' );
+
+  display.dispose();
+  document.body.removeChild( display.domElement );
+} );
+
+QUnit.test( 'accessibleTemplate - TemplateResult|null property toggles render', assert => {
+  const rootNode = new Node( { tagName: 'div' } );
+  const display = new Display( rootNode );
+  document.body.appendChild( display.domElement );
+
+  const visibleProperty = new BooleanProperty( true );
+  const textProperty = new StringProperty( 'Visible' );
+  const templateProperty = new DerivedProperty( [ visibleProperty, textProperty ],
+    ( visible, text ) => visible ? html`<p id="template-union-marker">${text}</p>` : null );
+
+  const a = new Node( {
+    accessibleTemplate: templateProperty
+  } );
+  rootNode.addChild( a );
+  display.updateDisplay();
+
+  let templateMarker = document.getElementById( 'template-union-marker' );
+  assert.ok( templateMarker, 'template renders when property value is a TemplateResult' );
+  assert.equal( templateMarker!.textContent, 'Visible', 'initial text is rendered' );
+
+  visibleProperty.value = false;
+  display.updateDisplay();
+
+  templateMarker = document.getElementById( 'template-union-marker' );
+  assert.ok( !templateMarker, 'template content is removed when property value becomes null' );
+
+  textProperty.value = 'Visible again';
+  visibleProperty.value = true;
+  display.updateDisplay();
+
+  templateMarker = document.getElementById( 'template-union-marker' );
+  assert.ok( templateMarker, 'template renders again after toggling back to TemplateResult' );
+  assert.equal( templateMarker!.textContent, 'Visible again', 'updated text is rendered after toggle' );
 
   display.dispose();
   document.body.removeChild( display.domElement );

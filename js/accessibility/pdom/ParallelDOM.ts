@@ -180,7 +180,8 @@ const DEFAULT_DESCRIPTION_TAG_NAME = P_TAG;
 const DEFAULT_LABEL_TAG_NAME = P_TAG;
 
 export type PDOMValueType = string | TReadOnlyProperty<string> | null;
-export type AccessibleTemplateType = TemplateResult | TReadOnlyProperty<TemplateResult> | null;
+export type AccessibleTemplateValue = TemplateResult | null;
+export type AccessibleTemplateType = AccessibleTemplateValue | TReadOnlyProperty<AccessibleTemplateValue>;
 export type LimitPanDirection = 'horizontal' | 'vertical';
 
 /**
@@ -195,7 +196,7 @@ const unwrapPDOMValueTypeProperty = ( valueOrProperty: PDOMValueType ): string |
 /**
  * Unwraps an AccessibleTemplateType, returning the current TemplateResult or null.
  */
-const unwrapAccessibleTemplate = ( valueOrProperty: AccessibleTemplateType ): TemplateResult | null => {
+const unwrapAccessibleTemplate = ( valueOrProperty: AccessibleTemplateType ): AccessibleTemplateValue => {
   if ( valueOrProperty === null ) {
     return null;
   }
@@ -1787,12 +1788,12 @@ export default class ParallelDOM extends PhetioObject {
 
   public set accessibleTemplate( accessibleTemplate: AccessibleTemplateType ) { this.setAccessibleTemplate( accessibleTemplate ); }
 
-  public get accessibleTemplate(): TemplateResult | null { return this.getAccessibleTemplate(); }
+  public get accessibleTemplate(): AccessibleTemplateValue { return this.getAccessibleTemplate(); }
 
   /**
    * Get the accessible template, returning the current TemplateResult if set.
    */
-  public getAccessibleTemplate(): TemplateResult | null {
+  public getAccessibleTemplate(): AccessibleTemplateValue {
     return unwrapAccessibleTemplate( this._accessibleTemplate );
   }
 

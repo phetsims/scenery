@@ -8,13 +8,12 @@
  * @author Jesse Greenberg
  */
 
-import { render as litRender } from '../../../../sherpa/lib/lit-core-3.3.1.min.js';
-import type { TemplateResult } from '../../../../sherpa/lib/lit-core-3.3.1.min.js';
 import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
 import merge from '../../../../phet-core/js/merge.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import stripEmbeddingMarks from '../../../../phet-core/js/stripEmbeddingMarks.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
+import { render as litRender } from '../../../../sherpa/lib/lit-core-3.3.1.min.js';
 import FocusManager from '../../accessibility/FocusManager.js';
 import PDOMSiblingStyle from '../../accessibility/pdom/PDOMSiblingStyle.js';
 import PDOMUtils from '../../accessibility/pdom/PDOMUtils.js';
@@ -24,6 +23,7 @@ import scenery from '../../scenery.js';
 import type Trail from '../../util/Trail.js';
 import { pdomFocusProperty } from '../pdomFocusProperty.js';
 import { guessVisualTrail } from './guessVisualTrail.js';
+import type { AccessibleTemplateValue } from './ParallelDOM.js';
 import type PDOMInstance from './PDOMInstance.js';
 import { PEER_ACCESSIBLE_PARAGRAPH_SIBLING } from './PEER_ACCESSIBLE_PARAGRAPH_SIBLING.js';
 import { PEER_CONTAINER_PARENT } from './PEER_CONTAINER_PARENT.js';
@@ -1029,7 +1029,7 @@ class PDOMPeer {
   /**
    * Render a lit-html template into the dedicated template sibling element.
    */
-  public renderAccessibleTemplate( accessibleTemplate: TemplateResult | null ): void {
+  public renderAccessibleTemplate( accessibleTemplate: AccessibleTemplateValue ): void {
     if ( !this._templateSibling ) {
       return;
     }
