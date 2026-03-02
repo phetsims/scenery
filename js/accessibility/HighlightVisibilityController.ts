@@ -9,19 +9,19 @@
 
 import Multilink from '../../../axon/js/Multilink.js';
 import Property from '../../../axon/js/Property.js';
+import TProperty from '../../../axon/js/TProperty.js';
 import Vector2 from '../../../dot/js/Vector2.js';
+import optionize from '../../../phet-core/js/optionize.js';
 import FocusManager from '../../../scenery/js/accessibility/FocusManager.js';
 import globalKeyStateTracker from '../../../scenery/js/accessibility/globalKeyStateTracker.js';
 import KeyboardUtils from '../../../scenery/js/accessibility/KeyboardUtils.js';
 import PDOMUtils from '../../../scenery/js/accessibility/pdom/PDOMUtils.js';
 import { getPDOMFocusedNode } from '../../../scenery/js/accessibility/pdomFocusProperty.js';
-import type Display from '../display/Display.js';
-import type Node from '../nodes/Node.js';
 import SceneryEvent from '../../../scenery/js/input/SceneryEvent.js';
 import TInputListener from '../../../scenery/js/input/TInputListener.js';
-import optionize from '../../../phet-core/js/optionize.js';
+import type Display from '../display/Display.js';
+import type Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
-import TProperty from '../../../axon/js/TProperty.js';
 
 // constants
 // The amount of Pointer movement required to switch from showing focus highlights to Interactive Highlights if both
@@ -50,9 +50,11 @@ class HighlightVisibilityController {
   private relativePointerDistance = 0;
 
   // The focusable Node from the most recent pointer down event. On the next Tab/Shift+Tab, this node
-  // will receive focus so that keyboard navigation continues from the clicked element. Null means no
-  // node is queued (Tab will behave normally).
-  private pendingFocusNode: Node | null = null;
+  // will be an anchor so that focus can move to the next/previous Node relative to this one. Null means no
+  // node is queued (Tab navigation will likely begin from the top of the page).
+  // For other key presses, focus will move directly to this Node so that keyboard interaction can continue
+  // on the clicked target.
+  private pendingFocusAnchorNode: Node | null = null;
 
   public constructor( display: Display, providedOptions: HighlightVisibilityControllerOptions ) {
 
@@ -93,9 +95,9 @@ class HighlightVisibilityController {
     // - On Tab/Shift+Tab, continue traversal from that queued node.
     // - On any other key, move focus directly to the queued node.
     const globalKeyDownListener = ( event: KeyboardEvent ) => {
-      if ( this.pendingFocusNode ) {
-        const node = this.pendingFocusNode;
-        this.pendingFocusNode = null;
+      if ( this.pendingFocusAnchorNode ) {
+        const node = this.pendingFocusAnchorNode;
+        this.pendingFocusAnchorNode = null;
 
         // Verify the node is still valid for focusing.
         if ( node.focusable && node.accessibleVisible && node.pdomInstances.length > 0 ) {
@@ -126,7 +128,7 @@ class HighlightVisibilityController {
     // If focus changes for any reason (native browser behavior or scripted focus), queued pointer focus
     // should not override that on the next Tab press.
     const windowFocusInListener = () => {
-      this.pendingFocusNode = null;
+      this.pendingFocusAnchorNode = null;
     };
     window.addEventListener( 'focusin', windowFocusInListener );
 
@@ -177,11 +179,11 @@ class HighlightVisibilityController {
           // without actually moving DOM focus during pointer interaction (which would interfere
           // with VoiceOver and screen readers).
           const trailNodes = event.trail.nodes;
-          this.pendingFocusNode = null;
+          this.pendingFocusAnchorNode = null;
           for ( let i = trailNodes.length - 1; i >= 0; i-- ) {
             const node = trailNodes[ i ];
             if ( node.focusable && node.accessibleVisible && node.pdomInstances.length > 0 ) {
-              this.pendingFocusNode = node;
+              this.pendingFocusAnchorNode = node;
               break;
             }
           }
