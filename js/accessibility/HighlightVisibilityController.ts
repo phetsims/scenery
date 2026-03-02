@@ -13,6 +13,7 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import FocusManager from '../../../scenery/js/accessibility/FocusManager.js';
 import globalKeyStateTracker from '../../../scenery/js/accessibility/globalKeyStateTracker.js';
 import KeyboardUtils from '../../../scenery/js/accessibility/KeyboardUtils.js';
+import PDOMUtils from '../../../scenery/js/accessibility/pdom/PDOMUtils.js';
 import { getPDOMFocusedNode } from '../../../scenery/js/accessibility/pdomFocusProperty.js';
 import type Display from '../display/Display.js';
 import type Node from '../nodes/Node.js';
@@ -88,18 +89,35 @@ class HighlightVisibilityController {
     };
     globalKeyStateTracker.keyupEmitter.addListener( globalKeyUpListener );
 
-    // If a pointer down event queued a focusable Node, intercept the next Tab/Shift+Tab on keydown
-    // (before the browser moves focus) to focus that node instead. This way keyboard navigation
-    // continues from the element the user clicked rather than jumping to the beginning.
+    // If a pointer down event queued a focusable Node:
+    // - On Tab/Shift+Tab, continue traversal from that queued node.
+    // - On any other key, move focus directly to the queued node.
     const globalKeyDownListener = ( event: KeyboardEvent ) => {
-      if ( KeyboardUtils.isKeyEvent( event, KeyboardUtils.KEY_TAB ) && this.pendingFocusNode ) {
+      if ( this.pendingFocusNode ) {
         const node = this.pendingFocusNode;
         this.pendingFocusNode = null;
 
         // Verify the node is still valid for focusing.
         if ( node.focusable && node.accessibleVisible && node.pdomInstances.length > 0 ) {
-          event.preventDefault();
-          node.focus();
+          if ( KeyboardUtils.isKeyEvent( event, KeyboardUtils.KEY_TAB ) ) {
+            const primarySibling = node.pdomInstances[ 0 ].peer?.primarySibling;
+            if ( primarySibling ) {
+              const nextElement = event.shiftKey ?
+                                  PDOMUtils.getPreviousFocusableFrom( primarySibling ) :
+                                  PDOMUtils.getNextFocusableFrom( primarySibling );
+
+              // If we found a focusable element after traversing from the pending node, emulate browser Tab behavior
+              // by moving focus there. If not, allow native behavior to proceed.
+              if ( nextElement !== primarySibling ) {
+                event.preventDefault();
+                nextElement.focus();
+              }
+            }
+          }
+          else {
+            node.focus();
+            setHighlightsVisible();
+          }
         }
       }
     };

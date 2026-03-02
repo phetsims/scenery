@@ -180,14 +180,14 @@ function isElementHidden( domElement: Element ): boolean {
  * @param direction - direction of traversal, one of 'NEXT' | 'PREVIOUS'
  * @param [parentElement] - optional, search will be limited to children of this element
  */
-function getNextPreviousFocusable( direction: 'NEXT' | 'PREVIOUS', parentElement: HTMLElement | null ): HTMLElement {
+function getNextPreviousFocusableFromElement( direction: 'NEXT' | 'PREVIOUS', parentElement: HTMLElement | null, fromElement: Element | null ): HTMLElement {
 
   // linearize the document [or the desired parent] for traversal
   const parent = parentElement || document.body;
   const linearDOM = getLinearDOMElements( parent );
 
-  const activeElement = document.activeElement;
-  const activeIndex = linearDOM.indexOf( activeElement! );
+  const anchorElement = fromElement || document.activeElement;
+  const activeIndex = linearDOM.indexOf( anchorElement! );
   const delta = direction === NEXT ? +1 : -1;
 
   // find the next focusable element in the DOM
@@ -202,7 +202,20 @@ function getNextPreviousFocusable( direction: 'NEXT' | 'PREVIOUS', parentElement
   }
 
   // if no next focusable is found, return the active DOM element
-  return activeElement as HTMLElement;
+  return anchorElement as HTMLElement;
+}
+
+/**
+ * Get the next or previous focusable element in the parallel DOM under the parent element and relative to the currently
+ * focused element. Useful if you need to set focus dynamically or need to prevent default behavior
+ * when focus changes. If no next or previous focusable is found, it returns the currently focused element.
+ * This function should not be used directly, use getNextFocusable() or getPreviousFocusable() instead.
+ *
+ * @param direction - direction of traversal, one of 'NEXT' | 'PREVIOUS'
+ * @param [parentElement] - optional, search will be limited to children of this element
+ */
+function getNextPreviousFocusable( direction: 'NEXT' | 'PREVIOUS', parentElement: HTMLElement | null ): HTMLElement {
+  return getNextPreviousFocusableFromElement( direction, parentElement, document.activeElement );
 }
 
 /**
@@ -260,6 +273,28 @@ const PDOMUtils = {
    */
   getPreviousFocusable( parentElement: HTMLElement | null = null ): HTMLElement {
     return getNextPreviousFocusable( PREVIOUS, parentElement );
+  },
+
+  /**
+   * Get the next focusable element relative to the provided element and under the parentElement.
+   * If no next focusable can be found, it will return the provided element.
+   *
+   * @param fromElement - element to traverse from
+   * @param [parentElement] - optional, search will be limited to elements under this parent
+   */
+  getNextFocusableFrom( fromElement: HTMLElement, parentElement: HTMLElement | null = null ): HTMLElement {
+    return getNextPreviousFocusableFromElement( NEXT, parentElement, fromElement );
+  },
+
+  /**
+   * Get the previous focusable element relative to the provided element and under the parentElement.
+   * If no previous focusable can be found, it will return the provided element.
+   *
+   * @param fromElement - element to traverse from
+   * @param [parentElement] - optional, search will be limited to elements under this parent
+   */
+  getPreviousFocusableFrom( fromElement: HTMLElement, parentElement: HTMLElement | null = null ): HTMLElement {
+    return getNextPreviousFocusableFromElement( PREVIOUS, parentElement, fromElement );
   },
 
   /**
