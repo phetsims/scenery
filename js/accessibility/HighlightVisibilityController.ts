@@ -13,10 +13,8 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import FocusManager from '../../../scenery/js/accessibility/FocusManager.js';
 import globalKeyStateTracker from '../../../scenery/js/accessibility/globalKeyStateTracker.js';
 import KeyboardUtils from '../../../scenery/js/accessibility/KeyboardUtils.js';
-import PDOMUtils from '../../../scenery/js/accessibility/pdom/PDOMUtils.js';
 import { getPDOMFocusedNode } from '../../../scenery/js/accessibility/pdomFocusProperty.js';
 import type Display from '../display/Display.js';
-import type Node from '../nodes/Node.js';
 import SceneryEvent from '../../../scenery/js/input/SceneryEvent.js';
 import TInputListener from '../../../scenery/js/input/TInputListener.js';
 import optionize from '../../../phet-core/js/optionize.js';
@@ -48,11 +46,6 @@ class HighlightVisibilityController {
   // {number} - The amount of distance that the Pointer has moved relative to initialPointerPoint, in the global
   // coordinate frame.
   private relativePointerDistance = 0;
-
-  // The focusable Node from the most recent pointer down event. On the next Tab/Shift+Tab, this node
-  // will receive focus so that keyboard navigation continues from the clicked element. Null means no
-  // node is queued (Tab will behave normally).
-  private pendingFocusNode: Node | null = null;
 
   public constructor( display: Display, providedOptions: HighlightVisibilityControllerOptions ) {
 
@@ -88,47 +81,6 @@ class HighlightVisibilityController {
       }
     };
     globalKeyStateTracker.keyupEmitter.addListener( globalKeyUpListener );
-
-    // If a pointer down event queued a focusable Node:
-    // - On Tab/Shift+Tab, continue traversal from that queued node.
-    // - On any other key, move focus directly to the queued node.
-    const globalKeyDownListener = ( event: KeyboardEvent ) => {
-      if ( this.pendingFocusNode ) {
-        const node = this.pendingFocusNode;
-        this.pendingFocusNode = null;
-
-        // Verify the node is still valid for focusing.
-        if ( node.focusable && node.accessibleVisible && node.pdomInstances.length > 0 ) {
-          if ( KeyboardUtils.isKeyEvent( event, KeyboardUtils.KEY_TAB ) ) {
-            const primarySibling = node.pdomInstances[ 0 ].peer?.primarySibling;
-            if ( primarySibling ) {
-              const nextElement = event.shiftKey ?
-                                  PDOMUtils.getPreviousFocusableFrom( primarySibling ) :
-                                  PDOMUtils.getNextFocusableFrom( primarySibling );
-
-              // If we found a focusable element after traversing from the pending node, emulate browser Tab behavior
-              // by moving focus there. If not, allow native behavior to proceed.
-              if ( nextElement !== primarySibling ) {
-                event.preventDefault();
-                nextElement.focus();
-              }
-            }
-          }
-          else {
-            node.focus();
-            setHighlightsVisible();
-          }
-        }
-      }
-    };
-    globalKeyStateTracker.keydownEmitter.addListener( globalKeyDownListener );
-
-    // If focus changes for any reason (native browser behavior or scripted focus), queued pointer focus
-    // should not override that on the next Tab press.
-    const windowFocusInListener = () => {
-      this.pendingFocusNode = null;
-    };
-    window.addEventListener( 'focusin', windowFocusInListener );
 
     const interactiveHighlightsEnabledListener = ( visible: boolean ) => {
       this.display.focusManager.interactiveHighlightsVisibleProperty.value = visible;
@@ -172,26 +124,25 @@ class HighlightVisibilityController {
           // in response to pointer events, always hide the focus highlight so it isn't distracting
           this.display.focusManager.pdomFocusHighlightsVisibleProperty.value = false;
 
-          // Queue the leaf-most focusable Node in the trail so that the next Tab/Shift+Tab
-          // will focus it, allowing keyboard navigation to continue from the clicked element
-          // without actually moving DOM focus during pointer interaction (which would interfere
-          // with VoiceOver and screen readers).
+          // Focus the closest focusable Node in the event trail immediately.
           const trailNodes = event.trail.nodes;
-          this.pendingFocusNode = null;
+          let focusedTrailNode = false;
           for ( let i = trailNodes.length - 1; i >= 0; i-- ) {
             const node = trailNodes[ i ];
             if ( node.focusable && node.accessibleVisible && node.pdomInstances.length > 0 ) {
-              this.pendingFocusNode = node;
+              node.focus();
+              focusedTrailNode = true;
               break;
             }
           }
 
           const focusedNode = getPDOMFocusedNode();
 
-          // If the event trail doesn't include the focusedNode, clear it - otherwise DOM focus is kept on the
-          // active element so that it can remain the target for assistive devices using pointer events
-          // on behalf of the user, see https://github.com/phetsims/scenery/issues/1137.
-          if ( focusedNode && !event.trail.nodes.includes( focusedNode ) ) {
+          // If no focusable target was found in the trail and the event trail doesn't include the focusedNode,
+          // clear it - otherwise DOM focus is kept on the active element so that it can remain the target for
+          // assistive devices using pointer events on behalf of the user, see
+          // https://github.com/phetsims/scenery/issues/1137.
+          if ( !focusedTrailNode && focusedNode && !event.trail.nodes.includes( focusedNode ) ) {
             FocusManager.pdomFocus = null;
           }
         }
@@ -202,8 +153,6 @@ class HighlightVisibilityController {
     this.disposeHighlightVisibilityController = () => {
       this.display.removeInputListener( focusHighlightVisibleListener );
       globalKeyStateTracker.keyupEmitter.removeListener( globalKeyUpListener );
-      globalKeyStateTracker.keydownEmitter.removeListener( globalKeyDownListener );
-      window.removeEventListener( 'focusin', windowFocusInListener );
       this.display.removeInputListener( displayDownListener );
 
       interactiveHighlightsEnabledListener && options.interactiveHighlightsEnabledProperty.unlink( interactiveHighlightsEnabledListener );
