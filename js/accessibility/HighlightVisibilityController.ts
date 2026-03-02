@@ -13,6 +13,7 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import FocusManager from '../../../scenery/js/accessibility/FocusManager.js';
 import globalKeyStateTracker from '../../../scenery/js/accessibility/globalKeyStateTracker.js';
 import KeyboardUtils from '../../../scenery/js/accessibility/KeyboardUtils.js';
+import { getPDOMFocusedNode } from '../../../scenery/js/accessibility/pdomFocusProperty.js';
 import type Display from '../display/Display.js';
 import type Node from '../nodes/Node.js';
 import SceneryEvent from '../../../scenery/js/input/SceneryEvent.js';
@@ -104,6 +105,13 @@ class HighlightVisibilityController {
     };
     globalKeyStateTracker.keydownEmitter.addListener( globalKeyDownListener );
 
+    // If focus changes for any reason (native browser behavior or scripted focus), queued pointer focus
+    // should not override that on the next Tab press.
+    const windowFocusInListener = () => {
+      this.pendingFocusNode = null;
+    };
+    window.addEventListener( 'focusin', windowFocusInListener );
+
     const interactiveHighlightsEnabledListener = ( visible: boolean ) => {
       this.display.focusManager.interactiveHighlightsVisibleProperty.value = visible;
     };
@@ -160,7 +168,14 @@ class HighlightVisibilityController {
             }
           }
 
-          FocusManager.pdomFocus = null;
+          const focusedNode = getPDOMFocusedNode();
+
+          // If the event trail doesn't include the focusedNode, clear it - otherwise DOM focus is kept on the
+          // active element so that it can remain the target for assistive devices using pointer events
+          // on behalf of the user, see https://github.com/phetsims/scenery/issues/1137.
+          if ( focusedNode && !event.trail.nodes.includes( focusedNode ) ) {
+            FocusManager.pdomFocus = null;
+          }
         }
       }
     };
@@ -170,6 +185,7 @@ class HighlightVisibilityController {
       this.display.removeInputListener( focusHighlightVisibleListener );
       globalKeyStateTracker.keyupEmitter.removeListener( globalKeyUpListener );
       globalKeyStateTracker.keydownEmitter.removeListener( globalKeyDownListener );
+      window.removeEventListener( 'focusin', windowFocusInListener );
       this.display.removeInputListener( displayDownListener );
 
       interactiveHighlightsEnabledListener && options.interactiveHighlightsEnabledProperty.unlink( interactiveHighlightsEnabledListener );
