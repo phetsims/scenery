@@ -124,12 +124,16 @@ class HighlightVisibilityController {
     };
     globalKeyStateTracker.keydownEmitter.addListener( globalKeyDownListener );
 
-    // If focus changes for any reason (native browser behavior or scripted focus), queued pointer focus
-    // should not override that on the next Tab press.
-    const windowFocusInListener = () => {
-      this.pendingFocusAnchorNode = null;
+    // If focus changes within this display for any reason (native browser behavior or scripted focus),
+    // queued pointer focus should not override that on the next key press.
+    // We intentionally do not clear on focusout: pointer down handling can clear active focus, which
+    // would immediately erase the newly queued anchor before keyboard re-entry can use it.
+    const displayFocusListener: TInputListener = {
+      focusin: () => {
+        this.pendingFocusAnchorNode = null;
+      }
     };
-    window.addEventListener( 'focusin', windowFocusInListener );
+    this.display.addInputListener( displayFocusListener );
 
     const interactiveHighlightsEnabledListener = ( visible: boolean ) => {
       this.display.focusManager.interactiveHighlightsVisibleProperty.value = visible;
@@ -203,7 +207,7 @@ class HighlightVisibilityController {
       this.display.removeInputListener( focusHighlightVisibleListener );
       globalKeyStateTracker.keyupEmitter.removeListener( globalKeyUpListener );
       globalKeyStateTracker.keydownEmitter.removeListener( globalKeyDownListener );
-      window.removeEventListener( 'focusin', windowFocusInListener );
+      this.display.removeInputListener( displayFocusListener );
       this.display.removeInputListener( displayDownListener );
 
       interactiveHighlightsEnabledListener && options.interactiveHighlightsEnabledProperty.unlink( interactiveHighlightsEnabledListener );
