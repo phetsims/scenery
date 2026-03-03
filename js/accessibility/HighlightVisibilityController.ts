@@ -91,29 +91,28 @@ class HighlightVisibilityController {
     };
     globalKeyStateTracker.keyupEmitter.addListener( globalKeyUpListener );
 
-    // If a pointer down event queued a focusable Node:
-    // - On Tab/Shift+Tab, continue traversal from that queued node.
-    // - On any other key, move focus directly to the queued node.
+    // If a pointer down event queued a valid focus anchor, intercept the next key press on keydown
+    // (before the browser moves focus) to manage focus instead.
+    // - On Tab/Shift+Tab, continue traversal from the queued anchor.
+    // - On any other key, move focus directly to the queued anchor node.
     const globalKeyDownListener = ( event: KeyboardEvent ) => {
       if ( this.pendingFocusAnchorNode ) {
         const node = this.pendingFocusAnchorNode;
         this.pendingFocusAnchorNode = null;
 
-        // Verify the node is still valid for focusing.
-        if ( node.focusable && node.accessibleVisible && node.pdomInstances.length > 0 ) {
+        // Verify the anchor is still focusable in the DOM.
+        const primarySibling = this.getValidPendingFocusAnchorElement( node );
+        if ( primarySibling ) {
           if ( KeyboardUtils.isKeyEvent( event, KeyboardUtils.KEY_TAB ) ) {
-            const primarySibling = node.pdomInstances[ 0 ].peer?.primarySibling;
-            if ( primarySibling ) {
-              const nextElement = event.shiftKey ?
-                                  PDOMUtils.getPreviousFocusableFrom( primarySibling ) :
-                                  PDOMUtils.getNextFocusableFrom( primarySibling );
+            const nextElement = event.shiftKey ?
+                                PDOMUtils.getPreviousFocusableFrom( primarySibling ) :
+                                PDOMUtils.getNextFocusableFrom( primarySibling );
 
-              // If we found a focusable element after traversing from the pending node, emulate browser Tab behavior
-              // by moving focus there. If not, allow native behavior to proceed.
-              if ( nextElement !== primarySibling ) {
-                event.preventDefault();
-                nextElement.focus();
-              }
+            // If we found a focusable element after traversing from the pending node, emulate browser Tab behavior
+            // by moving focus there. If not, allow native behavior to proceed.
+            if ( nextElement !== primarySibling ) {
+              event.preventDefault();
+              nextElement.focus();
             }
           }
           else {
@@ -174,15 +173,14 @@ class HighlightVisibilityController {
           // in response to pointer events, always hide the focus highlight so it isn't distracting
           this.display.focusManager.pdomFocusHighlightsVisibleProperty.value = false;
 
-          // Queue the leaf-most focusable Node in the trail so that the next Tab/Shift+Tab
-          // will focus it, allowing keyboard navigation to continue from the clicked element
-          // without actually moving DOM focus during pointer interaction (which would interfere
-          // with VoiceOver and screen readers).
+          // Queue the leaf-most Node in the trail whose primary sibling is currently focusable.
+          // This preserves an anchor for the next keyboard event without moving DOM focus during
+          // pointer interaction (which would interfere with VoiceOver and screen readers).
           const trailNodes = event.trail.nodes;
           this.pendingFocusAnchorNode = null;
           for ( let i = trailNodes.length - 1; i >= 0; i-- ) {
             const node = trailNodes[ i ];
-            if ( node.focusable && node.accessibleVisible && node.pdomInstances.length > 0 ) {
+            if ( this.getValidPendingFocusAnchorElement( node ) ) {
               this.pendingFocusAnchorNode = node;
               break;
             }
@@ -211,6 +209,14 @@ class HighlightVisibilityController {
       interactiveHighlightsEnabledListener && options.interactiveHighlightsEnabledProperty.unlink( interactiveHighlightsEnabledListener );
       swapVisibilityMultilink && swapVisibilityMultilink.dispose();
     };
+  }
+
+  /**
+   * Returns the Node's primary sibling if it is currently focusable in the DOM.
+   */
+  private getValidPendingFocusAnchorElement( node: Node ): HTMLElement | null {
+    const primarySibling = node.pdomInstances[ 0 ]?.peer?.primarySibling;
+    return primarySibling && PDOMUtils.isElementFocusable( primarySibling ) ? primarySibling : null;
   }
 
   /**
