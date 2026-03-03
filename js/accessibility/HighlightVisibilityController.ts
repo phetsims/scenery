@@ -10,10 +10,8 @@
 import Multilink from '../../../axon/js/Multilink.js';
 import Property from '../../../axon/js/Property.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import FocusManager from '../../../scenery/js/accessibility/FocusManager.js';
 import globalKeyStateTracker from '../../../scenery/js/accessibility/globalKeyStateTracker.js';
 import KeyboardUtils from '../../../scenery/js/accessibility/KeyboardUtils.js';
-import { getPDOMFocusedNode } from '../../../scenery/js/accessibility/pdomFocusProperty.js';
 import type Display from '../display/Display.js';
 import SceneryEvent from '../../../scenery/js/input/SceneryEvent.js';
 import TInputListener from '../../../scenery/js/input/TInputListener.js';
@@ -113,38 +111,14 @@ class HighlightVisibilityController {
 
     const displayDownListener = {
 
-      // Whenever we receive a down event focus highlights are made invisible. We may also blur the active element in
-      // some cases, but not always as is necessary for iOS VoiceOver. See documentation details in the function.
+      // Whenever we receive a down event, make focus highlights invisible.
       down: ( event: SceneryEvent ) => {
 
-        // An AT might have sent a down event outside of the display, if this happened we will not do anything
-        // to change focus
+        // An AT might send a down event outside of the display.
         if ( this.display.bounds.containsPoint( event.pointer.point ) ) {
 
           // in response to pointer events, always hide the focus highlight so it isn't distracting
           this.display.focusManager.pdomFocusHighlightsVisibleProperty.value = false;
-
-          // Focus the closest focusable Node in the event trail immediately.
-          const trailNodes = event.trail.nodes;
-          let focusedTrailNode = false;
-          for ( let i = trailNodes.length - 1; i >= 0; i-- ) {
-            const node = trailNodes[ i ];
-            if ( node.focusable && node.accessibleVisible && node.pdomInstances.length > 0 ) {
-              node.focus();
-              focusedTrailNode = true;
-              break;
-            }
-          }
-
-          const focusedNode = getPDOMFocusedNode();
-
-          // If no focusable target was found in the trail and the event trail doesn't include the focusedNode,
-          // clear it - otherwise DOM focus is kept on the active element so that it can remain the target for
-          // assistive devices using pointer events on behalf of the user, see
-          // https://github.com/phetsims/scenery/issues/1137.
-          if ( !focusedTrailNode && focusedNode && !event.trail.nodes.includes( focusedNode ) ) {
-            FocusManager.pdomFocus = null;
-          }
         }
       }
     };

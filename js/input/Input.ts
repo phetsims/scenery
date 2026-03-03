@@ -174,8 +174,10 @@ import ArrayIO from '../../../tandem/js/types/ArrayIO.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
+import FocusManager from '../accessibility/FocusManager.js';
 import { pdomUniqueIdToTrail } from '../accessibility/pdom/pdomUniqueIdToTrail.js';
 import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
+import { getPDOMFocusedNode } from '../accessibility/pdomFocusProperty.js';
 import type Display from '../display/Display.js';
 import DisplayGlobals from '../display/DisplayGlobals.js';
 import BatchedDOMEvent, { BatchedDOMEventCallback, BatchedDOMEventType } from '../input/BatchedDOMEvent.js';
@@ -1662,6 +1664,9 @@ export default class Input extends PhetioObject {
 
     pointer.down( context.domEvent );
 
+    // On the down event, attempt to move focus to the target under the pointer by inspecting the trail.
+    this.moveFocusUnderPoint( eventTrail, point );
+
     this.dispatchEvent<DOMEvent>( eventTrail, 'down', pointer, context, true );
 
     sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -1700,6 +1705,39 @@ export default class Input extends PhetioObject {
     }
 
     sceneryLog && sceneryLog.Input && sceneryLog.pop();
+  }
+
+  /**
+   * Move PDOM focus to the deepest focusable Node in the Trail under the pointer.
+   *
+   * This runs before dispatching down events so app callbacks observe the updated focus state.
+   */
+  private moveFocusUnderPoint( trail: Trail, point: Vector2 ): void {
+
+    // An AT might have sent a down event outside of the display. In this case, keep focus unchanged.
+    if ( !this.display.bounds.containsPoint( point ) ) {
+      return;
+    }
+
+    const trailNodes = trail.nodes;
+    let focusedTrailNode = false;
+    for ( let i = trailNodes.length - 1; i >= 0; i-- ) {
+      const node = trailNodes[ i ];
+      if ( node.focusable && node.accessibleVisible && node.pdomInstances.length > 0 ) {
+        node.focus();
+        focusedTrailNode = true;
+        break;
+      }
+    }
+
+    const focusedNode = getPDOMFocusedNode();
+
+    // If no focusable target was found in the trail and the trail doesn't include the focusedNode, clear it.
+    // Otherwise DOM focus is kept on the active element so that it can remain the target for assistive devices
+    // using pointer events on behalf of the user.
+    if ( !focusedTrailNode && focusedNode && !trail.nodes.includes( focusedNode ) ) {
+      FocusManager.pdomFocus = null;
+    }
   }
 
   /**
