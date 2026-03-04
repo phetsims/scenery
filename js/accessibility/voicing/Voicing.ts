@@ -40,6 +40,7 @@ import type { InteractiveHighlightingOptions } from '../../accessibility/voicing
 import InteractiveHighlighting from '../../accessibility/voicing/InteractiveHighlighting.js';
 import voicingUtteranceQueue from '../../accessibility/voicing/voicingUtteranceQueue.js';
 import Instance from '../../display/Instance.js';
+import SceneryEvent from '../../input/SceneryEvent.js';
 import type { SceneryListenerFunction } from '../../input/TInputListener.js';
 import Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
@@ -203,7 +204,7 @@ export interface TVoicing<SuperType extends Node = Node> extends TInteractiveHig
 
   getVoicingFocusListener(): SceneryListenerFunction<FocusEvent> | null;
 
-  defaultFocusListener(): void;
+  defaultFocusListener( event: SceneryEvent<FocusEvent> ): void;
 
   // Prefer exported function isVoicing() for better TypeScript support
   get _isVoicing(): true;
@@ -718,10 +719,15 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ): SuperT
       /**
        * The default focus listener attached to this Node during initialization.
        */
-      public defaultFocusListener(): void {
-        this.voicingSpeakFullResponse( {
-          contextResponse: null
-        } );
+      public defaultFocusListener( event: SceneryEvent<FocusEvent> ): void {
+
+        // Voicing "focus" responses are only for keyboard interaction right now. We may want to change that
+        // in the future.
+        if ( event.focusOrigin !== 'pointer-down' ) {
+          this.voicingSpeakFullResponse( {
+            contextResponse: null
+          } );
+        }
       }
 
       /**

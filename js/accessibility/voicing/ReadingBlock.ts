@@ -421,6 +421,12 @@ const ReadingBlock = memoize( <SuperType extends Constructor<Node>>( Type: Super
        */
       private _speakReadingBlockContentListener( event: SceneryEvent ): void {
 
+        // Don't read the reading block on a focus from a mouse or touch event, we will speak on the up event
+        // for that input method.
+        if ( event.focusOrigin === 'pointer-down' ) {
+          return;
+        }
+
         const displays = this.getConnectedDisplays();
 
         const readingBlockUtterance = this.voicingUtterance;
