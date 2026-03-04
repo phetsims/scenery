@@ -1655,6 +1655,10 @@ export default class Input extends PhetioObject {
 
     this.dispatchEvent<DOMEvent>( eventTrail, 'up', pointer, context, true );
 
+    // Run a final focus pass on pointer-up so interactions that moved content during down/drag can update focus
+    // to the pointer's current target after layout/model changes have settled.
+    this.correctFocusAfterPointerUp( pointer, point );
+
     // touch pointers are transient, so fire exit/out to the trail afterwards
     if ( pointer.isTouchLike() ) {
       this.exitEvents<DOMEvent>( pointer, context, eventTrail, 0, true );
@@ -1742,16 +1746,7 @@ export default class Input extends PhetioObject {
     // Reset pending annotation from any prior attempt. If this down causes a focusin, we'll set it again below.
     this.pendingFocusInOrigin = null;
 
-    // Walk from leaf to root and focus the deepest Node that can own PDOM focus.
-    const trailNodes = trail.nodes;
-    let focusCandidateNode: Node | null = null;
-    for ( let i = trailNodes.length - 1; i >= 0; i-- ) {
-      const node = trailNodes[ i ];
-      if ( node.focusable && node.accessibleVisible && node.pdomInstances.length > 0 ) {
-        focusCandidateNode = node;
-        break;
-      }
-    }
+    const focusCandidateNode = this.getDeepestFocusableNodeInTrail( trail );
 
     const focusedNode = getPDOMFocusedNode();
 
@@ -1765,6 +1760,45 @@ export default class Input extends PhetioObject {
     // Otherwise keep current focus so AT using pointer events can continue targeting the active element.
     else if ( !focusCandidateNode && focusedNode && !trail.nodes.includes( focusedNode ) ) {
       FocusManager.pdomFocus = null;
+    }
+  }
+
+  /**
+   * Returns the deepest focusable Node in a Trail, or null if no Node in the Trail can own PDOM focus.
+   */
+  private getDeepestFocusableNodeInTrail( trail: Trail ): Node | null {
+    const trailNodes = trail.nodes;
+    for ( let i = trailNodes.length - 1; i >= 0; i-- ) {
+      const node = trailNodes[ i ];
+      if ( node.focusable && node.accessibleVisible && node.pdomInstances.length > 0 ) {
+        return node;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Re-hit-tests focus on pointer-up to correct stale down-time targeting when app logic repositions content during
+   * the same interaction. This only adjusts focus when a new valid focus target is found.
+   */
+  private correctFocusAfterPointerUp( pointer: Pointer, point: Vector2 ): void {
+
+    // Keep this correction narrow: desktop-like pointer interactions only, within display bounds.
+    if ( !( pointer instanceof Mouse ) || !this.display.bounds.containsPoint( point ) ) {
+      return;
+    }
+
+    // If focus is already established (e.g. from down), do not retarget on up.
+    const focusedNode = getPDOMFocusedNode();
+    if ( focusedNode ) {
+      return;
+    }
+
+    const upTrail = this.getPointerTrail( pointer );
+    const upFocusCandidateNode = this.getDeepestFocusableNodeInTrail( upTrail );
+
+    if ( upFocusCandidateNode && upFocusCandidateNode !== focusedNode ) {
+      upFocusCandidateNode.focus();
     }
   }
 
