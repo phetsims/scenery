@@ -203,6 +203,7 @@ import Renderer from '../display/Renderer.js';
 import type SVGSelfDrawable from '../display/SVGSelfDrawable.js';
 import type WebGLSelfDrawable from '../display/WebGLSelfDrawable.js';
 import type Filter from '../filters/Filter.js';
+import FocusedBooleanProperty from '../input/FocusedBooleanProperty.js';
 import hotkeyManager from '../input/hotkeyManager.js';
 import type Pointer from '../input/Pointer.js';
 import type TInputListener from '../input/TInputListener.js';
@@ -473,7 +474,7 @@ class Node extends ParallelDOM {
   public readonly voicingVisibleProperty: TinyProperty<boolean>;
 
   // A lazily created Property indicating whether this Node is focused. See getter for the focusedProperty.
-  private _focusedProperty?: BooleanProperty;
+  private _focusedProperty?: FocusedBooleanProperty;
 
   // Areas for hit intersection. If set on a Node, no descendants can handle events.
   // (scenery-internal)
@@ -3998,13 +3999,16 @@ class Node extends ParallelDOM {
   /**
    * Returns a read-only Property indicating whether this Node is focused. The Property is lazily created
    * on access.
+   *
+   * In addition to `value`, this Property also exposes `focusOrigin`, metadata describing what caused focus to be
+   * gained. `focusOrigin` is null when the Node is unfocused.
    */
-  public get focusedProperty(): BooleanProperty {
+  public get focusedProperty(): FocusedBooleanProperty {
     if ( !this._focusedProperty ) {
-      const focusedProperty = new BooleanProperty( this.focused );
+      const focusedProperty = new FocusedBooleanProperty( this.focused );
       this.addInputListener( {
-        focus: () => focusedProperty.set( true ),
-        blur: () => focusedProperty.set( false )
+        focus: event => focusedProperty.setFocused( true, event.focusOrigin ),
+        blur: () => focusedProperty.setFocused( false )
       } );
       this._focusedProperty = focusedProperty;
     }
