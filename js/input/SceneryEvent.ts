@@ -18,11 +18,13 @@ import IOType from '../../../tandem/js/types/IOType.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import StringIO from '../../../tandem/js/types/StringIO.js';
 import EventContext from '../input/EventContext.js';
-import type Node from '../nodes/Node.js';
 import type Pointer from '../input/Pointer.js';
+import type Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
 import Trail from '../util/Trail.js';
 import EventIO from './EventIO.js';
+
+export type FocusOrigin = 'pointer-down';
 
 // "out" here ensures that SceneryListenerFunctions don't specify a wider type arguments for the event, see  https://github.com/phetsims/scenery/issues/1483
 export default class SceneryEvent<out DOMEvent extends Event = Event> {
@@ -61,13 +63,18 @@ export default class SceneryEvent<out DOMEvent extends Event = Event> {
   // for the mouse if it is the primary (left) mouse button.
   public isPrimary: boolean;
 
+  // Metadata describing what caused focus events. Null unless this event was associated with known focus movement
+  // source information (for example, focus moved by pointer down).
+  public readonly focusOrigin: FocusOrigin | null;
+
   /**
    * @param trail - The trail to the node picked/hit by this input event.
    * @param type - Type of the event, e.g. 'string'
    * @param pointer - The pointer that triggered this event
    * @param context - The original DOM EventContext that caused this SceneryEvent to fire.
+   * @param focusOrigin - Metadata describing what caused focus events. Null unless this event was associated with known focus movement source, like a pointer down.
    */
-  public constructor( trail: Trail, type: string, pointer: Pointer, context: EventContext<DOMEvent> ) {
+  public constructor( trail: Trail, type: string, pointer: Pointer, context: EventContext<DOMEvent>, focusOrigin: FocusOrigin | null = null ) {
     // TODO: add domEvent type assertion -- will browsers support this? https://github.com/phetsims/scenery/issues/1581
 
     this.handled = false;
@@ -83,6 +90,7 @@ export default class SceneryEvent<out DOMEvent extends Event = Event> {
 
     // TODO: don't require check on domEvent (seems sometimes this is passed as null as a hack?) https://github.com/phetsims/scenery/issues/1581
     this.isPrimary = !( pointer.type === 'mouse' ) || !this.domEvent || ( this.domEvent as unknown as MouseEvent ).button === 0;
+    this.focusOrigin = focusOrigin;
 
     // Store the last-used non-null DOM event for future use if required.
     pointer.lastEventContext = context;

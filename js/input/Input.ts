@@ -187,6 +187,7 @@ import Mouse from '../input/Mouse.js';
 import PDOMPointer from '../input/PDOMPointer.js';
 import Pen from '../input/Pen.js';
 import Pointer, { PointerState } from '../input/Pointer.js';
+import type { FocusOrigin } from '../input/SceneryEvent.js';
 import SceneryEvent from '../input/SceneryEvent.js';
 import type { default as TInputListener, SceneryListenerFunction, SupportedEventTypes } from '../input/TInputListener.js';
 import Touch from '../input/Touch.js';
@@ -246,6 +247,15 @@ export default class Input extends PhetioObject {
   public currentlyFiringEvents: boolean;
 
   public currentSceneryEvent: SceneryEvent | null = null;
+
+  // Metadata to annotate focus events while they are being dispatched.
+  private focusOriginForCurrentDispatch: FocusOrigin | null = null;
+
+  // Pending metadata for the next focusin event initiated by pointer-down focus management.
+  // We cannot annotate immediately in moveFocusUnderPoint(), because the resulting DOM focus events may be queued
+  // and dispatched later via Input's batching flow. So we store the origin here and consume it in focusIn(), right
+  // before dispatching scenery's 'focus' and 'focusin' events, so both events have this metadata.
+  private pendingFocusInOrigin: FocusOrigin | null = null;
 
   private batchedEvents: BatchedDOMEvent[];
 
@@ -663,8 +673,8 @@ export default class Input extends PhetioObject {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( `focusin(${Input.debugText( null, context.domEvent )});` );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-      this.dispatchPDOMEvent<FocusEvent>( trail, 'focus', context, false );
-      this.dispatchPDOMEvent<FocusEvent>( trail, 'focusin', context, true );
+      this.dispatchPDOMEvent<FocusEvent>( trail, 'focus', context, false, this.focusOriginForCurrentDispatch );
+      this.dispatchPDOMEvent<FocusEvent>( trail, 'focusin', context, true, this.focusOriginForCurrentDispatch );
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }, {
@@ -1103,7 +1113,13 @@ export default class Input extends PhetioObject {
    * Steps to dispatch a pdom-related event. Before dispatch, the PDOMPointer is initialized if it
    * hasn't been created yet and a userGestureEmitter emits to indicate that a user has begun an interaction.
    */
-  private dispatchPDOMEvent<DOMEvent extends Event>( trail: Trail, eventType: SupportedEventTypes, context: EventContext<DOMEvent>, bubbles: boolean ): void {
+  private dispatchPDOMEvent<DOMEvent extends Event>(
+    trail: Trail,
+    eventType: SupportedEventTypes,
+    context: EventContext<DOMEvent>,
+    bubbles: boolean,
+    focusOrigin: FocusOrigin | null = null
+  ): void {
 
     this.ensurePDOMPointer( context ).updateTrail( trail );
 
@@ -1122,7 +1138,7 @@ export default class Input extends PhetioObject {
       const canDispatchToTrail = trail.isPickable() || PDOM_ALWAYS_ACTIVE_EVENTS.includes( eventType );
 
       affirm( this.pdomPointer );
-      this.dispatchEvent<DOMEvent>( trail, eventType, this.pdomPointer, context, bubbles, PDOM_ALWAYS_ACTIVE_EVENTS.includes( eventType ), canDispatchToTrail );
+      this.dispatchEvent<DOMEvent>( trail, eventType, this.pdomPointer, context, bubbles, PDOM_ALWAYS_ACTIVE_EVENTS.includes( eventType ), canDispatchToTrail, focusOrigin );
     }
   }
 
@@ -1517,7 +1533,11 @@ export default class Input extends PhetioObject {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `focusIn('${Input.debugText( null, context.domEvent )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
 
+    // Consume only when focus events are actually dispatched (not when focus was requested).
+    this.focusOriginForCurrentDispatch = this.pendingFocusInOrigin;
+    this.pendingFocusInOrigin = null;
     this.focusinAction.execute( context );
+    this.focusOriginForCurrentDispatch = null;
 
     sceneryLog && sceneryLog.Input && sceneryLog.pop();
   }
@@ -1714,28 +1734,36 @@ export default class Input extends PhetioObject {
    */
   private moveFocusUnderPoint( trail: Trail, point: Vector2 ): void {
 
-    // An AT might have sent a down event outside of the display. In this case, keep focus unchanged.
+    // Ignore synthetic pointer-down events outside the display bounds (for example, some AT cases).
     if ( !this.display.bounds.containsPoint( point ) ) {
       return;
     }
 
+    // Reset pending annotation from any prior attempt. If this down causes a focusin, we'll set it again below.
+    this.pendingFocusInOrigin = null;
+
+    // Walk from leaf to root and focus the deepest Node that can own PDOM focus.
     const trailNodes = trail.nodes;
-    let focusedTrailNode = false;
+    let focusCandidateNode: Node | null = null;
     for ( let i = trailNodes.length - 1; i >= 0; i-- ) {
       const node = trailNodes[ i ];
       if ( node.focusable && node.accessibleVisible && node.pdomInstances.length > 0 ) {
-        node.focus();
-        focusedTrailNode = true;
+        focusCandidateNode = node;
         break;
       }
     }
 
     const focusedNode = getPDOMFocusedNode();
 
-    // If no focusable target was found in the trail and the trail doesn't include the focusedNode, clear it.
-    // Otherwise DOM focus is kept on the active element so that it can remain the target for assistive devices
-    // using pointer events on behalf of the user.
-    if ( !focusedTrailNode && focusedNode && !trail.nodes.includes( focusedNode ) ) {
+    // Move focus only if the deepest focusable candidate differs from the current focused node.
+    if ( focusCandidateNode && focusCandidateNode !== focusedNode ) {
+      this.pendingFocusInOrigin = 'pointer-down';
+      focusCandidateNode.focus();
+    }
+
+      // If no focusable candidate was found and current focus is outside this trail, clear focus.
+    // Otherwise keep current focus so AT using pointer events can continue targeting the active element.
+    else if ( !focusCandidateNode && focusedNode && !trail.nodes.includes( focusedNode ) ) {
       FocusManager.pdomFocus = null;
     }
   }
@@ -1850,6 +1878,8 @@ export default class Input extends PhetioObject {
    * @param bubbles - If bubbles is false, the event is only dispatched to the leaf node of the trail.
    * @param fireOnInputDisabled - Whether to fire this event even if nodes have inputEnabled:false
    * @param dispatchToTargets - Whether to fire the event on targets along the Trail. If false, only Display and Pointer listeners are fired.
+   * @param focusOrigin - If this event is being dispatched as part of a focus change, the origin of the focus change
+   *                      (for example: 'pointer-down').
    */
   private dispatchEvent<DOMEvent extends Event>(
     trail: Trail,
@@ -1858,7 +1888,8 @@ export default class Input extends PhetioObject {
     context: EventContext<DOMEvent>,
     bubbles: boolean,
     fireOnInputDisabled = false,
-    dispatchToTargets = true ): void {
+    dispatchToTargets = true,
+    focusOrigin: FocusOrigin | null = null ): void {
     sceneryLog && sceneryLog.EventDispatch && sceneryLog.EventDispatch(
       `${type} trail:${trail.toString()} pointer:${pointer.toString()} at ${pointer.point ? pointer.point.toString() : 'null'}` );
     sceneryLog && sceneryLog.EventDispatch && sceneryLog.push();
@@ -1868,7 +1899,7 @@ export default class Input extends PhetioObject {
     sceneryLog && sceneryLog.EventPath && sceneryLog.EventPath( `${type} ${trail.toPathString()}` );
 
     // NOTE: event is not immutable, as its currentTarget changes
-    const inputEvent = new SceneryEvent<DOMEvent>( trail, type, pointer, context );
+    const inputEvent = new SceneryEvent<DOMEvent>( trail, type, pointer, context, focusOrigin );
 
     this.currentSceneryEvent = inputEvent;
 
