@@ -127,7 +127,6 @@ export const applyAccessibleNameFastPath = (
       peer.setPrimarySiblingContent( innerContent );
     }
     if ( labelContent !== undefined ) {
-      console.log( labelContent );
       peer.setLabelSiblingContent( labelContent );
     }
     if ( ariaLabel !== undefined ) {
