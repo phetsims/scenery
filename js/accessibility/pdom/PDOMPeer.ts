@@ -1019,12 +1019,7 @@ class PDOMPeer {
     }
 
     assert && assert( content === null || typeof content === 'string', 'incorrect inner content type' );
-
-    // TODO: Add this back once we understand https://github.com/phetsims/scenery/issues/1758. There are places
-    // where innerContent is set on a Node that has children and this is not caught. On the other hand, there are
-    // places where there are hidden children and this assertion is thrown
-    // assert && assert( this.pdomInstance.children.length === 0, 'descendants exist with accessible content, innerContent cannot be used' );
-
+    assert && assert( this.pdomInstance.children.length === 0, 'descendants exist with accessible content, innerContent cannot be used' );
     assert && assert( PDOMUtils.tagNameSupportsContent( this._primarySibling.tagName ),
       `tagName: ${this.node!.tagName} does not support inner content` );
 
