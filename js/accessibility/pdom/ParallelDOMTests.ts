@@ -1898,13 +1898,9 @@ QUnit.test( 'accessibleName option', assert => {
     } );
     return options;
   };
+  rootNode.removeChild( e );
 
   const testAccessibleName = 'This is a test';
-
-  window.assert && assert.throws( () => {
-    f.accessibleName = testAccessibleName;
-  }, 'Triggering re-render on parent is not supported because it would cause recursion and should throw.' );
-  rootNode.removeChild( e );
 
   //-------------------------------------------------------------------------------
   // An accessibleNameBehavior that triggers PDOMTree.createTree is not supported
@@ -1943,6 +1939,90 @@ QUnit.test( 'accessibleName option', assert => {
   rootNode.removeChild( h );
 
   pdomAuditRootNode( rootNode );
+  display.dispose();
+  display.domElement.parentElement!.removeChild( display.domElement );
+} );
+
+QUnit.test( 'accessibleName fast path', assert => {
+  const rootNode = new Node( { tagName: 'div' } );
+  const display = new Display( rootNode );
+  document.body.appendChild( display.domElement );
+
+  // Default behavior for content tags updates innerContent.
+  const contentNode = new Node( { tagName: 'div', accessibleName: TEST_LABEL } );
+  rootNode.addChild( contentNode );
+  const contentPrimarySibling = getPrimarySiblingElementByNode( contentNode );
+  contentNode.accessibleName = 'Updated accessible name';
+  assert.ok( getPrimarySiblingElementByNode( contentNode ) === contentPrimarySibling, 'content node updates name without recreating the primary sibling' );
+  assert.ok( contentPrimarySibling.textContent === 'Updated accessible name', 'content node updates primary sibling text' );
+
+  // Behavior that only modifies aria-label should also update in place.
+  const ariaLabelNode = new Node( {
+    containerTagName: 'div',
+    tagName: 'div',
+    ariaLabel: 'overrideThis'
+  } );
+  ariaLabelNode.accessibleNameBehavior = ( node, options, accessibleName ) => {
+    options.ariaLabel = accessibleName;
+    return options;
+  };
+  rootNode.addChild( ariaLabelNode );
+  const ariaPrimarySibling = getPrimarySiblingElementByNode( ariaLabelNode );
+  ariaLabelNode.accessibleName = 'Accessible name description';
+  assert.ok( getPrimarySiblingElementByNode( ariaLabelNode ) === ariaPrimarySibling, 'aria-label behavior updates without recreating the primary sibling' );
+  assert.ok( ariaPrimarySibling.getAttribute( 'aria-label' ) === 'Accessible name description', 'aria-label behavior updates the attribute value' );
+
+  // Default behavior for input nodes needs structural changes (label sibling), so this should still rebuild.
+  const inputNode = new Node( { tagName: 'input', accessibleName: TEST_LABEL, inputType: 'range' } );
+  rootNode.addChild( inputNode );
+  const inputPrimarySibling = getPrimarySiblingElementByNode( inputNode );
+  inputNode.accessibleName = 'Input updated accessible name';
+  assert.ok( getPrimarySiblingElementByNode( inputNode ) !== inputPrimarySibling, 'input node falls back to full render when structure can change' );
+
+  display.dispose();
+  display.domElement.parentElement!.removeChild( display.domElement );
+} );
+
+QUnit.test( 'accessibleName setter transitions between slow and fast paths', assert => {
+  const rootNode = new Node( { tagName: 'div' } );
+  const display = new Display( rootNode );
+  document.body.appendChild( display.domElement );
+
+  const transitionNode = new Node( { tagName: 'div', accessibleName: 'initial' } );
+  rootNode.addChild( transitionNode );
+
+  const slowAccessibleNameBehavior: AccessibleNameBehaviorFunction = ( node, options, accessibleName ) => {
+    options.labelTagName = 'label';
+    options.labelContent = accessibleName;
+    return options;
+  };
+  const fastAccessibleNameBehavior: AccessibleNameBehaviorFunction = ( node, options, accessibleName ) => {
+    options.innerContent = accessibleName;
+    return options;
+  };
+
+  // Slow path: behavior sets labelTagName (outside fast-path keys), so setter update should rebuild.
+  transitionNode.accessibleNameBehavior = slowAccessibleNameBehavior;
+  const slowPrimarySiblingBeforeSetter = getPrimarySiblingElementByNode( transitionNode );
+  transitionNode.accessibleName = 'slow-update';
+  const slowPrimarySiblingAfterSetter = getPrimarySiblingElementByNode( transitionNode );
+  assert.ok( slowPrimarySiblingAfterSetter !== slowPrimarySiblingBeforeSetter, 'slow-path setter update rebuilds primary sibling' );
+
+  // Fast path: behavior only sets innerContent, so setter update should patch in place.
+  transitionNode.accessibleNameBehavior = fastAccessibleNameBehavior;
+  const fastPrimarySiblingBeforeSetter = getPrimarySiblingElementByNode( transitionNode );
+  transitionNode.accessibleName = 'fast-update';
+  const fastPrimarySiblingAfterSetter = getPrimarySiblingElementByNode( transitionNode );
+  assert.ok( fastPrimarySiblingAfterSetter === fastPrimarySiblingBeforeSetter, 'fast-path setter update keeps primary sibling' );
+  assert.ok( fastPrimarySiblingAfterSetter.textContent === 'fast-update', 'fast-path setter update refreshes primary sibling text content' );
+
+  // Slow path again: switching back should restore full-render behavior on setter updates.
+  transitionNode.accessibleNameBehavior = slowAccessibleNameBehavior;
+  const slowAgainPrimarySiblingBeforeSetter = getPrimarySiblingElementByNode( transitionNode );
+  transitionNode.accessibleName = 'slow-update-2';
+  const slowAgainPrimarySiblingAfterSetter = getPrimarySiblingElementByNode( transitionNode );
+  assert.ok( slowAgainPrimarySiblingAfterSetter !== slowAgainPrimarySiblingBeforeSetter, 'slow-path setter update still rebuilds after returning from fast path' );
+
   display.dispose();
   display.domElement.parentElement!.removeChild( display.domElement );
 } );
@@ -2433,6 +2513,25 @@ QUnit.test( 'accessibleParagraph', assert => {
 
   display.dispose();
   display.domElement.parentElement!.removeChild( display.domElement );
+} );
+
+QUnit.test( 'accessibleParagraph fast path', assert => {
+  const rootNode = new Node( { tagName: 'div' } );
+  const display = new Display( rootNode );
+  document.body.appendChild( display.domElement );
+
+  // Basic paragraph behavior should update content in place without rebuilding peer siblings.
+  const paragraphNode = new Node( { accessibleParagraph: 'Initial paragraph' } );
+  rootNode.addChild( paragraphNode );
+  const paragraphPeer = getPDOMPeerByNode( paragraphNode );
+  const initialParagraphSibling = paragraphPeer.getPlaceableSibling();
+  paragraphNode.accessibleParagraph = 'Updated paragraph';
+  const updatedParagraphSibling = getPDOMPeerByNode( paragraphNode ).getPlaceableSibling();
+  assert.ok( updatedParagraphSibling === initialParagraphSibling, 'accessibleParagraph fast path updates paragraph content without recreating sibling element' );
+  assert.ok( updatedParagraphSibling.textContent === 'Updated paragraph', 'accessibleParagraph fast path updates paragraph text content' );
+
+  display.dispose();
+  document.body.removeChild( display.domElement );
 } );
 
 QUnit.test( 'accessibleHeading', assert => {
