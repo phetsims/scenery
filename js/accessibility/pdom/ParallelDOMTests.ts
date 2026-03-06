@@ -2092,12 +2092,12 @@ QUnit.test( 'accessibleName fast path', assert => {
   assert.ok( getPrimarySiblingElementByNode( ariaLabelNode ) === ariaPrimarySibling, 'aria-label behavior updates without recreating the primary sibling' );
   assert.ok( ariaPrimarySibling.getAttribute( 'aria-label' ) === 'Accessible name description', 'aria-label behavior updates the attribute value' );
 
-  // Default behavior for input nodes needs structural changes (label sibling), so this should still rebuild.
+  // Label siblings can be updated in place as well.
   const inputNode = new Node( { tagName: 'input', accessibleName: TEST_LABEL, inputType: 'range' } );
   rootNode.addChild( inputNode );
   const inputPrimarySibling = getPrimarySiblingElementByNode( inputNode );
   inputNode.accessibleName = 'Input updated accessible name';
-  assert.ok( getPrimarySiblingElementByNode( inputNode ) !== inputPrimarySibling, 'input node falls back to full render when structure can change' );
+  assert.ok( getPrimarySiblingElementByNode( inputNode ) === inputPrimarySibling, 'label sibling on input Node is able to be updated in place' );
 
   display.dispose();
   display.domElement.parentElement!.removeChild( display.domElement );
@@ -2114,6 +2114,9 @@ QUnit.test( 'accessibleName setter transitions between slow and fast paths', ass
   const slowAccessibleNameBehavior: AccessibleNameBehaviorFunction = ( node, options, accessibleName ) => {
     options.labelTagName = 'label';
     options.labelContent = accessibleName;
+
+    // The presence of this option is what should indicate slower behavior
+    options.appendLabel = true;
     return options;
   };
   const fastAccessibleNameBehavior: AccessibleNameBehaviorFunction = ( node, options, accessibleName ) => {
