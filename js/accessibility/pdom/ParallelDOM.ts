@@ -159,9 +159,10 @@ import type UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.j
 import type Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
 import Trail from '../../util/Trail.js';
-
 import { Highlight } from '../Highlight.js';
 import globalDescriptionQueue from './globalDescriptionQueue.js';
+import type { PDOMBehaviorFunction } from './ParallelDOMBehavior.js';
+import { ACCESSIBLE_NAME_FAST_PATH_KEYS, ACCESSIBLE_PARAGRAPH_FAST_PATH_KEYS, applyAccessibleNameFastPath, applyAccessibleParagraphFastPath, behaviorOptionsRequireRender, evaluateBehaviorOptions, isFastPathSafeLabelTagName } from './ParallelDOMBehavior.js';
 import PDOMDisplaysInfo from './PDOMDisplaysInfo.js';
 import type PDOMInstance from './PDOMInstance.js';
 import PDOMTree from './PDOMTree.js';
@@ -202,17 +203,6 @@ const unwrapAccessibleTemplate = ( valueOrProperty: AccessibleTemplateType ): Ac
   }
   return isTReadOnlyProperty( valueOrProperty ) ? valueOrProperty.value : valueOrProperty;
 };
-
-// Behavior option keys that can be applied by patching existing peer content/attributes without rebuilding peers.
-// Any additional defined key from accessibleNameBehavior requires a full PDOM render.
-// WARNING: If you add keys here, you must also update invalidatePeerAccessibleName() (and related tests) so every
-// declared fast-path key has concrete peer patch logic.
-const ACCESSIBLE_NAME_FAST_PATH_KEYS: readonly ( keyof ParallelDOMOptions )[] = [ 'innerContent', 'ariaLabel', 'labelContent' ];
-
-// Behavior option keys that can be applied directly by updating paragraph sibling content.
-// Any additional defined key from accessibleParagraphBehavior requires a full PDOM render.
-// WARNING: If you add keys here, update the paragraph fast-path patching path so every declared key is handled.
-const ACCESSIBLE_PARAGRAPH_FAST_PATH_KEYS: readonly ( keyof ParallelDOMOptions )[] = [ 'accessibleParagraphContent' ];
 
 // these elements are typically associated with forms, and support certain attributes
 const FORM_ELEMENTS = PDOMUtils.FORM_ELEMENTS;
@@ -441,7 +431,6 @@ export type DescriptionResponseOptions = {
  *   NOTE: The other Nodes must be a child of this Node, or not in the same subtree. Otherwise, updates could trigger infinite loops in PDOMTree/PDOMPeer update.
  * @returns the options that have been mutated by the behavior function.
  */
-type PDOMBehaviorFunction<AllowedKeys extends keyof ParallelDOMOptions> = ( node: Node, options: Pick<ParallelDOMOptions, AllowedKeys>, value: PDOMValueType, callbacksForOtherNodes: ( () => void )[] ) => ParallelDOMOptions;
 
 // Each behavior function supports a limited set of lower level options, as full access to the API in the behavior function can create
 // confusing side effects.
@@ -1057,7 +1046,7 @@ export default class ParallelDOM extends PhetioObject {
 
     const tagNameBeforeBehavior = this._tagName;
     this._isEvaluatingAccessibleNameBehavior = true;
-    ParallelDOM.evaluateBehaviorOptions( this as unknown as Node, this._accessibleNameBehavior, this._accessibleName, ( behaviorOptions, hasOtherNodeCallbacks ) => {
+    evaluateBehaviorOptions( this as unknown as Node, this._accessibleNameBehavior, this._accessibleName, ( behaviorOptions, hasOtherNodeCallbacks ) => {
       assert && assert( this._tagName === tagNameBeforeBehavior,
         'accessibleNameBehavior cannot mutate Node state directly (like tagName). Return options from the behavior function instead.' );
 
@@ -1069,13 +1058,13 @@ export default class ParallelDOM extends PhetioObject {
       // then no structural DOM change is needed. In that case, ignore labelTagName for this cycle so that
       // labelContent/ariaLabel/innerContent can still use the peer-level fast path.
       let ignoredDefinedKeys: ReadonlySet<keyof ParallelDOMOptions> | undefined;
-      if ( behaviorOptions.labelTagName !== undefined && this.isFastPathSafeLabelTagName( behaviorOptions.labelTagName ) ) {
+      if ( behaviorOptions.labelTagName !== undefined && isFastPathSafeLabelTagName( behaviorOptions.labelTagName, this._pdomInstances ) ) {
         ignoredDefinedKeys = new Set<keyof ParallelDOMOptions>( [ 'labelTagName' ] );
       }
 
       // Preserve existing semantics when accessibleName is cleared: behavior output should no longer apply and
       // base options from getBaseOptions() (for example a pre-existing ariaLabel) must be restored.
-      const requireRender = ParallelDOM.behaviorOptionsRequireRender(
+      const requireRender = behaviorOptionsRequireRender(
         behaviorOptions,
         ACCESSIBLE_NAME_FAST_PATH_KEYS,
         hasOtherNodeCallbacks,
@@ -1092,67 +1081,10 @@ export default class ParallelDOM extends PhetioObject {
       }
       else {
         this._accessibleNameDirty = false;
-        this.invalidatePeerAccessibleName( behaviorOptions );
+        applyAccessibleNameFastPath( this._pdomInstances, behaviorOptions, unwrapPDOMValueTypeProperty );
       }
     } );
     this._isEvaluatingAccessibleNameBehavior = false;
-  }
-
-  /**
-   * Returns whether a behavior-provided labelTagName can be treated as non-structural for this update.
-   *
-   * This is true only when all existing peers already have a label sibling with the same tag name.
-   * If any peer is missing a label sibling, or the tag differs, a full render is required to rebuild structure.
-   */
-  private isFastPathSafeLabelTagName( labelTagName: string | null ): boolean {
-    if ( typeof labelTagName !== 'string' ) {
-      return false;
-    }
-
-    for ( let i = 0; i < this._pdomInstances.length; i++ ) {
-      const labelSibling = this._pdomInstances[ i ].peer!.getLabelSibling();
-      if ( !labelSibling || labelSibling.tagName.toLowerCase() !== labelTagName.toLowerCase() ) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  /**
-   * Applies behavior-produced accessibleName options directly to existing peers without rebuilding sibling structure.
-   */
-  private invalidatePeerAccessibleName( behaviorOptions: ParallelDOMOptions ): void {
-    const innerContent = behaviorOptions.innerContent === undefined ? undefined : unwrapPDOMValueTypeProperty( behaviorOptions.innerContent );
-    const labelContent = behaviorOptions.labelContent === undefined ? undefined : unwrapPDOMValueTypeProperty( behaviorOptions.labelContent );
-    const ariaLabel = behaviorOptions.ariaLabel === undefined ? undefined : unwrapPDOMValueTypeProperty( behaviorOptions.ariaLabel );
-
-    for ( let i = 0; i < this._pdomInstances.length; i++ ) {
-      const peer = this._pdomInstances[ i ].peer!;
-
-      if ( innerContent !== undefined ) {
-        peer.setPrimarySiblingContent( innerContent );
-      }
-      if ( labelContent !== undefined ) {
-        console.log( labelContent );
-        peer.setLabelSiblingContent( labelContent );
-      }
-      if ( ariaLabel !== undefined ) {
-        const primarySibling = peer.getPrimarySibling();
-        if ( primarySibling ) {
-          if ( ariaLabel === null ) {
-            primarySibling.removeAttribute( 'aria-label' );
-          }
-          else {
-
-            // Apply aria-label directly to the peer for fast-path updates. We intentionally avoid mutating
-            // model-level attribute state (like setPDOMAttribute/setAriaLabel) so behavior output stays
-            // render-time only and base options are restored correctly when accessibleName is cleared.
-            peer.setAttributeToElement( 'aria-label', ariaLabel );
-          }
-        }
-      }
-    }
   }
 
   public set accessibleName( accessibleName: PDOMValueType ) { this.setAccessibleName( accessibleName ); }
@@ -1184,8 +1116,8 @@ export default class ParallelDOM extends PhetioObject {
       ParallelDOM.unlinkPDOMValueTypeListeners( this._accessibleParagraph, [ this._onPDOMContentChangeListener ] );
 
       this._accessibleParagraph = accessibleParagraph;
-      ParallelDOM.evaluateBehaviorOptions( this as unknown as Node, this._accessibleParagraphBehavior, accessibleParagraph, ( behaviorOptions, hasOtherNodeCallbacks ) => {
-        const requireRender = ParallelDOM.behaviorOptionsRequireRender(
+      evaluateBehaviorOptions( this as unknown as Node, this._accessibleParagraphBehavior, accessibleParagraph, ( behaviorOptions, hasOtherNodeCallbacks ) => {
+        const requireRender = behaviorOptionsRequireRender(
           behaviorOptions,
           ACCESSIBLE_PARAGRAPH_FAST_PATH_KEYS,
           hasOtherNodeCallbacks,
@@ -1923,10 +1855,7 @@ export default class ParallelDOM extends PhetioObject {
    * the update change to the PDOMPeer.
    */
   private invalidatePeerParagraphSiblingContent(): void {
-    for ( let i = 0; i < this._pdomInstances.length; i++ ) {
-      const peer = this._pdomInstances[ i ].peer!;
-      peer.setAccessibleParagraphContent( this.accessibleParagraphContent );
-    }
+    applyAccessibleParagraphFastPath( this._pdomInstances, this.accessibleParagraphContent );
   }
 
   /**
@@ -3917,70 +3846,6 @@ export default class ParallelDOM extends PhetioObject {
     if ( !node.tagName ) {
       node.tagName = DEFAULT_TAG_NAME;
     }
-  }
-
-  /**
-   * Evaluates a behavior function with per-call scratch objects, then runs callback logic with resulting options.
-   */
-  private static evaluateBehaviorOptions<AllowedKeys extends keyof ParallelDOMOptions>(
-    node: Node,
-    behaviorFunction: PDOMBehaviorFunction<AllowedKeys>,
-    value: PDOMValueType,
-    callback: ( behaviorOptions: ParallelDOMOptions, hasOtherNodeCallbacks: boolean ) => void
-  ): void {
-    const behaviorOptionsScratch = {} as Pick<ParallelDOMOptions, AllowedKeys>;
-    const callbacksScratch: ( () => void )[] = [];
-    const behaviorOptions = behaviorFunction(
-      node,
-      behaviorOptionsScratch,
-      value,
-      callbacksScratch
-    );
-    callback( behaviorOptions, callbacksScratch.length > 0 );
-  }
-
-  /**
-   * Returns whether a behavior result requires a full PDOM re-render instead of a fast peer-level update.
-   * Re-render is required if:
-   * - forceRender is true,
-   * - callbacks for other Nodes are present, or
-   * - any defined option is outside the allowed fast-path keys.
-   * Optionally, defined keys in ignoredDefinedKeys are skipped for the render check.
-   * Optionally requires that at least one allowed key is defined.
-   */
-  private static behaviorOptionsRequireRender(
-    behaviorOptions: ParallelDOMOptions,
-    allowedFastPathKeys: readonly ( keyof ParallelDOMOptions )[],
-    hasOtherNodeCallbacks: boolean,
-    forceRender: boolean,
-    requireAtLeastOneAllowedKey: boolean,
-    ignoredDefinedKeys?: ReadonlySet<keyof ParallelDOMOptions>
-  ): boolean {
-
-    if ( forceRender || hasOtherNodeCallbacks ) {
-      return true;
-    }
-
-    let hasAllowedFastPathOption = false;
-    for ( const key in behaviorOptions ) {
-      const optionKey = key as keyof ParallelDOMOptions;
-      const optionValue = behaviorOptions[ optionKey ];
-
-      if ( optionValue === undefined ) {
-        continue;
-      }
-      if ( ignoredDefinedKeys?.has( optionKey ) ) {
-        continue;
-      }
-      if ( allowedFastPathKeys.includes( optionKey ) ) {
-        hasAllowedFastPathOption = true;
-      }
-      else {
-        return true;
-      }
-    }
-
-    return requireAtLeastOneAllowedKey && !hasAllowedFastPathOption;
   }
 
   /**
