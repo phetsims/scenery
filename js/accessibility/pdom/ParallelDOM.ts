@@ -203,15 +203,16 @@ const unwrapAccessibleTemplate = ( valueOrProperty: AccessibleTemplateType ): Ac
   return isTReadOnlyProperty( valueOrProperty ) ? valueOrProperty.value : valueOrProperty;
 };
 
-// Scratch objects that are used in various places to avoid allocations in hot code paths.
-const scratchOptions: ParallelDOMOptions = {};
-const scratchCallbacksArray: ( () => void )[] = [];
-const cleanScratches = () => {
-  for ( const key in scratchOptions ) {
-    delete scratchOptions[ key as keyof ParallelDOMOptions ];
-  }
-  scratchCallbacksArray.length = 0;
-};
+// Behavior option keys that can be applied by patching existing peer content/attributes without rebuilding peers.
+// Any additional defined key from accessibleNameBehavior requires a full PDOM render.
+// WARNING: If you add keys here, you must also update invalidatePeerAccessibleName() (and related tests) so every
+// declared fast-path key has concrete peer patch logic.
+const ACCESSIBLE_NAME_FAST_PATH_KEYS: readonly ( keyof ParallelDOMOptions )[] = [ 'innerContent', 'ariaLabel', 'labelContent' ];
+
+// Behavior option keys that can be applied directly by updating paragraph sibling content.
+// Any additional defined key from accessibleParagraphBehavior requires a full PDOM render.
+// WARNING: If you add keys here, update the paragraph fast-path patching path so every declared key is handled.
+const ACCESSIBLE_PARAGRAPH_FAST_PATH_KEYS: readonly ( keyof ParallelDOMOptions )[] = [ 'accessibleParagraphContent' ];
 
 // these elements are typically associated with forms, and support certain attributes
 const FORM_ELEMENTS = PDOMUtils.FORM_ELEMENTS;
@@ -701,8 +702,13 @@ export default class ParallelDOM extends PhetioObject {
   protected _onAccessibleHeadingChangeListener: () => void;
   protected _onDescriptionContentChangeListener: () => void;
   protected _onAccessibleParagraphContentChangeListener: () => void;
+
+  // Dedicated listener for Property-backed accessibleName values so updates can run through fast-path evaluation.
+  // When behavior output is not fast-path eligible, listener routing switches back to _onPDOMContentChangeListener.
+  protected _onAccessibleNameChangeListener: () => void;
   protected _onInnerContentChangeListener: () => void;
   protected _onAccessibleTemplateChangeListener: () => void;
+  private _isEvaluatingAccessibleNameBehavior = false;
 
   protected constructor( options?: PhetioObjectOptions ) {
 
@@ -715,6 +721,7 @@ export default class ParallelDOM extends PhetioObject {
     this._onAccessibleHeadingChangeListener = this.invalidateAccessibleHeadingContent.bind( this );
     this._onDescriptionContentChangeListener = this.invalidatePeerDescriptionSiblingContent.bind( this );
     this._onAccessibleParagraphContentChangeListener = this.invalidatePeerParagraphSiblingContent.bind( this );
+    this._onAccessibleNameChangeListener = this.onAccessibleNamePropertyChange.bind( this );
     this._onInnerContentChangeListener = this.onInnerContentPropertyChange.bind( this );
     this._onAccessibleTemplateChangeListener = this.invalidatePeerAccessibleTemplate.bind( this );
     this._onAccessibleRoleDescriptionChangeListener = this.onAccessibleRoleDescriptionChange.bind( this );
@@ -775,7 +782,7 @@ export default class ParallelDOM extends PhetioObject {
   protected disposeParallelDOM(): void {
 
     if ( isTReadOnlyProperty( this._accessibleName ) && !this._accessibleName.isDisposed ) {
-      this._accessibleName.unlink( this._onPDOMContentChangeListener );
+      ParallelDOM.unlinkPDOMValueTypeListeners( this._accessibleName, [ this._onPDOMContentChangeListener, this._onAccessibleNameChangeListener ] );
       this._accessibleName = null;
     }
 
@@ -987,6 +994,33 @@ export default class ParallelDOM extends PhetioObject {
   /***********************************************************************************************************/
 
   /**
+   * Routes Property listeners between full-render and fast-path update channels for behavior-driven options.
+   *
+   * Behavior-backed high-level options (for example accessibleName with a TReadOnlyProperty) can update through:
+   * 1. _onPDOMContentChangeListener -> full PDOM recompute/re-render
+   * 2. a fast-path listener -> direct peer-level patching
+   *
+   * We intentionally keep exactly one channel active at a time. If both listeners are active, a single Property
+   * change can trigger duplicate/conflicting work (a fast patch plus a full render). If the wrong listener is active,
+   * we either lose performance (always full render) or miss required structural updates (always fast path).
+   *
+   * This helper switches listeners based on whether the current behavior options require a full render.
+   * If requireRender is true, updates are routed to _onPDOMContentChangeListener.
+   */
+  private routeBehaviorPropertyListeners( valueOrProperty: PDOMValueType, fastPathListener: () => void, requireRender: boolean ): void {
+    if ( isTReadOnlyProperty( valueOrProperty ) ) {
+      if ( requireRender ) {
+        ParallelDOM.unlinkPDOMValueTypeListeners( valueOrProperty, [ fastPathListener ] );
+        !valueOrProperty.hasListener( this._onPDOMContentChangeListener ) && valueOrProperty.lazyLink( this._onPDOMContentChangeListener );
+      }
+      else {
+        ParallelDOM.unlinkPDOMValueTypeListeners( valueOrProperty, [ this._onPDOMContentChangeListener ] );
+        !valueOrProperty.hasListener( fastPathListener ) && valueOrProperty.lazyLink( fastPathListener );
+      }
+    }
+  }
+
+  /**
    * Sets the accessible name that describes this Node. The accessible name is the semantic title for the Node. It is
    * the content that will be read by a screen reader when the Node is discovered by the virtual cursor.
    *
@@ -998,19 +1032,91 @@ export default class ParallelDOM extends PhetioObject {
    */
   public setAccessibleName( accessibleName: PDOMValueType ): void {
     if ( accessibleName !== this._accessibleName ) {
-      if ( isTReadOnlyProperty( this._accessibleName ) && !this._accessibleName.isDisposed ) {
-        this._accessibleName.unlink( this._onPDOMContentChangeListener );
-      }
+      ParallelDOM.unlinkPDOMValueTypeListeners( this._accessibleName, [ this._onPDOMContentChangeListener, this._onAccessibleNameChangeListener ] );
 
       this._accessibleName = accessibleName;
+      this.onAccessibleNamePropertyChange();
+    }
+  }
 
-      if ( isTReadOnlyProperty( accessibleName ) ) {
-        accessibleName.lazyLink( this._onPDOMContentChangeListener );
+  /**
+   * Re-evaluates accessibleName behavior when the value (or Property value) changes, then chooses between:
+   * - full PDOM re-render, or
+   * - fast peer-level content/attribute updates.
+   */
+  private onAccessibleNamePropertyChange(): void {
+    assert && assert( !this._isEvaluatingAccessibleNameBehavior,
+      'accessibleNameBehavior cannot update accessibleName recursively while it is being evaluated.' );
+
+    // If there is no tagName, this Node has no PDOM representation yet. Defer behavior evaluation until a tagName
+    // is present and route future Property updates through this listener so behavior can be evaluated once tagName is set.
+    if ( this._tagName === null ) {
+      this.routeBehaviorPropertyListeners( this._accessibleName, this._onAccessibleNameChangeListener, false );
+      return;
+    }
+
+    const tagNameBeforeBehavior = this._tagName;
+    this._isEvaluatingAccessibleNameBehavior = true;
+    ParallelDOM.evaluateBehaviorOptions( this as unknown as Node, this._accessibleNameBehavior, this._accessibleName, ( behaviorOptions, hasOtherNodeCallbacks ) => {
+      assert && assert( this._tagName === tagNameBeforeBehavior,
+        'accessibleNameBehavior cannot mutate Node state directly (like tagName). Return options from the behavior function instead.' );
+
+      // Preserve existing semantics when accessibleName is cleared: behavior output should no longer apply and
+      // base options from getBaseOptions() (for example a pre-existing ariaLabel) must be restored.
+      const requireRender = ParallelDOM.behaviorOptionsRequireRender(
+        behaviorOptions,
+        ACCESSIBLE_NAME_FAST_PATH_KEYS,
+        hasOtherNodeCallbacks,
+        this._accessibleName === null,
+        true
+      );
+
+      this.routeBehaviorPropertyListeners( this._accessibleName, this._onAccessibleNameChangeListener, requireRender );
+
+      if ( requireRender ) {
+        this._accessibleNameDirty = true;
+        this.onPDOMContentChange();
       }
+      else {
+        this._accessibleNameDirty = false;
+        this.invalidatePeerAccessibleName( behaviorOptions );
+      }
+    } );
+    this._isEvaluatingAccessibleNameBehavior = false;
+  }
 
-      this._accessibleNameDirty = true;
+  /**
+   * Applies behavior-produced accessibleName options directly to existing peers without rebuilding sibling structure.
+   */
+  private invalidatePeerAccessibleName( behaviorOptions: ParallelDOMOptions ): void {
+    const innerContent = behaviorOptions.innerContent === undefined ? undefined : unwrapPDOMValueTypeProperty( behaviorOptions.innerContent );
+    const labelContent = behaviorOptions.labelContent === undefined ? undefined : unwrapPDOMValueTypeProperty( behaviorOptions.labelContent );
+    const ariaLabel = behaviorOptions.ariaLabel === undefined ? undefined : unwrapPDOMValueTypeProperty( behaviorOptions.ariaLabel );
 
-      this.onPDOMContentChange();
+    for ( let i = 0; i < this._pdomInstances.length; i++ ) {
+      const peer = this._pdomInstances[ i ].peer!;
+
+      if ( innerContent !== undefined ) {
+        peer.setPrimarySiblingContent( innerContent );
+      }
+      if ( labelContent !== undefined ) {
+        peer.setLabelSiblingContent( labelContent );
+      }
+      if ( ariaLabel !== undefined ) {
+        const primarySibling = peer.getPrimarySibling();
+        if ( primarySibling ) {
+          if ( ariaLabel === null ) {
+            primarySibling.removeAttribute( 'aria-label' );
+          }
+          else {
+
+            // Apply aria-label directly to the peer for fast-path updates. We intentionally avoid mutating
+            // model-level attribute state (like setPDOMAttribute/setAriaLabel) so behavior output stays
+            // render-time only and base options are restored correctly when accessibleName is cleared.
+            peer.setAttributeToElement( 'aria-label', ariaLabel );
+          }
+        }
+      }
     }
   }
 
@@ -1040,70 +1146,37 @@ export default class ParallelDOM extends PhetioObject {
   public setAccessibleParagraph( accessibleParagraph: PDOMValueType ): void {
     if ( accessibleParagraph !== this._accessibleParagraph ) {
 
-      if ( isTReadOnlyProperty( this._accessibleParagraph ) &&
-
-           // The listener may not have been linked when we can render more efficiently,
-           // see below requireRender logic.
-           this._accessibleParagraph.hasListener( this._onPDOMContentChangeListener ) &&
-           !this._accessibleParagraph.isDisposed ) {
-        this._accessibleParagraph.unlink( this._onPDOMContentChangeListener );
-      }
+      ParallelDOM.unlinkPDOMValueTypeListeners( this._accessibleParagraph, [ this._onPDOMContentChangeListener ] );
 
       this._accessibleParagraph = accessibleParagraph;
+      ParallelDOM.evaluateBehaviorOptions( this as unknown as Node, this._accessibleParagraphBehavior, accessibleParagraph, ( behaviorOptions, hasOtherNodeCallbacks ) => {
+        const requireRender = ParallelDOM.behaviorOptionsRequireRender(
+          behaviorOptions,
+          ACCESSIBLE_PARAGRAPH_FAST_PATH_KEYS,
+          hasOtherNodeCallbacks,
+          false,
+          true
+        );
 
-      // Run the behavior function for accessible paragraph. If the returned options only changes
-      // the accessibleParagraphContent, then we can optimize by only setting the content directly.
-      // Otherwise, we assume that a full PDOM update is needed.
-      const behaviorOptions = this._accessibleParagraphBehavior(
-        this as unknown as Node,
-        scratchOptions,
-        accessibleParagraph,
-        scratchCallbacksArray
-      );
+        if ( requireRender ) {
 
-      // Optimization flag - we almost never need to re-render the full PDOM for accessible paragraph.
-      let requireRender = false;
-
-      // The behavior function is clearing content or setting options in another way. We may need to fully recompute.
-      // This might also happen if the behavior function is forwarding the content to another Node, and so this
-      // Node will not have any accessible paragraph content. We could call the forwarded callbacks
-      // after updating accessibleParagraphContent, but we would have to do that every time accessibleParagraph
-      // changes (requiring a new invalidation listener). So for now it is simpler to just do a full recompute
-      // in this case.
-      if ( behaviorOptions.accessibleParagraphContent === undefined || scratchCallbacksArray.length > 0 ) {
-        requireRender = true;
-      }
-      else {
-
-        // We have the content, but check to see if any other options are being set. If any other are present
-        // we need to do the full recompute.
-        for ( const key in behaviorOptions ) {
-          if ( key !== 'accessibleParagraphContent' && behaviorOptions[ key as keyof ParallelDOMOptions ] !== undefined ) {
-            requireRender = true;
-            break;
+          // Full render may be necessary. Make sure that any future changes to the Property trigger a full
+          // re-render and then update content immediately.
+          if ( isTReadOnlyProperty( accessibleParagraph ) && !accessibleParagraph.hasListener( this._onPDOMContentChangeListener ) ) {
+            accessibleParagraph.lazyLink( this._onPDOMContentChangeListener );
           }
+          this._accessibleParagraphDirty = true;
+          this.onPDOMContentChange();
         }
-      }
+        else {
 
-      if ( requireRender ) {
-
-        // Full render may be necessary. Make sure that any future changes to the Property trigger a full
-        // re-render and then update content immediately.
-        if ( isTReadOnlyProperty( accessibleParagraph ) ) {
-          accessibleParagraph.lazyLink( this._onPDOMContentChangeListener );
+          // Only the accessibleParagraphContent is changing and that can be updated efficiently. This function
+          // will also link to the StringProperty if necessary.
+          this._accessibleParagraphDirty = false;
+          this.setAccessibleParagraphContent( behaviorOptions.accessibleParagraphContent ?? null );
         }
-        this._accessibleParagraphDirty = true;
-        this.onPDOMContentChange();
-      }
-      else {
-
-        // Only the accessibleParagraphContent is changing and that can be updated efficiently. This function
-        // will also link to the StringProperty if necessary.
-        this.setAccessibleParagraphContent( behaviorOptions.accessibleParagraphContent ?? null );
-      }
+      } );
     }
-
-    cleanScratches();
   }
 
   public set accessibleParagraph( accessibleParagraph: PDOMValueType ) { this.setAccessibleParagraph( accessibleParagraph ); }
@@ -3809,6 +3882,77 @@ export default class ParallelDOM extends PhetioObject {
   private static useDefaultTagName( node: ParallelDOM ): void {
     if ( !node.tagName ) {
       node.tagName = DEFAULT_TAG_NAME;
+    }
+  }
+
+  /**
+   * Evaluates a behavior function with per-call scratch objects, then runs callback logic with resulting options.
+   */
+  private static evaluateBehaviorOptions<AllowedKeys extends keyof ParallelDOMOptions>(
+    node: Node,
+    behaviorFunction: PDOMBehaviorFunction<AllowedKeys>,
+    value: PDOMValueType,
+    callback: ( behaviorOptions: ParallelDOMOptions, hasOtherNodeCallbacks: boolean ) => void
+  ): void {
+    const behaviorOptionsScratch = {} as Pick<ParallelDOMOptions, AllowedKeys>;
+    const callbacksScratch: ( () => void )[] = [];
+    const behaviorOptions = behaviorFunction(
+      node,
+      behaviorOptionsScratch,
+      value,
+      callbacksScratch
+    );
+    callback( behaviorOptions, callbacksScratch.length > 0 );
+  }
+
+  /**
+   * Returns whether a behavior result requires a full PDOM re-render instead of a fast peer-level update.
+   * Re-render is required if:
+   * - forceRender is true,
+   * - callbacks for other Nodes are present, or
+   * - any defined option is outside the allowed fast-path keys.
+   * Optionally requires that at least one allowed key is defined.
+   */
+  private static behaviorOptionsRequireRender(
+    behaviorOptions: ParallelDOMOptions,
+    allowedFastPathKeys: readonly ( keyof ParallelDOMOptions )[],
+    hasOtherNodeCallbacks: boolean,
+    forceRender: boolean,
+    requireAtLeastOneAllowedKey: boolean
+  ): boolean {
+
+    if ( forceRender || hasOtherNodeCallbacks ) {
+      return true;
+    }
+
+    let hasAllowedFastPathOption = false;
+    for ( const key in behaviorOptions ) {
+      const optionKey = key as keyof ParallelDOMOptions;
+      const optionValue = behaviorOptions[ optionKey ];
+
+      if ( optionValue === undefined ) {
+        continue;
+      }
+      if ( allowedFastPathKeys.includes( optionKey ) ) {
+        hasAllowedFastPathOption = true;
+      }
+      else {
+        return true;
+      }
+    }
+
+    return requireAtLeastOneAllowedKey && !hasAllowedFastPathOption;
+  }
+
+  /**
+   * Safely unlinks listeners from a PDOMValueType Property. No-op for string/null values.
+   */
+  private static unlinkPDOMValueTypeListeners( valueOrProperty: PDOMValueType, listeners: ( () => void )[] ): void {
+    if ( isTReadOnlyProperty( valueOrProperty ) && !valueOrProperty.isDisposed ) {
+      for ( let i = 0; i < listeners.length; i++ ) {
+        const listener = listeners[ i ];
+        valueOrProperty.hasListener( listener ) && valueOrProperty.unlink( listener );
+      }
     }
   }
 }
