@@ -42,6 +42,8 @@ const CONTAINER_PARENT = PEER_CONTAINER_PARENT;
 const LABEL_TAG = PDOMUtils.TAGS.LABEL;
 const INPUT_TAG = PDOMUtils.TAGS.INPUT;
 const DISABLED_ATTRIBUTE_NAME = 'disabled';
+const PRIMARY_CONTENT_WRAPPER_TAG = 'span';
+const PRIMARY_CONTENT_WRAPPER_ATTRIBUTE = 'data-pdom-primary-content-wrapper';
 
 let globalId = 1;
 
@@ -105,6 +107,11 @@ class PDOMPeer {
   // the focus. It also will contain any children.
   private _primarySibling!: HTMLElement | undefined;
 
+  // Optional content wrapper inside the primary sibling. Created lazily when primary content needs to coexist
+  // with descendant peer elements (including promotion from previously direct content), and then kept sticky.
+  // Keeping it once created avoids repeated promotion/churn across later updates and order-of-operation changes.
+  private _primaryContentWrapper!: HTMLElement | null;
+
   protected constructor( pdomInstance: PDOMInstance, options: IntentionalAny ) {
     this.initializePDOMPeer( pdomInstance, options );
   }
@@ -143,6 +150,7 @@ class PDOMPeer {
     this._accessibleParagraphSibling = null;
     this._templateSibling = null;
     this._containerParent = null;
+    this._primaryContentWrapper = null;
     this.topLevelElements = [];
 
     this._preservedDisabledValue = null;
@@ -1020,15 +1028,129 @@ class PDOMPeer {
 
     assert && assert( content === null || typeof content === 'string', 'incorrect inner content type' );
 
-    // TODO: Add this back once we understand https://github.com/phetsims/scenery/issues/1758. There are places
-    // where innerContent is set on a Node that has children and this is not caught. On the other hand, there are
-    // places where there are hidden children and this assertion is thrown
-    // assert && assert( this.pdomInstance.children.length === 0, 'descendants exist with accessible content, innerContent cannot be used' );
+    // When descendants are present, render content in a dedicated wrapper so descendant peer elements can
+    // coexist under the primary sibling without being removed by innerHTML/textContent writes.
+    // If descendants are not present, retain historical behavior and set content directly on the primary sibling.
 
     assert && assert( PDOMUtils.tagNameSupportsContent( this._primarySibling.tagName ),
       `tagName: ${this.node!.tagName} does not support inner content` );
 
-    PDOMUtils.setTextContent( this._primarySibling, content );
+    if ( this._primaryContentWrapper || this.pdomInstance.children.length > 0 ) {
+      const wrapperWasMissing = !this._primaryContentWrapper;
+      const primaryContentWrapper = this.ensurePrimaryContentWrapper();
+
+      // If we just switched from direct-content mode to wrapper mode, remove any direct content nodes
+      // (text or formatting elements) that were previously set on the primary sibling.
+      if ( wrapperWasMissing ) {
+        this.removeLegacyPrimaryDirectContent();
+      }
+      PDOMUtils.setTextContent( primaryContentWrapper, content );
+    }
+    else {
+      PDOMUtils.setTextContent( this._primarySibling, content );
+    }
+  }
+
+  /**
+   * Returns whether the provided element is this peer's reserved primary-content wrapper.
+   */
+  public isPrimaryContentWrapperElement( element: Element ): boolean {
+    return element === this._primaryContentWrapper || element.hasAttribute( PRIMARY_CONTENT_WRAPPER_ATTRIBUTE );
+  }
+
+  /**
+   * Ensures a wrapper exists inside the primary sibling for inner content, and keeps it first.
+   */
+  private ensurePrimaryContentWrapper(): HTMLElement {
+    assert && assert( this._primarySibling, 'primary sibling required for content wrapper' );
+    const primarySibling = this._primarySibling!;
+
+    if ( !this._primaryContentWrapper ) {
+
+      // Intentionally avoid PDOMUtils.createElement: this is an internal content wrapper, not a
+      // focus-managed/styled sibling.
+      this._primaryContentWrapper = document.createElement( PRIMARY_CONTENT_WRAPPER_TAG );
+      this._primaryContentWrapper.setAttribute( PRIMARY_CONTENT_WRAPPER_ATTRIBUTE, 'true' );
+    }
+
+    if ( this._primaryContentWrapper.parentElement !== primarySibling || primarySibling.firstChild !== this._primaryContentWrapper ) {
+      primarySibling.insertBefore( this._primaryContentWrapper, primarySibling.firstChild || null );
+    }
+
+    return this._primaryContentWrapper;
+  }
+
+  /**
+   * Remove direct-content nodes previously set on the primary sibling while preserving child peer elements
+   * and the dedicated content wrapper.
+   */
+  private removeLegacyPrimaryDirectContent(): void {
+    assert && assert( this._primarySibling, 'primary sibling required' );
+    assert && assert( this._primaryContentWrapper, 'content wrapper required' );
+
+    const primarySibling = this._primarySibling!;
+    const primaryContentWrapper = this._primaryContentWrapper!;
+    const preservedElements = new Set<Element>();
+
+    for ( let i = 0; i < this.pdomInstance.children.length; i++ ) {
+      const childPeer = this.pdomInstance.children[ i ].peer!;
+      for ( let j = 0; j < childPeer.topLevelElements.length; j++ ) {
+        preservedElements.add( childPeer.topLevelElements[ j ] );
+      }
+    }
+
+    const childNodes = Array.from( primarySibling.childNodes );
+    for ( let i = 0; i < childNodes.length; i++ ) {
+      const childNode = childNodes[ i ];
+      if ( childNode === primaryContentWrapper ) {
+        continue;
+      }
+      if ( childNode instanceof Element && preservedElements.has( childNode ) ) {
+        continue;
+      }
+      primarySibling.removeChild( childNode );
+    }
+  }
+
+  /**
+   * Promotes direct primary sibling content to wrapper content so descendants can be inserted safely.
+   * This is intended for transitions where descendants are added after direct content has been set.
+   * If content is null, this will infer content from the primary sibling DOM.
+   */
+  public promotePrimarySiblingContentToWrapper( content: string | null ): void {
+    if ( !this._primarySibling || this._primaryContentWrapper ) {
+      return;
+    }
+
+    if ( assert ) {
+
+      // By engine ordering, promotion runs before descendant peer elements are inserted, so the primary sibling
+      // should not yet contain non-formatting element children/subtrees. Promotion round-trips through string
+      // content and setTextContent, which only preserves formatting tags as markup, so assert to catch violations.
+      const existingInnerHTML = this._primarySibling.innerHTML;
+      const existingContentHasMarkup = /<[^>]+>/.test( existingInnerHTML );
+      assert(
+        !existingContentHasMarkup || PDOMUtils.containsFormattingTags( existingInnerHTML ),
+        'Unexpected non-formatting subtree in primary sibling during content promotion.'
+      );
+    }
+
+    let contentToPromote = content;
+    if ( contentToPromote === null ) {
+
+      // In behavior-driven paths (for example accessibleNameBehavior), direct content may have been written
+      // to the primary sibling without updating node.innerContent. In that case, infer current content
+      // from the DOM for one-time promotion.
+      if ( this._primarySibling.childNodes.length === 0 ) {
+        return;
+      }
+      contentToPromote = this._primarySibling.innerHTML;
+    }
+
+    // Safe here because this promotion runs before child peer elements are inserted.
+    PDOMUtils.setTextContent( this._primarySibling, null );
+    const primaryContentWrapper = this.ensurePrimaryContentWrapper();
+    PDOMUtils.setTextContent( primaryContentWrapper, contentToPromote );
   }
 
   /**
@@ -1069,6 +1191,10 @@ class PDOMPeer {
     if ( this._primarySibling ) {
       this._primarySibling.setAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID, indices );
       this._primarySibling.id = this.getElementId( 'primary', indices );
+    }
+    if ( this._primaryContentWrapper ) {
+      this._primaryContentWrapper.setAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID, indices );
+      this._primaryContentWrapper.id = this.getElementId( 'content', indices );
     }
     if ( this._labelSibling ) {
       this._labelSibling.setAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID, indices );
@@ -1147,6 +1273,7 @@ class PDOMPeer {
     this.trail = null;
     // @ts-expect-error
     this._primarySibling = null;
+    this._primaryContentWrapper = null;
     this._labelSibling = null;
     this._descriptionSibling = null;
     this._headingSibling = null;

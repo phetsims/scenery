@@ -258,6 +258,12 @@ class PDOMInstance {
 
     Array.prototype.push.apply( this.children, pdomInstances );
 
+    // If this instance just transitioned from no descendants to descendants, migrate any direct content into
+    // the dedicated wrapper before child elements are inserted.
+    if ( !hadChildren && this.children.length > 0 && this.node ) {
+      pdomPeer.promotePrimarySiblingContentToWrapper( this.node.innerContent );
+    }
+
     if ( this.children.length > 0 && pdomPeer.getPrimarySibling() === null ) {
 
       // There are children but the PDOMPeer doesn't have a primary sibling yet. In the last update,
@@ -279,16 +285,6 @@ class PDOMInstance {
 
     if ( hadChildren ) {
       this.sortChildren();
-    }
-
-    if ( assert && this.node ) {
-      assert && assert( !!this.node );
-
-      // We do not support rendering children into a Node that has innerContent.
-      // If you hit this when mutating both children and innerContent at the same time, it is an issue with scenery.
-      // Remove one in a single step and them add then other in the next step.
-      this.children.length > 0 && assert( !this.node.innerContent,
-        `${this.children.length} child PDOMInstances present but this node has innerContent: ${this.node.innerContent}` );
     }
 
     if ( UNIQUE_ID_STRATEGY === PDOMUniqueIdStrategy.INDICES ) {
@@ -544,7 +540,8 @@ class PDOMInstance {
       // Since this doesn't happen often, we can just recompute the full order, and move every other element.
 
       const desiredOrder = _.flatten( this.children.map( child => child.peer!.topLevelElements ) );
-      const needsOrderChange = !_.every( desiredOrder, ( desiredElement, index ) => placeableSibling.children[ index ] === desiredElement );
+      const placeableChildElements = Array.from( placeableSibling.children ).filter( childElement => !this.peer!.isPrimaryContentWrapperElement( childElement ) );
+      const needsOrderChange = !_.every( desiredOrder, ( desiredElement, index ) => placeableChildElements[ index ] === desiredElement );
 
       if ( needsOrderChange ) {
 
@@ -595,9 +592,10 @@ class PDOMInstance {
 
     if ( assert ) {
       const desiredOrder = _.flatten( this.children.map( child => child.peer!.topLevelElements ) );
+      const placeableChildElements = Array.from( placeableSibling.children ).filter( childElement => !this.peer!.isPrimaryContentWrapperElement( childElement ) );
 
       // Verify the order
-      assert( _.every( desiredOrder, ( desiredElement, index ) => placeableSibling.children[ index ] === desiredElement ) );
+      assert( _.every( desiredOrder, ( desiredElement, index ) => placeableChildElements[ index ] === desiredElement ) );
     }
 
     if ( UNIQUE_ID_STRATEGY === PDOMUniqueIdStrategy.INDICES ) {

@@ -525,7 +525,7 @@ export default class ParallelDOM extends PhetioObject {
   private _labelContent: PDOMValueType = null;
 
   // The inner label content for this Node's primary sibling. Set as inner HTML
-  // or text content of the actual DOM element. If this is used, the Node should not have children.
+  // or text content of an internal content wrapper element inside the primary sibling.
   private _innerContent: PDOMValueType = null;
 
   // A lit-html template for rendering arbitrary HTML structure into a dedicated template sibling.
@@ -1794,8 +1794,7 @@ export default class ParallelDOM extends PhetioObject {
 
   /**
    * Set the inner content for the primary sibling of the PDOMPeers of this Node. Will be set as textContent
-   * unless content is html which uses exclusively formatting tags. A Node with inner content cannot
-   * have accessible descendants because this content will override the HTML of descendants of this Node.
+   * unless content is html which uses exclusively formatting tags.
    */
   public setInnerContent( innerContent: PDOMValueType ): void {
     if ( innerContent !== this._innerContent ) {
