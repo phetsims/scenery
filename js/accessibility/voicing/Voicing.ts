@@ -204,7 +204,7 @@ export interface TVoicing<SuperType extends Node = Node> extends TInteractiveHig
 
   getVoicingFocusListener(): SceneryListenerFunction<FocusEvent> | null;
 
-  defaultFocusListener( event: SceneryEvent<FocusEvent> ): void;
+  defaultFocusListener( event?: SceneryEvent<FocusEvent> ): void;
 
   // Prefer exported function isVoicing() for better TypeScript support
   get _isVoicing(): true;
@@ -719,11 +719,11 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ): SuperT
       /**
        * The default focus listener attached to this Node during initialization.
        */
-      public defaultFocusListener( event: SceneryEvent<FocusEvent> ): void {
+      public defaultFocusListener( event?: SceneryEvent<FocusEvent> ): void {
 
         // Voicing "focus" responses are only for keyboard interaction right now. We may want to change that
         // in the future.
-        if ( event.focusOrigin !== 'pointer-down' ) {
+        if ( event && event.focusOrigin !== 'pointer-down' ) {
           this.voicingSpeakFullResponse( {
             contextResponse: null
           } );
