@@ -162,6 +162,7 @@ QUnit.test( 'tagName/innerContent options', assert => {
   assert.ok( a.pdomInstances.length === 1, 'only 1 instance' );
   assert.ok( aElement.parentElement!.childNodes.length === 1, 'parent contains one primary siblings' );
   assert.ok( aElement.tagName === 'BUTTON', 'default label tagName' );
+  assert.ok( !aElement.firstElementChild || aElement.firstElementChild.tagName !== 'SPAN', 'no wrapper when there are no descendants' );
   assert.ok( aElement.textContent === TEST_LABEL, 'no html should use textContent' );
 
   a.innerContent = TEST_LABEL_HTML;
@@ -201,6 +202,68 @@ QUnit.test( 'tagName/innerContent options', assert => {
     b.tagName = 'input';
   }, /.*/, 'error thrown after setting tagName to input on Node with innerContent.' );
 
+  display.dispose();
+  display.domElement.parentElement!.removeChild( display.domElement );
+} );
+
+QUnit.test( 'innerContent with descendants uses wrapper content element', assert => {
+
+  const rootNode = new Node( { tagName: 'div' } );
+  const display = new Display( rootNode );
+  document.body.appendChild( display.domElement );
+
+  const parent = new Node( { tagName: 'div', innerContent: 'Parent label' } );
+  const child = new Node( { tagName: 'div', innerContent: 'Child content' } );
+  parent.addChild( child );
+  rootNode.addChild( parent );
+
+  const parentElement = getPrimarySiblingElementByNode( parent );
+  const childElement = getPrimarySiblingElementByNode( child );
+  const parentWrapper = parentElement.firstElementChild as HTMLElement;
+
+  assert.ok( parentWrapper.tagName === 'SPAN', 'wrapper element exists for primary sibling content' );
+  assert.ok( parentWrapper.textContent === 'Parent label', 'wrapper contains parent inner content' );
+  assert.ok( parentElement.contains( childElement ), 'child peer remains in parent primary sibling' );
+  assert.ok( parentElement.children[ 0 ] === parentWrapper, 'wrapper remains first child' );
+
+  parent.innerContent = 'Updated parent label';
+  assert.ok( parentWrapper.textContent === 'Updated parent label', 'wrapper updates without clobbering descendants' );
+  assert.ok( parentElement.contains( childElement ), 'child peer still attached after innerContent update' );
+
+  pdomAuditRootNode( rootNode );
+  display.dispose();
+  display.domElement.parentElement!.removeChild( display.domElement );
+} );
+
+QUnit.test( 'accessibleName wrapper promotion removes legacy direct content', assert => {
+
+  const rootNode = new Node( { tagName: 'div' } );
+  const display = new Display( rootNode );
+  document.body.appendChild( display.domElement );
+
+  const accessibleNameProperty = new StringProperty( 'Symbol Screen' );
+  const parent = new Node( { tagName: 'button', accessibleName: accessibleNameProperty } );
+  rootNode.addChild( parent );
+
+  const parentElement = getPrimarySiblingElementByNode( parent );
+  assert.ok( parentElement.firstElementChild === null || parentElement.firstElementChild.tagName !== 'SPAN',
+    'no wrapper before descendants are present' );
+  assert.ok( parentElement.textContent === 'Symbol Screen', 'accessibleName initially set as direct content' );
+
+  const child = new Node( { tagName: 'div', innerContent: 'child content' } );
+  parent.addChild( child );
+
+  const wrapper = parentElement.firstElementChild as HTMLElement;
+  assert.ok( wrapper.tagName === 'SPAN', 'wrapper created once descendants are present' );
+  assert.ok( wrapper.textContent === 'Symbol Screen', 'wrapper contains existing accessibleName content' );
+  assert.ok( parentElement.childNodes.length === 2, 'wrapper and child element only, no duplicate direct text nodes' );
+  assert.ok( parentElement.childNodes[ 0 ] === wrapper, 'wrapper remains first child' );
+
+  accessibleNameProperty.value = 'Updated Symbol Screen';
+  assert.ok( wrapper.textContent === 'Updated Symbol Screen', 'wrapper updates from accessibleName property changes' );
+  assert.ok( parentElement.childNodes.length === 2, 'no duplicated direct content after updates' );
+
+  pdomAuditRootNode( rootNode );
   display.dispose();
   display.domElement.parentElement!.removeChild( display.domElement );
 } );
@@ -1827,9 +1890,10 @@ QUnit.test( 'accessibleName option', assert => {
   a.addChild( b );
   const bElement = getPrimarySiblingElementByNode( b );
   const bParent = getPrimarySiblingElementByNode( b ).parentElement!;
-  const bLabelSibling = bParent.children[ DEFAULT_LABEL_SIBLING_INDEX ];
-  assert.ok( bLabelSibling.textContent === TEST_LABEL, 'accessibleName sets label sibling' );
-  assert.ok( bLabelSibling.getAttribute( 'for' )!.includes( bElement.id ), 'accessibleName sets label\'s "for" attribute' );
+  const bLabelSibling = bParent.querySelector( `label[for="${bElement.id}"]` );
+  assert.ok( bLabelSibling, 'accessibleName sets label sibling' );
+  assert.ok( bLabelSibling!.textContent === TEST_LABEL, 'accessibleName sets label content' );
+  assert.ok( bLabelSibling!.getAttribute( 'for' ) === bElement.id, 'accessibleName sets label\'s "for" attribute' );
 
   const c = new Node( { containerTagName: 'div', tagName: 'div', ariaLabel: 'overrideThis' } );
   rootNode.addChild( c );
@@ -1898,13 +1962,9 @@ QUnit.test( 'accessibleName option', assert => {
     } );
     return options;
   };
+  rootNode.removeChild( e );
 
   const testAccessibleName = 'This is a test';
-
-  window.assert && assert.throws( () => {
-    f.accessibleName = testAccessibleName;
-  }, 'Triggering re-render on parent is not supported because it would cause recursion and should throw.' );
-  rootNode.removeChild( e );
 
   //-------------------------------------------------------------------------------
   // An accessibleNameBehavior that triggers PDOMTree.createTree is not supported
@@ -1943,6 +2003,149 @@ QUnit.test( 'accessibleName option', assert => {
   rootNode.removeChild( h );
 
   pdomAuditRootNode( rootNode );
+  display.dispose();
+  display.domElement.parentElement!.removeChild( display.domElement );
+} );
+
+QUnit.test( 'accessibleName permutations with property-backed values', assert => {
+  const rootNode = new Node( { tagName: 'div' } );
+  const display = new Display( rootNode );
+  document.body.appendChild( display.domElement );
+
+  const accessibleNameProperty = new StringProperty( 'Shared accessible name' );
+
+  const divNode = new Node( { tagName: 'div', accessibleName: accessibleNameProperty } );
+  rootNode.addChild( divNode );
+  const divPrimarySibling = getPrimarySiblingElementByNode( divNode );
+  assert.ok( divPrimarySibling.textContent === 'Shared accessible name', 'div accessibleName uses primary sibling content' );
+
+  const inputNode = new Node( { tagName: 'input', accessibleName: accessibleNameProperty, inputType: 'range' } );
+  rootNode.addChild( inputNode );
+  const inputPrimarySibling = getPrimarySiblingElementByNode( inputNode );
+  const inputLabelSibling = inputPrimarySibling.parentElement!.querySelector( `label[for="${inputPrimarySibling.id}"]` );
+  assert.ok( inputLabelSibling, 'input accessibleName creates associated label sibling' );
+  assert.ok( inputLabelSibling!.textContent === 'Shared accessible name', 'input label sibling gets accessibleName content' );
+
+  const customLabelNode = new Node( {
+    tagName: 'button',
+    labelTagName: 'label',
+    accessibleName: accessibleNameProperty
+  } );
+  rootNode.addChild( customLabelNode );
+  const customPrimarySibling = getPrimarySiblingElementByNode( customLabelNode );
+  const customLabelSibling = customPrimarySibling.parentElement!.querySelector( `label[for="${customPrimarySibling.id}"]` );
+  assert.ok( customLabelSibling, 'custom labelTagName routes accessibleName to label sibling' );
+  assert.ok( customLabelSibling!.textContent === 'Shared accessible name', 'custom label sibling gets accessibleName content' );
+
+  const behaviorNode = new Node( { tagName: 'div', accessibleName: accessibleNameProperty } );
+  behaviorNode.accessibleNameBehavior = ( node, options, accessibleName ) => {
+    options.innerContent = accessibleName;
+    return options;
+  };
+  rootNode.addChild( behaviorNode );
+  const behaviorPrimarySibling = getPrimarySiblingElementByNode( behaviorNode );
+  assert.ok( behaviorPrimarySibling.textContent === 'Shared accessible name', 'behavior-driven accessibleName applies initial property value' );
+
+  accessibleNameProperty.value = 'Updated accessible name';
+  assert.ok( divPrimarySibling.textContent === 'Updated accessible name', 'div accessibleName updates from Property changes' );
+
+  // Input accessibleName default behavior includes labelTagName, so updates can trigger full render and replace peers.
+  // Re-query instead of using stale element references from before the Property change.
+  const updatedInputPrimarySibling = getPrimarySiblingElementByNode( inputNode );
+  const updatedInputLabelSibling = updatedInputPrimarySibling.parentElement!.querySelector( `label[for="${updatedInputPrimarySibling.id}"]` );
+  assert.ok( updatedInputLabelSibling, 'input label sibling exists after Property update' );
+  assert.ok( updatedInputLabelSibling!.textContent === 'Updated accessible name', 'input label updates from Property changes' );
+  assert.ok( customLabelSibling!.textContent === 'Updated accessible name', 'custom label updates from Property changes' );
+  assert.ok( behaviorPrimarySibling.textContent === 'Updated accessible name', 'behavior-driven content updates from Property changes' );
+
+  pdomAuditRootNode( rootNode );
+  display.dispose();
+  display.domElement.parentElement!.removeChild( display.domElement );
+} );
+
+QUnit.test( 'accessibleName fast path', assert => {
+  const rootNode = new Node( { tagName: 'div' } );
+  const display = new Display( rootNode );
+  document.body.appendChild( display.domElement );
+
+  // Default behavior for content tags updates innerContent.
+  const contentNode = new Node( { tagName: 'div', accessibleName: TEST_LABEL } );
+  rootNode.addChild( contentNode );
+  const contentPrimarySibling = getPrimarySiblingElementByNode( contentNode );
+  contentNode.accessibleName = 'Updated accessible name';
+  assert.ok( getPrimarySiblingElementByNode( contentNode ) === contentPrimarySibling, 'content node updates name without recreating the primary sibling' );
+  assert.ok( contentPrimarySibling.textContent === 'Updated accessible name', 'content node updates primary sibling text' );
+
+  // Behavior that only modifies aria-label should also update in place.
+  const ariaLabelNode = new Node( {
+    containerTagName: 'div',
+    tagName: 'div',
+    ariaLabel: 'overrideThis'
+  } );
+  ariaLabelNode.accessibleNameBehavior = ( node, options, accessibleName ) => {
+    options.ariaLabel = accessibleName;
+    return options;
+  };
+  rootNode.addChild( ariaLabelNode );
+  const ariaPrimarySibling = getPrimarySiblingElementByNode( ariaLabelNode );
+  ariaLabelNode.accessibleName = 'Accessible name description';
+  assert.ok( getPrimarySiblingElementByNode( ariaLabelNode ) === ariaPrimarySibling, 'aria-label behavior updates without recreating the primary sibling' );
+  assert.ok( ariaPrimarySibling.getAttribute( 'aria-label' ) === 'Accessible name description', 'aria-label behavior updates the attribute value' );
+
+  // Label siblings can be updated in place as well.
+  const inputNode = new Node( { tagName: 'input', accessibleName: TEST_LABEL, inputType: 'range' } );
+  rootNode.addChild( inputNode );
+  const inputPrimarySibling = getPrimarySiblingElementByNode( inputNode );
+  inputNode.accessibleName = 'Input updated accessible name';
+  assert.ok( getPrimarySiblingElementByNode( inputNode ) === inputPrimarySibling, 'label sibling on input Node is able to be updated in place' );
+
+  display.dispose();
+  display.domElement.parentElement!.removeChild( display.domElement );
+} );
+
+QUnit.test( 'accessibleName setter transitions between slow and fast paths', assert => {
+  const rootNode = new Node( { tagName: 'div' } );
+  const display = new Display( rootNode );
+  document.body.appendChild( display.domElement );
+
+  const transitionNode = new Node( { tagName: 'div', accessibleName: 'initial' } );
+  rootNode.addChild( transitionNode );
+
+  const slowAccessibleNameBehavior: AccessibleNameBehaviorFunction = ( node, options, accessibleName ) => {
+    options.labelTagName = 'label';
+    options.labelContent = accessibleName;
+
+    // The presence of this option is what should indicate slower behavior
+    options.appendLabel = true;
+    return options;
+  };
+  const fastAccessibleNameBehavior: AccessibleNameBehaviorFunction = ( node, options, accessibleName ) => {
+    options.innerContent = accessibleName;
+    return options;
+  };
+
+  // Slow path: behavior sets labelTagName (outside fast-path keys), so setter update should rebuild.
+  transitionNode.accessibleNameBehavior = slowAccessibleNameBehavior;
+  const slowPrimarySiblingBeforeSetter = getPrimarySiblingElementByNode( transitionNode );
+  transitionNode.accessibleName = 'slow-update';
+  const slowPrimarySiblingAfterSetter = getPrimarySiblingElementByNode( transitionNode );
+  assert.ok( slowPrimarySiblingAfterSetter !== slowPrimarySiblingBeforeSetter, 'slow-path setter update rebuilds primary sibling' );
+
+  // Fast path: behavior only sets innerContent, so setter update should patch in place.
+  transitionNode.accessibleNameBehavior = fastAccessibleNameBehavior;
+  const fastPrimarySiblingBeforeSetter = getPrimarySiblingElementByNode( transitionNode );
+  transitionNode.accessibleName = 'fast-update';
+  const fastPrimarySiblingAfterSetter = getPrimarySiblingElementByNode( transitionNode );
+  assert.ok( fastPrimarySiblingAfterSetter === fastPrimarySiblingBeforeSetter, 'fast-path setter update keeps primary sibling' );
+  assert.ok( fastPrimarySiblingAfterSetter.textContent === 'fast-update', 'fast-path setter update refreshes primary sibling text content' );
+
+  // Slow path again: switching back should restore full-render behavior on setter updates.
+  transitionNode.accessibleNameBehavior = slowAccessibleNameBehavior;
+  const slowAgainPrimarySiblingBeforeSetter = getPrimarySiblingElementByNode( transitionNode );
+  transitionNode.accessibleName = 'slow-update-2';
+  const slowAgainPrimarySiblingAfterSetter = getPrimarySiblingElementByNode( transitionNode );
+  assert.ok( slowAgainPrimarySiblingAfterSetter !== slowAgainPrimarySiblingBeforeSetter, 'slow-path setter update still rebuilds after returning from fast path' );
+
   display.dispose();
   display.domElement.parentElement!.removeChild( display.domElement );
 } );
@@ -2433,6 +2636,25 @@ QUnit.test( 'accessibleParagraph', assert => {
 
   display.dispose();
   display.domElement.parentElement!.removeChild( display.domElement );
+} );
+
+QUnit.test( 'accessibleParagraph fast path', assert => {
+  const rootNode = new Node( { tagName: 'div' } );
+  const display = new Display( rootNode );
+  document.body.appendChild( display.domElement );
+
+  // Basic paragraph behavior should update content in place without rebuilding peer siblings.
+  const paragraphNode = new Node( { accessibleParagraph: 'Initial paragraph' } );
+  rootNode.addChild( paragraphNode );
+  const paragraphPeer = getPDOMPeerByNode( paragraphNode );
+  const initialParagraphSibling = paragraphPeer.getPlaceableSibling();
+  paragraphNode.accessibleParagraph = 'Updated paragraph';
+  const updatedParagraphSibling = getPDOMPeerByNode( paragraphNode ).getPlaceableSibling();
+  assert.ok( updatedParagraphSibling === initialParagraphSibling, 'accessibleParagraph fast path updates paragraph content without recreating sibling element' );
+  assert.ok( updatedParagraphSibling.textContent === 'Updated paragraph', 'accessibleParagraph fast path updates paragraph text content' );
+
+  display.dispose();
+  document.body.removeChild( display.domElement );
 } );
 
 QUnit.test( 'accessibleHeading', assert => {

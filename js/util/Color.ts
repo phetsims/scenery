@@ -45,6 +45,12 @@ function parseRGBNumber( str: string ): number {
   return roundSymmetric( Number( str ) * multiplier );
 }
 
+// sRGB linearization per WCAG 2.0 https://www.w3.org/TR/WCAG20/#relativeluminancedef
+function sRGBToLinear( c: number ): number {
+  c = c / 255;
+  return c <= 0.03928 ? c / 12.92 : Math.pow( ( c + 0.055 ) / 1.055, 2.4 );
+}
+
 export default class Color {
   // RGBA values
   declare public r: number;
@@ -512,6 +518,14 @@ export default class Color {
     return roundSymmetric( l * 100 );
   }
 
+  /**
+   * Returns the WCAG 2.0 relative luminance of this color, in the range [0, 1].
+   * Uses sRGB linearization per https://www.w3.org/TR/WCAG20/#relativeluminancedef
+   */
+  public getRelativeLuminance(): number {
+    return 0.2126 * sRGBToLinear( this.r ) + 0.7152 * sRGBToLinear( this.g ) + 0.0722 * sRGBToLinear( this.b );
+  }
+
   public equals( color: Color ): boolean {
     return this.r === color.r && this.g === color.g && this.b === color.b && this.a === color.a;
   }
@@ -797,6 +811,16 @@ export default class Color {
    */
   public static isLightColor( color: Color | string, luminanceThreshold?: number ): boolean {
     return !Color.isDarkColor( color, luminanceThreshold );
+  }
+
+  /**
+   * Returns the WCAG 2.0 contrast ratio between two colors, in the range [1, 21].
+   * See https://www.w3.org/TR/WCAG20/#contrast-ratiodef
+   */
+  public static getContrastRatio( color1: TColor, color2: TColor ): number {
+    const l1 = Color.toColor( color1 ).getRelativeLuminance();
+    const l2 = Color.toColor( color2 ).getRelativeLuminance();
+    return ( Math.max( l1, l2 ) + 0.05 ) / ( Math.min( l1, l2 ) + 0.05 );
   }
 
   /**
