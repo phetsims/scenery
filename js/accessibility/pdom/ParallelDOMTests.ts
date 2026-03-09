@@ -1721,6 +1721,23 @@ QUnit.test( 'focusable option', assert => {
 
 } );
 
+QUnit.test( 'pointerFocusTarget assertions', assert => {
+  if ( !window.assert ) {
+    assert.ok( true, 'Skipping test because assertions are disabled' );
+    return;
+  }
+
+  const a = new Node();
+
+  assert.throws( () => {
+    a.pointerFocusTarget = a;
+  }, /pointerFocusTarget/, 'disallow self-referential pointerFocusTarget' );
+
+  const b = new Node();
+  a.pointerFocusTarget = b;
+  assert.strictEqual( a.pointerFocusTarget, b, 'allows non-self pointerFocusTarget' );
+} );
+
 QUnit.test( 'append siblings/appendLabel/appendDescription setters', assert => {
 
   // test the behavior of focusable function

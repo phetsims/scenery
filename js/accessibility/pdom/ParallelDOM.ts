@@ -273,6 +273,8 @@ const ACCESSIBILITY_OPTION_KEYS = [
 
   'pdomAttributes',
 
+  'pointerFocusTarget',
+
   'ariaLabelledbyAssociations',
   'ariaDescribedbyAssociations',
   'activeDescendantAssociations',
@@ -336,6 +338,8 @@ type ParallelDOMSelfOptions = {
   pdomOrder?: ( Node | null )[] | null; // Modifies the order of accessible navigation
 
   pdomAttributes?: PDOMAttribute[]; // Sets a list of attributes all at once, see setPDOMAttributes().
+
+  pointerFocusTarget?: Node | null; // Optional focus target for pointer-based focus management
 
   ariaLabelledbyAssociations?: Association[]; // sets the list of aria-labelledby associations between from this Node to others (including itself)
   ariaDescribedbyAssociations?: Association[]; // sets the list of aria-describedby associations between from this Node to others (including itself)
@@ -584,6 +588,11 @@ export default class ParallelDOM extends PhetioObject {
   // native HTML function from these form elements can be overridden with this property.
   private _focusableOverride: boolean | null;
 
+  // Optional target for pointer-based focus management, used when this Node is not focusable. You can assign
+  // another Node that should receive focus when the Pointer goes down on this Node. If this Node (or another
+  // ancestor) is focusable, this option will be ignored.
+  private _pointerFocusTarget: Node | null;
+
   // The focus highlight that will surround this Node when it
   // is focused.  By default, the focus highlight will be a pink rectangle that surrounds the Node's local
   // bounds. When providing a custom highlight, draw around the Node's local coordinate frame.
@@ -738,6 +747,7 @@ export default class ParallelDOM extends PhetioObject {
     this._activeDescendantAssociations = [];
     this._nodesThatAreActiveDescendantToThisNode = [];
     this._focusableOverride = null;
+    this._pointerFocusTarget = null;
     this._focusHighlight = null;
     this._focusHighlightLayerable = false;
     this._groupFocusHighlight = false;
@@ -853,6 +863,9 @@ export default class ParallelDOM extends PhetioObject {
     this.setAriaLabelledbyAssociations( [] );
     this.setAriaDescribedbyAssociations( [] );
     this.setActiveDescendantAssociations( [] );
+
+    // Clear pointer focus delegation to avoid cross-node references after disposal.
+    this.pointerFocusTarget = null;
 
     // PDOM attributes can potentially have listeners, so we will clear those out.
     this.removePDOMAttributes();
@@ -3236,6 +3249,31 @@ export default class ParallelDOM extends PhetioObject {
   public set focusable( isFocusable: boolean | null ) { this.setFocusable( isFocusable ); }
 
   public get focusable(): boolean { return this.isFocusable(); }
+
+  /**
+   * Sets a focus target for pointer-based focus management. Use this when a Node is interactive but not focusable,
+   * and pointer interactions should move focus to a separate focusable Node (e.g., a composite control).
+   *
+   * This does not affect keyboard traversal order or accessibility semantics; it only influences pointer-driven
+   * focus handling.
+   */
+  public setPointerFocusTarget( target: Node | null ): void {
+    const thisNode = this as unknown as Node;
+    assert && assert( target !== thisNode, 'pointerFocusTarget cannot reference itself' );
+
+    this._pointerFocusTarget = target;
+  }
+
+  public set pointerFocusTarget( target: Node | null ) { this.setPointerFocusTarget( target ); }
+
+  public get pointerFocusTarget(): Node | null { return this.getPointerFocusTarget(); }
+
+  /**
+   * Returns the pointer focus target, if any. See setPointerFocusTarget for more information.
+   */
+  public getPointerFocusTarget(): Node | null {
+    return this._pointerFocusTarget;
+  }
 
   /**
    * Get whether or not the Node is focusable. Use the focusOverride, and then default to browser defined

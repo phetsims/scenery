@@ -1773,7 +1773,18 @@ export default class Input extends PhetioObject {
       if ( node.focusable && node.accessibleVisible && node.pdomInstances.length > 0 ) {
         return node;
       }
+
+      // If the node itself isn't a focus target, allow it to delegate pointer focus to a separate focusable Node.
+      const pointerFocusTarget = node.pointerFocusTarget;
+      if ( pointerFocusTarget &&
+           pointerFocusTarget.focusable &&
+           pointerFocusTarget.accessibleVisible &&
+           pointerFocusTarget.pdomInstances.length > 0 ) {
+        return pointerFocusTarget;
+      }
     }
+
+    // No focusable candidate in the trail (or via delegation).
     return null;
   }
 
