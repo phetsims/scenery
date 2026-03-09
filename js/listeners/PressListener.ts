@@ -38,6 +38,7 @@ import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import Display from '../display/Display.js';
+import FocusedBooleanProperty from '../input/FocusedBooleanProperty.js';
 import Mouse from '../input/Mouse.js';
 import Node from '../nodes/Node.js';
 import Pointer from '../input/Pointer.js';
@@ -181,7 +182,7 @@ export default class PressListener extends EnabledComponent implements TInputLis
   public readonly isHighlightedProperty: TProperty<boolean>;
 
   // (read-only) - Whether the listener has focus (should appear to be over)
-  public readonly isFocusedProperty: TProperty<boolean>;
+  public readonly isFocusedProperty: FocusedBooleanProperty;
 
   private readonly cursorProperty: TReadOnlyProperty<string | null>;
 
@@ -323,7 +324,7 @@ export default class PressListener extends EnabledComponent implements TInputLis
     this.isOverOrFocusedProperty = new BooleanProperty( false );
     this.isHoveringProperty = new BooleanProperty( false );
     this.isHighlightedProperty = new BooleanProperty( false );
-    this.isFocusedProperty = new BooleanProperty( false );
+    this.isFocusedProperty = new FocusedBooleanProperty( false );
     this.cursorProperty = new DerivedProperty( [ this.enabledProperty ], enabled => {
       if ( options.useInputListenerCursor && enabled && this._attach ) {
         return this._pressCursor;
@@ -964,7 +965,7 @@ export default class PressListener extends EnabledComponent implements TInputLis
       this.pdomClickingProperty.value = true;
 
       // ensure that button is 'focused' so listener can be called while button is down
-      this.isFocusedProperty.value = true;
+      this.isFocusedProperty.setFocused( true );
       this.isPressedProperty.value = true;
 
       // fire the optional callback
@@ -1017,7 +1018,7 @@ export default class PressListener extends EnabledComponent implements TInputLis
     }
 
     // On focus, button should look 'over'.
-    this.isFocusedProperty.value = true;
+    this.isFocusedProperty.setFocused( true, event.focusOrigin );
   }
 
   /**
@@ -1033,7 +1034,7 @@ export default class PressListener extends EnabledComponent implements TInputLis
     }
 
     // On blur, the button should no longer look 'over'.
-    this.isFocusedProperty.value = false;
+    this.isFocusedProperty.setFocused( false );
   }
 
   // (scenery-internal) Tagged for instanceof-like checks that do not require an import
