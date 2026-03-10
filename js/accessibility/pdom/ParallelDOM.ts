@@ -162,7 +162,7 @@ import Trail from '../../util/Trail.js';
 import { Highlight } from '../Highlight.js';
 import globalDescriptionQueue from './globalDescriptionQueue.js';
 import type { PDOMBehaviorFunction } from './ParallelDOMBehavior.js';
-import { ACCESSIBLE_NAME_FAST_PATH_KEYS, ACCESSIBLE_PARAGRAPH_FAST_PATH_KEYS, applyAccessibleNameFastPath, applyAccessibleParagraphFastPath, behaviorOptionsRequireRender, evaluateBehaviorOptions, isFastPathSafeLabelTagName } from './ParallelDOMBehavior.js';
+import { ACCESSIBLE_HELP_TEXT_FAST_PATH_KEYS, ACCESSIBLE_NAME_FAST_PATH_KEYS, ACCESSIBLE_PARAGRAPH_FAST_PATH_KEYS, applyAccessibleHelpTextFastPath, applyAccessibleNameFastPath, applyAccessibleParagraphFastPath, behaviorOptionsRequireRender, evaluateBehaviorOptions, isFastPathSafeAppendDescription, isFastPathSafeAppendLabel, isFastPathSafeDescriptionTagName, isFastPathSafeLabelTagName } from './ParallelDOMBehavior.js';
 import PDOMDisplaysInfo from './PDOMDisplaysInfo.js';
 import type PDOMInstance from './PDOMInstance.js';
 import PDOMTree from './PDOMTree.js';
@@ -187,9 +187,24 @@ export type LimitPanDirection = 'horizontal' | 'vertical';
 
 /**
  * Unwraps a PDOMValueType, returning the current string or null.
+ *
+ * Note: In practice, options passed through optionize can be omitted, which means callers may
+ * inadvertently pass undefined even though it is not part of PDOMValueType. We treat undefined as null here
+ * to keep runtime behavior working.
  */
 const unwrapPDOMValueTypeProperty = ( valueOrProperty: PDOMValueType ): string | null => {
-  const result = valueOrProperty === null ? null : ( typeof valueOrProperty === 'string' ? valueOrProperty : valueOrProperty.value );
+  let result: string | null;
+
+  if ( valueOrProperty === null || valueOrProperty === undefined ) {
+    result = null;
+  }
+  else if ( typeof valueOrProperty === 'string' ) {
+    result = valueOrProperty;
+  }
+  else {
+    result = valueOrProperty.value;
+  }
+
   assert && assert( result === null || typeof result === 'string' );
   return result;
 };
@@ -695,9 +710,11 @@ export default class ParallelDOM extends PhetioObject {
   // Dedicated listener for Property-backed accessibleName values so updates can run through fast-path evaluation.
   // When behavior output is not fast-path eligible, listener routing switches back to _onPDOMContentChangeListener.
   protected _onAccessibleNameChangeListener: () => void;
+  protected _onAccessibleHelpTextChangeListener: () => void;
   protected _onInnerContentChangeListener: () => void;
   protected _onAccessibleTemplateChangeListener: () => void;
   private _isEvaluatingAccessibleNameBehavior = false;
+  private _isEvaluatingAccessibleHelpTextBehavior = false;
 
   protected constructor( options?: PhetioObjectOptions ) {
 
@@ -711,6 +728,7 @@ export default class ParallelDOM extends PhetioObject {
     this._onDescriptionContentChangeListener = this.invalidatePeerDescriptionSiblingContent.bind( this );
     this._onAccessibleParagraphContentChangeListener = this.invalidatePeerParagraphSiblingContent.bind( this );
     this._onAccessibleNameChangeListener = this.onAccessibleNamePropertyChange.bind( this );
+    this._onAccessibleHelpTextChangeListener = this.onAccessibleHelpTextPropertyChange.bind( this );
     this._onInnerContentChangeListener = this.onInnerContentPropertyChange.bind( this );
     this._onAccessibleTemplateChangeListener = this.invalidatePeerAccessibleTemplate.bind( this );
     this._onAccessibleRoleDescriptionChangeListener = this.onAccessibleRoleDescriptionChange.bind( this );
@@ -776,7 +794,7 @@ export default class ParallelDOM extends PhetioObject {
     }
 
     if ( isTReadOnlyProperty( this._accessibleHelpText ) && !this._accessibleHelpText.isDisposed ) {
-      this._accessibleHelpText.unlink( this._onPDOMContentChangeListener );
+      ParallelDOM.unlinkPDOMValueTypeListeners( this._accessibleHelpText, [ this._onPDOMContentChangeListener, this._onAccessibleHelpTextChangeListener ] );
       this._accessibleHelpText = null;
     }
 
@@ -1057,18 +1075,27 @@ export default class ParallelDOM extends PhetioObject {
       // Special case: if behavior returns a labelTagName that already matches every existing peer's label sibling,
       // then no structural DOM change is needed. In that case, ignore labelTagName for this cycle so that
       // labelContent/ariaLabel/innerContent can still use the peer-level fast path.
-      let ignoredDefinedKeys: ReadonlySet<keyof ParallelDOMOptions> | undefined;
+      const ignoredKeys = new Set<keyof ParallelDOMOptions>();
       if ( behaviorOptions.labelTagName !== undefined && isFastPathSafeLabelTagName( behaviorOptions.labelTagName, this._pdomInstances ) ) {
-        ignoredDefinedKeys = new Set<keyof ParallelDOMOptions>( [ 'labelTagName' ] );
+        ignoredKeys.add( 'labelTagName' );
       }
+      if ( behaviorOptions.appendLabel !== undefined && isFastPathSafeAppendLabel( behaviorOptions.appendLabel, this._pdomInstances ) ) {
+        ignoredKeys.add( 'appendLabel' );
+      }
+      const ignoredDefinedKeys = ignoredKeys.size ? ignoredKeys : undefined;
 
       // Preserve existing semantics when accessibleName is cleared: behavior output should no longer apply and
       // base options from getBaseOptions() (for example a pre-existing ariaLabel) must be restored.
+      const accessibleNameValue = unwrapPDOMValueTypeProperty( this._accessibleName );
+
       const requireRender = behaviorOptionsRequireRender(
         behaviorOptions,
         ACCESSIBLE_NAME_FAST_PATH_KEYS,
         hasOtherNodeCallbacks,
-        this._accessibleName === null,
+
+        // If the accessibleName Property's value becomes null, re-render so base options (like ariaLabel)
+        // are restored instead of only patching peer content/attributes.
+        accessibleNameValue === null,
         true,
         ignoredDefinedKeys
       );
@@ -1212,19 +1239,9 @@ export default class ParallelDOM extends PhetioObject {
    */
   public setAccessibleHelpText( accessibleHelpText: PDOMValueType ): void {
     if ( accessibleHelpText !== this._accessibleHelpText ) {
-      if ( isTReadOnlyProperty( this._accessibleHelpText ) && !this._accessibleHelpText.isDisposed ) {
-        this._accessibleHelpText.unlink( this._onPDOMContentChangeListener );
-      }
-
+      ParallelDOM.unlinkPDOMValueTypeListeners( this._accessibleHelpText, [ this._onPDOMContentChangeListener, this._onAccessibleHelpTextChangeListener ] );
       this._accessibleHelpText = accessibleHelpText;
-
-      if ( isTReadOnlyProperty( accessibleHelpText ) ) {
-        accessibleHelpText.lazyLink( this._onPDOMContentChangeListener );
-      }
-
-      this._accessibleHelpTextDirty = true;
-
-      this.onPDOMContentChange();
+      this.onAccessibleHelpTextPropertyChange();
     }
   }
 
@@ -1242,6 +1259,70 @@ export default class ParallelDOM extends PhetioObject {
     else {
       return this._accessibleHelpText;
     }
+  }
+
+  /**
+   * Re-evaluates accessibleHelpText behavior when the value (or Property value) changes, then chooses between:
+   * - full PDOM re-render, or
+   * - fast peer-level description updates.
+   */
+  private onAccessibleHelpTextPropertyChange(): void {
+    assert && assert( !this._isEvaluatingAccessibleHelpTextBehavior,
+      'accessibleHelpTextBehavior cannot update accessibleHelpText recursively while it is being evaluated.' );
+
+    // If there is no tagName, this Node has no PDOM representation yet. Defer behavior evaluation until a tagName
+    // is present and route future Property updates through this listener so behavior can be evaluated once tagName is set.
+    if ( this._tagName === null ) {
+      this.routeBehaviorPropertyListeners( this._accessibleHelpText, this._onAccessibleHelpTextChangeListener, false );
+      return;
+    }
+
+    const tagNameBeforeBehavior = this._tagName;
+    this._isEvaluatingAccessibleHelpTextBehavior = true;
+    evaluateBehaviorOptions( this as unknown as Node, this._accessibleHelpTextBehavior, this._accessibleHelpText, ( behaviorOptions, hasOtherNodeCallbacks ) => {
+      assert && assert( this._tagName === tagNameBeforeBehavior,
+        'accessibleHelpTextBehavior cannot mutate Node state directly (like tagName). Return options from the behavior function instead.' );
+
+      const ignoredKeys = new Set<keyof ParallelDOMOptions>();
+      if ( behaviorOptions.descriptionTagName !== undefined && isFastPathSafeDescriptionTagName( behaviorOptions.descriptionTagName, this._pdomInstances ) ) {
+        ignoredKeys.add( 'descriptionTagName' );
+      }
+      if ( behaviorOptions.appendDescription !== undefined && isFastPathSafeAppendDescription( behaviorOptions.appendDescription, this._pdomInstances ) ) {
+        ignoredKeys.add( 'appendDescription' );
+      }
+      const ignoredDefinedKeys = ignoredKeys.size ? ignoredKeys : undefined;
+
+      const descriptionSiblingMissing = behaviorOptions.descriptionContent !== undefined &&
+                                        !this._pdomInstances.every( pdomInstance => !!pdomInstance.peer!.getDescriptionSibling() );
+
+      // Preserve existing semantics when accessibleHelpText is cleared: behavior output should no longer apply and
+      // base options from getBaseOptions() (for example a pre-existing descriptionContent) must be restored.
+      const accessibleHelpTextValue = unwrapPDOMValueTypeProperty( this._accessibleHelpText );
+
+      const requireRender = behaviorOptionsRequireRender(
+        behaviorOptions,
+        ACCESSIBLE_HELP_TEXT_FAST_PATH_KEYS,
+        hasOtherNodeCallbacks,
+
+        // If the accessibleHelpText Property's value becomes null, we must re-render to restore base description
+        // content rather than only updating the existing description sibling text.
+        accessibleHelpTextValue === null || descriptionSiblingMissing,
+        true,
+        ignoredDefinedKeys
+      );
+
+      this.routeBehaviorPropertyListeners( this._accessibleHelpText, this._onAccessibleHelpTextChangeListener, requireRender );
+
+      if ( requireRender ) {
+        this._accessibleHelpTextDirty = true;
+        this.onPDOMContentChange();
+      }
+      else {
+        this._accessibleHelpTextDirty = false;
+        applyAccessibleHelpTextFastPath( this._pdomInstances, behaviorOptions, unwrapPDOMValueTypeProperty );
+      }
+    } );
+    this._isEvaluatingAccessibleHelpTextBehavior = false;
   }
 
   /**
