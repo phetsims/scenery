@@ -283,7 +283,7 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
       drag: null,
       end: null,
       moveOnHoldDelay: 500,
-      moveOnHoldInterval: 400,
+      moveOnHoldInterval: 50,
       tandem: Tandem.REQUIRED,
 
       // DragListener by default doesn't allow PhET-iO to trigger drag Action events
