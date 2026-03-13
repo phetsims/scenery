@@ -24,6 +24,7 @@ import './listeners/DragListenerTests.js';
 import './listeners/FireListenerTests.js';
 import './listeners/PressListenerTests.js';
 import './listeners/KeyboardListenerTests.js';
+import './listeners/KeyboardDragListenerTests.js';
 import './input/KeyDescriptorTests.js';
 import './nodes/NodeTests.js';
 import './nodes/RichTextTests.js';
