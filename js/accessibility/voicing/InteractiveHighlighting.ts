@@ -306,6 +306,9 @@ const InteractiveHighlighting = <SuperType extends Constructor<Node>>( Type: Sup
           // 2) Alt input highlights are not visible - if they are visible then alt input highlights are used instead
           if (
             display.focusManager.pointerHighlightsVisibleProperty.value &&
+
+            // When PDOM focus highlights are visible, we are in "focus highlight mode" and pointer-based
+            // interactive highlighting is intentionally suppressed.
             !display.focusManager.pdomFocusHighlightsVisibleProperty.value
           ) {
 
