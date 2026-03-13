@@ -9,17 +9,17 @@
 
 import Multilink from '../../../axon/js/Multilink.js';
 import Property from '../../../axon/js/Property.js';
+import TProperty from '../../../axon/js/TProperty.js';
 import Vector2 from '../../../dot/js/Vector2.js';
+import optionize from '../../../phet-core/js/optionize.js';
 import FocusManager from '../../../scenery/js/accessibility/FocusManager.js';
 import globalKeyStateTracker from '../../../scenery/js/accessibility/globalKeyStateTracker.js';
 import KeyboardUtils from '../../../scenery/js/accessibility/KeyboardUtils.js';
 import { getPDOMFocusedNode } from '../../../scenery/js/accessibility/pdomFocusProperty.js';
-import type Display from '../display/Display.js';
 import SceneryEvent from '../../../scenery/js/input/SceneryEvent.js';
 import TInputListener from '../../../scenery/js/input/TInputListener.js';
-import optionize from '../../../phet-core/js/optionize.js';
+import type Display from '../display/Display.js';
 import scenery from '../scenery.js';
-import TProperty from '../../../axon/js/TProperty.js';
 
 // constants
 // The amount of Pointer movement required to switch from showing focus highlights to Interactive Highlights if both
@@ -111,31 +111,45 @@ class HighlightVisibilityController {
       }
     );
 
+    const handlePointerLikeDown = ( event: SceneryEvent ) => {
+
+      // An AT might have sent a down-like event outside of the display, if this happened we will not do anything
+      // to change focus.
+      if ( this.display.bounds.containsPoint( event.pointer.point ) ) {
+
+        // Switch to pointer/interactive highlight mode for pointer input. Focus highlights are usually distracting
+        // for mouse input. InteractiveHighlighting is suppressed while pdomFocusHighlightsVisibleProperty is true,
+        // so this also ensures pointer drags can activate highlights.
+        this.display.focusManager.pdomFocusHighlightsVisibleProperty.value = false;
+
+        const focusedNode = getPDOMFocusedNode();
+
+        // No need to do this work unless some element in the simulation has focus.
+        if ( focusedNode ) {
+
+          // If the event trail doesn't include the focusedNode, clear it - otherwise DOM focus is kept on the
+          // active element so that it can remain the target for assistive devices using pointer events
+          // on behalf of the user, see https://github.com/phetsims/scenery/issues/1137
+          if ( !event.trail.nodes.includes( focusedNode ) ) {
+            FocusManager.pdomFocus = null;
+          }
+        }
+      }
+    };
+
     const displayDownListener = {
 
       // Whenever we receive a down event focus highlights are made invisible. We may also blur the active element in
       // some cases, but not always as is necessary for iOS VoiceOver. See documentation details in the function.
       down: ( event: SceneryEvent ) => {
+        handlePointerLikeDown( event );
+      },
 
-        // An AT might have sent a down event outside of the display, if this happened we will not do anything
-        // to change focus
-        if ( this.display.bounds.containsPoint( event.pointer.point ) ) {
-
-          // in response to pointer events, always hide the focus highlight so it isn't distracting
-          this.display.focusManager.pdomFocusHighlightsVisibleProperty.value = false;
-
-          const focusedNode = getPDOMFocusedNode();
-
-          // no need to do this work unless some element in the simulation has focus
-          if ( focusedNode ) {
-
-            // if the event trail doesn't include the focusedNode, clear it - otherwise DOM focus is kept on the
-            // active element so that it can remain the target for assistive devices using pointer events
-            // on behalf of the user, see https://github.com/phetsims/scenery/issues/1137
-            if ( !event.trail.nodes.includes( focusedNode ) ) {
-              FocusManager.pdomFocus = null;
-            }
-          }
+      // Touch-snags can begin on touchenter/touchmove without a down event. Mirror down behavior so
+      // interactive highlights are allowed to activate immediately for touch drags.
+      touchenter: ( event: SceneryEvent ) => {
+        if ( event.pointer.isTouchLike() ) {
+          handlePointerLikeDown( event );
         }
       }
     };
