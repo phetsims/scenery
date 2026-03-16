@@ -3492,7 +3492,7 @@ export default class ParallelDOM extends PhetioObject {
       responseGroupUtterance.alert = utterance;
 
       // Apply the alert delay and interruptions setting from options for this call.
-      responseGroupUtterance.alertStableDelay = alertDelay ?? Utterance.DEFAULT_ALERT_STABLE_DELAY;
+      responseGroupUtterance.alertDelay = alertDelay ?? Utterance.DEFAULT_ALERT_STABLE_DELAY;
       responseGroupUtterance.interruptible = interruptible;
 
       alertableToSpeak = responseGroupUtterance;
@@ -3502,7 +3502,7 @@ export default class ParallelDOM extends PhetioObject {
       alertableToSpeak = new Utterance( {
         alert: alertableToSpeak,
         interruptible: interruptible,
-        alertStableDelay: alertDelay ?? Utterance.DEFAULT_ALERT_STABLE_DELAY
+        alertDelay: alertDelay ?? Utterance.DEFAULT_ALERT_STABLE_DELAY
       } );
     }
     else {
@@ -3510,7 +3510,7 @@ export default class ParallelDOM extends PhetioObject {
       // Interruptible from the options always overrides the Utterance setting.
       alertableToSpeak.interruptible = interruptible;
       if ( alertDelay !== null ) {
-        alertableToSpeak.alertStableDelay = alertDelay;
+        alertableToSpeak.alertDelay = alertDelay;
       }
     }
 
