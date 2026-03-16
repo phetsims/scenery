@@ -12,6 +12,7 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import Transform3 from '../../../dot/js/Transform3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector2Property from '../../../dot/js/Vector2Property.js';
+import Tandem from '../../../tandem/js/Tandem.js';
 import KeyboardUtils from '../accessibility/KeyboardUtils.js';
 import type PDOMInstance from '../accessibility/pdom/PDOMInstance.js';
 import Display from '../display/Display.js';
@@ -84,6 +85,7 @@ QUnit.test( 'modelPoint initializes from positionProperty', assert => {
 
     const listener = new KeyboardDragListener( {
       positionProperty: positionProperty,
+      tandem: Tandem.ROOT_TEST.createTandem( 'modelPointPositionPropertyListener' ),
       start: ( event, dragListener ) => {
         startCalled = true;
         assert.ok( dragListener.modelPoint.equals( positionProperty.value ),
@@ -109,6 +111,7 @@ QUnit.test( 'modelPoint applies mapPosition at start', assert => {
     const listener = new KeyboardDragListener( {
       positionProperty: positionProperty,
       mapPosition: mapPosition,
+      tandem: Tandem.ROOT_TEST.createTandem( 'modelPointMapPositionListener' ),
       start: ( event, dragListener ) => {
         startCalled = true;
         assert.ok( dragListener.modelPoint.equals( new Vector2( 3, 4 ) ),
@@ -133,6 +136,7 @@ QUnit.test( 'modelPoint applies dragBounds at start', assert => {
     const listener = new KeyboardDragListener( {
       positionProperty: positionProperty,
       dragBoundsProperty: new Property( new Bounds2( 0, 0, 5, 6 ) ),
+      tandem: Tandem.ROOT_TEST.createTandem( 'modelPointDragBoundsListener' ),
       start: ( event, dragListener ) => {
         startCalled = true;
         assert.ok( dragListener.modelPoint.equals( new Vector2( 5, 6 ) ),
@@ -155,6 +159,7 @@ QUnit.test( 'modelPoint initializes from target translation without positionProp
     let startCalled = false;
 
     const listener = new KeyboardDragListener( {
+      tandem: Tandem.ROOT_TEST.createTandem( 'modelPointTargetTranslationListener' ),
       start: ( event, dragListener ) => {
         startCalled = true;
         assert.ok( dragListener.modelPoint.equals( new Vector2( 2, 4 ) ),
@@ -179,6 +184,7 @@ QUnit.test( 'modelPoint uses full inverse transform for translation', assert => 
 
     const listener = new KeyboardDragListener( {
       transform: transform,
+      tandem: Tandem.ROOT_TEST.createTandem( 'modelPointTransformListener' ),
       start: ( event, dragListener ) => {
         startCalled = true;
         assert.ok( dragListener.modelPoint.equals( new Vector2( 5, 12 ) ),
@@ -204,6 +210,7 @@ QUnit.test( 'modelPoint updates during drag', assert => {
       positionProperty: positionProperty,
       dragDelta: 2,
       shiftDragDelta: 1,
+      tandem: Tandem.ROOT_TEST.createTandem( 'modelPointDragListener' ),
       drag: ( event, dragListener ) => {
         dragCalled = true;
         assert.ok( dragListener.modelPoint.equals( new Vector2( 2, 0 ) ),
