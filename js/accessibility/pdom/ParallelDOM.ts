@@ -430,6 +430,12 @@ export type DescriptionResponseOptions = {
   // This flushes all pending responses, even protected ones. Default is false.
   flush?: boolean;
 
+  // Delay (in ms) between enqueuing this response and when it is spoken by the screen reader.
+  // Increasing the value gives more time for interruption/override by newer responses.
+  // For responseGroup, new responses in the same group reset the timer (debounce behavior).
+  // Use 0 to alert immediately.
+  alertDelay?: number;
+
   // Optional global group that causes successive responses with the same group to replace each other.
   // Use a stable, shared string (not per-instance) to create a self-interrupting stream of updates.
   // Groups are global across the application and can be reused at different call sites.
@@ -3459,6 +3465,7 @@ export default class ParallelDOM extends PhetioObject {
     const flush = providedOptions?.flush ?? false;
     const responseGroup = providedOptions?.responseGroup ?? null;
     const alertWhenNotDisplayed = providedOptions?.alertWhenNotDisplayed ?? false;
+    const alertDelay = providedOptions?.alertDelay ?? null;
 
     // Nothing to do if there is no content.
     const alertableText = Utterance.alertableToText( utterance );
@@ -3484,7 +3491,8 @@ export default class ParallelDOM extends PhetioObject {
       const responseGroupUtterance = responseGroupRegistry.getOrCreateGroupUtterance( responseGroup, interruptible );
       responseGroupUtterance.alert = utterance;
 
-      // Apply the interruptible setting from options for this call.
+      // Apply the alert delay and interruptions setting from options for this call.
+      responseGroupUtterance.alertStableDelay = alertDelay ?? Utterance.DEFAULT_ALERT_STABLE_DELAY;
       responseGroupUtterance.interruptible = interruptible;
 
       alertableToSpeak = responseGroupUtterance;
@@ -3493,13 +3501,17 @@ export default class ParallelDOM extends PhetioObject {
     if ( !( alertableToSpeak instanceof Utterance ) ) {
       alertableToSpeak = new Utterance( {
         alert: alertableToSpeak,
-        interruptible: interruptible
+        interruptible: interruptible,
+        alertStableDelay: alertDelay ?? Utterance.DEFAULT_ALERT_STABLE_DELAY
       } );
     }
     else {
 
       // Interruptible from the options always overrides the Utterance setting.
       alertableToSpeak.interruptible = interruptible;
+      if ( alertDelay !== null ) {
+        alertableToSpeak.alertStableDelay = alertDelay;
+      }
     }
 
     if ( alertWhenNotDisplayed ) {
