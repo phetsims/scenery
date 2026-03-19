@@ -3591,6 +3591,32 @@ export default class ParallelDOM extends PhetioObject {
   }
 
   /**
+   * Remove any queued responses for the provided response groups across connected Displays.
+   * This does not cancel currently speaking responses.
+   */
+  public clearAccessibleResponseGroups( responseGroups: string | string[] ): void {
+    const groups = Array.isArray( responseGroups ) ? responseGroups : [ responseGroups ];
+
+    for ( let i = 0; i < groups.length; i++ ) {
+      const group = groups[ i ];
+      const responseGroupUtterance = responseGroupRegistry.getGroupUtterance( group );
+      if ( !responseGroupUtterance ) {
+        continue;
+      }
+
+      if ( globalDescriptionQueue.hasUtterance( responseGroupUtterance ) ) {
+        globalDescriptionQueue.removeUtterance( responseGroupUtterance );
+      }
+
+      this.forEachUtteranceQueue( queue => {
+        if ( queue.hasUtterance( responseGroupUtterance ) ) {
+          queue.removeUtterance( responseGroupUtterance );
+        }
+      } );
+    }
+  }
+
+  /**
    * Apply a callback on each utteranceQueue that this Node has a connection to (via Display). Note that only
    * accessible Displays have utteranceQueues that this function will interface with.
    */

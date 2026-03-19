@@ -46,6 +46,14 @@ class ResponseGroupRegistry {
   }
 
   /**
+   * Return the Utterance for a group, or null if none exists.
+   */
+  public getGroupUtterance( group: string ): Utterance | null {
+    assert && assert( group.trim().length > 0, 'group must be a non-empty string' );
+    return this.groupMap.get( group ) || null;
+  }
+
+  /**
    * Remove a single group from the registry.
    */
   public removeGroup( group: string ): void {
