@@ -61,6 +61,7 @@ const INS_TAG = 'INS';
 const SUB_TAG = 'SUB';
 const SUP_TAG = 'SUP';
 const BR_TAG = 'BR';
+const U_TAG = 'U';
 
 // These browser tags define which elements are focusable by default. Used by ParallelDOM to decide when
 // to override tabindex on the primary sibling. See https://stackoverflow.com/questions/1599660/which-html-elements-can-receive-focus
@@ -68,7 +69,7 @@ const DEFAULT_FOCUSABLE_TAGS = [ A_TAG, AREA_TAG, INPUT_TAG, SELECT_TAG, TEXTARE
 
 // collection of tags that are used for formatting text
 const FORMATTING_TAGS = [ BOLD_TAG, STRONG_TAG, I_TAG, EM_TAG, MARK_TAG, SMALL_TAG, DEL_TAG, INS_TAG, SUB_TAG,
-  SUP_TAG, BR_TAG ];
+  SUP_TAG, BR_TAG, U_TAG ];
 
 // these elements do not have a closing tag, so they won't support features like innerHTML. This is how PhET treats
 // these elements, not necessary what is legal html.
