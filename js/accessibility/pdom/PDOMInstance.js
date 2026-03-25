@@ -32,7 +32,8 @@ import cleanArray from '../../../../phet-core/js/cleanArray.js';
 import Enumeration from '../../../../phet-core/js/Enumeration.js';
 import EnumerationValue from '../../../../phet-core/js/EnumerationValue.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import { FocusManager, PDOMPeer, PDOMUtils, scenery, Trail, TransformTracker } from '../../imports.js';
+// eslint-disable-next-line no-unused-vars ---- this is needed for Node to be used for types
+import { FocusManager, Node, PDOMPeer, PDOMUtils, scenery, Trail, TransformTracker } from '../../imports.js';
 
 // PDOMInstances support two different styles of unique IDs, each with their own tradeoffs, https://github.com/phetsims/phet-io/issues/1851
 class PDOMUniqueIdStrategy extends EnumerationValue {
