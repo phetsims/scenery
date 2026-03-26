@@ -49,11 +49,25 @@ export default class RichTextLink extends Voicing( RichTextCleanable( Node ) ) i
       super.initialize();
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const extractText = ( nodes: any ): string => nodes.map( ( node: any ) => {
+      if ( node.type === 'text' ) {
+        return node.content;
+      }
+      if ( node.children ) {
+        return extractText( node.children );
+      }
+      return '';
+    } ).join( '' );
+
+    // @ts-expect-error
+    const tagStrippedInnerContent = extractText( himalaya.parse( innerContent ) );
+
     // pdom - open the link in the new tab when activated with a keyboard.
     // also see https://github.com/phetsims/joist/issues/430
     this.innerContent = innerContent;
 
-    this.voicingNameResponse = innerContent;
+    this.voicingNameResponse = tagStrippedInnerContent;
 
     // If our href is a function, it should be called when the user clicks on the link
     if ( typeof href === 'function' ) {
