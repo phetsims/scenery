@@ -1903,9 +1903,21 @@ class RichTextLink extends RichTextCleanable( Node ) {
     // also see https://github.com/phetsims/joist/issues/430
     this.innerContent = innerContent;
 
+    const extractText = nodes => nodes.map( node => {
+      if ( node.type === 'text' || node.type === 'Text' ) {
+        return node.content;
+      }
+      if ( node.children ) {
+        return extractText( node.children );
+      }
+      return '';
+    } ).join( '' );
+
+    const tagStrippedInnerContent = extractText( himalaya.parse( innerContent ) );
+
     // voicing - mix Voicing into the RichTextLink so that the link content is interactive with Voicing
     this.initializeVoicing( {
-      voicingNameResponse: innerContent
+      voicingNameResponse: tagStrippedInnerContent
     } );
 
     // If our href is a function, it should be called when the user clicks on the link
