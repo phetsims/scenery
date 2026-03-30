@@ -1784,7 +1784,7 @@ export default class RichText extends WidthSizable( Node ) {
    * Stringifies an HTML subtree defined by the given element, but removing certain tags that we don't need for
    * accessibility (like <a>, <span>, etc.), and adding in tags we do want (see ACCESSIBLE_TAGS).
    */
-  public static himalayaElementToAccessibleString( element: HimalayaNode ): string {
+  public static himalayaElementToAccessibleString( element: HimalayaNode, keepFormattingTags = true ): string {
     if ( isHimalayaTextNode( element ) ) {
       return richTextContentToString( element.content );
     }
@@ -1797,11 +1797,18 @@ export default class RichText extends WidthSizable( Node ) {
         content = StringUtils.wrapDirection( content, dir );
       }
 
-      if ( _.includes( ACCESSIBLE_TAGS, element.tagName ) ) {
+      if ( keepFormattingTags && _.includes( ACCESSIBLE_TAGS, element.tagName ) ) {
         return `<${element.tagName}>${content}</${element.tagName}>`;
       }
       else {
-        return content;
+
+        // We are removing all formatting tags. For breaks, add a space as that was the most likely intent.
+        if ( element.tagName === 'br' ) {
+          return ` ${content}`;
+        }
+        else {
+          return content;
+        }
       }
     }
     else {
@@ -1813,13 +1820,13 @@ export default class RichText extends WidthSizable( Node ) {
    * Transforms a given string with HTML markup into a string suitable for screen readers.
    * Preserves basic styling tags while removing non-accessible markup.
    */
-  public static getAccessibleStringProperty( stringProperty: TReadOnlyProperty<string> ): TReadOnlyProperty<string> {
+  public static getAccessibleStringProperty( stringProperty: TReadOnlyProperty<string>, keepFormattingTags = true ): TReadOnlyProperty<string> {
     return new DerivedStringProperty( [ stringProperty ], string => {
       const rootElements: HimalayaNode[] = himalayaVar.parse( string );
 
       let accessibleString = '';
       rootElements.forEach( element => {
-        accessibleString += RichText.himalayaElementToAccessibleString( element );
+        accessibleString += RichText.himalayaElementToAccessibleString( element, keepFormattingTags );
       } );
 
       return accessibleString;

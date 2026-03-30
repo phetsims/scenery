@@ -1155,6 +1155,15 @@ class PDOMPeer {
 
   /**
    * Render a lit-html template into the dedicated template sibling element.
+   *
+   * Hack alert! We modified the built lit-html in `sherpa/lib/lit-core-3.3.1.min.js` so that it works in XHTML.
+   * See notes and following discussion in https://github.com/phetsims/scenery/issues/1780#issuecomment-4043367389
+   * about why and alternatives that we ruled out.
+   *
+   * This has limitations. In particular, do not use custom elements in lit templates (they are not compatible with
+   * the XHTML DOM in this setup).
+   *
+   * If this causes problems, consider avoiding lit and using the custom templating strategy described in that issue.
    */
   public renderAccessibleTemplate( accessibleTemplate: AccessibleTemplateValue ): void {
     if ( !this._templateSibling ) {

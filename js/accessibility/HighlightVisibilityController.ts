@@ -16,7 +16,6 @@ import type Display from '../display/Display.js';
 import SceneryEvent from '../../../scenery/js/input/SceneryEvent.js';
 import TInputListener from '../../../scenery/js/input/TInputListener.js';
 import optionize from '../../../phet-core/js/optionize.js';
-import scenery from '../scenery.js';
 import TProperty from '../../../axon/js/TProperty.js';
 
 // constants
@@ -161,5 +160,4 @@ class HighlightVisibilityController {
   }
 }
 
-scenery.register( 'HighlightVisibilityController', HighlightVisibilityController );
 export default HighlightVisibilityController;

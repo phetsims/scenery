@@ -23,6 +23,11 @@ export const ACCESSIBLE_NAME_FAST_PATH_KEYS: readonly ( keyof ParallelDOMOptions
 // WARNING: If you add keys here, update applyAccessibleParagraphFastPath() so every declared key is handled.
 export const ACCESSIBLE_PARAGRAPH_FAST_PATH_KEYS: readonly ( keyof ParallelDOMOptions )[] = [ 'accessibleParagraphContent' ];
 
+// Behavior option keys that can be applied directly by updating description sibling content.
+// Any additional defined key from accessibleHelpTextBehavior requires a full PDOM render.
+// WARNING: If you add keys here, update applyAccessibleHelpTextFastPath() so every declared key is handled.
+export const ACCESSIBLE_HELP_TEXT_FAST_PATH_KEYS: readonly ( keyof ParallelDOMOptions )[] = [ 'descriptionContent' ];
+
 /**
  * Evaluates a behavior function with per-call scratch objects, then runs callback logic with resulting options.
  */
@@ -109,6 +114,111 @@ export const isFastPathSafeLabelTagName = ( labelTagName: string | null, pdomIns
 };
 
 /**
+ * Returns whether a behavior-provided descriptionTagName can be treated as non-structural for this update.
+ *
+ * This is true only when all existing peers already have a description sibling with the same tag name.
+ * If any peer is missing a description sibling, or the tag differs, a full render is required to rebuild structure.
+ */
+export const isFastPathSafeDescriptionTagName = ( descriptionTagName: string | null, pdomInstances: PDOMInstance[] ): boolean => {
+  if ( typeof descriptionTagName !== 'string' ) {
+    return false;
+  }
+
+  for ( let i = 0; i < pdomInstances.length; i++ ) {
+    const descriptionSibling = pdomInstances[ i ].peer!.getDescriptionSibling();
+    if ( !descriptionSibling || descriptionSibling.tagName.toLowerCase() !== descriptionTagName.toLowerCase() ) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
+/**
+ * Returns whether a behavior-provided appendLabel can be treated as non-structural for this update.
+ *
+ * This is true only when all existing peers already have label siblings ordered relative to the primary
+ * sibling in the same way that appendLabel would require.
+ */
+export const isFastPathSafeAppendLabel = ( appendLabel: boolean, pdomInstances: PDOMInstance[] ): boolean => {
+  if ( typeof appendLabel !== 'boolean' ) {
+    return false;
+  }
+
+  for ( let i = 0; i < pdomInstances.length; i++ ) {
+    const peer = pdomInstances[ i ].peer!;
+    const labelSibling = peer.getLabelSibling();
+    const primarySibling = peer.getPrimarySibling();
+
+    if ( !labelSibling || !primarySibling ) {
+      return false;
+    }
+
+    const parentElement = labelSibling.parentElement;
+    if ( !parentElement || primarySibling.parentElement !== parentElement ) {
+      return false;
+    }
+
+    const labelIndex = Array.prototype.indexOf.call( parentElement.children, labelSibling );
+    const primaryIndex = Array.prototype.indexOf.call( parentElement.children, primarySibling );
+    if ( labelIndex === -1 || primaryIndex === -1 ) {
+      return false;
+    }
+
+    if ( appendLabel && labelIndex < primaryIndex ) {
+      return false;
+    }
+    if ( !appendLabel && labelIndex > primaryIndex ) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
+/**
+ * Returns whether a behavior-provided appendDescription can be treated as non-structural for this update.
+ *
+ * This is true only when all existing peers already have description siblings ordered relative to the primary
+ * sibling in the same way that appendDescription would require.
+ */
+export const isFastPathSafeAppendDescription = ( appendDescription: boolean, pdomInstances: PDOMInstance[] ): boolean => {
+  if ( typeof appendDescription !== 'boolean' ) {
+    return false;
+  }
+
+  for ( let i = 0; i < pdomInstances.length; i++ ) {
+    const peer = pdomInstances[ i ].peer!;
+    const descriptionSibling = peer.getDescriptionSibling();
+    const primarySibling = peer.getPrimarySibling();
+
+    if ( !descriptionSibling || !primarySibling ) {
+      return false;
+    }
+
+    const parentElement = descriptionSibling.parentElement;
+    if ( !parentElement || primarySibling.parentElement !== parentElement ) {
+      return false;
+    }
+
+    const descriptionIndex = Array.prototype.indexOf.call( parentElement.children, descriptionSibling );
+    const primaryIndex = Array.prototype.indexOf.call( parentElement.children, primarySibling );
+    if ( descriptionIndex === -1 || primaryIndex === -1 ) {
+      return false;
+    }
+
+    if ( appendDescription && descriptionIndex < primaryIndex ) {
+      return false;
+    }
+    if ( !appendDescription && descriptionIndex > primaryIndex ) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
+/**
  * Applies behavior-produced accessibleName options directly to existing peers without rebuilding sibling structure.
  */
 export const applyAccessibleNameFastPath = (
@@ -154,5 +264,25 @@ export const applyAccessibleParagraphFastPath = ( pdomInstances: PDOMInstance[],
   for ( let i = 0; i < pdomInstances.length; i++ ) {
     const peer = pdomInstances[ i ].peer!;
     peer.setAccessibleParagraphContent( content );
+  }
+};
+
+/**
+ * Applies behavior-produced accessibleHelpText options directly to existing peers without rebuilding sibling structure.
+ */
+export const applyAccessibleHelpTextFastPath = (
+  pdomInstances: PDOMInstance[],
+  behaviorOptions: ParallelDOMOptions,
+  unwrapValue: ( valueOrProperty: PDOMValueType ) => string | null
+): void => {
+  const descriptionContent = behaviorOptions.descriptionContent === undefined ? undefined : unwrapValue( behaviorOptions.descriptionContent );
+
+  if ( descriptionContent === undefined ) {
+    return;
+  }
+
+  for ( let i = 0; i < pdomInstances.length; i++ ) {
+    const peer = pdomInstances[ i ].peer!;
+    peer.setDescriptionSiblingContent( descriptionContent );
   }
 };

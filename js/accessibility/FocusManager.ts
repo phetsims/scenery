@@ -1,4 +1,4 @@
-// Copyright 2021-2025, University of Colorado Boulder
+// Copyright 2021-2026, University of Colorado Boulder
 
 /**
  * Manages the Properties which signify and control where various forms of focus are. A Focus
@@ -293,6 +293,9 @@ export default class FocusManager {
 
   /**
    * Get the Focus pointing to the Node whose Parallel DOM element has DOM focus.
+   *
+   * Note: This is an internal model of PDOM focus and is not guaranteed to match document.activeElement at all times.
+   * It can persist across pointer interactions and be cleared/replaced explicitly by focus management logic.
    */
   public static get pdomFocus(): Focus | null {
     return pdomFocusProperty.value;

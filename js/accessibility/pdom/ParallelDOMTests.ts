@@ -10,8 +10,8 @@ import BooleanProperty from '../../../../axon/js/BooleanProperty.js';
 import DerivedProperty from '../../../../axon/js/DerivedProperty.js';
 import Property from '../../../../axon/js/Property.js';
 import StringProperty from '../../../../axon/js/StringProperty.js';
-import Utterance from '../../../../utterance-queue/js/Utterance.js';
 import { html } from '../../../../sherpa/lib/lit-core-3.3.1.min.js';
+import Utterance from '../../../../utterance-queue/js/Utterance.js';
 import Display from '../../display/Display.js';
 import Circle from '../../nodes/Circle.js';
 import Node from '../../nodes/Node.js';
@@ -2120,6 +2120,51 @@ QUnit.test( 'accessibleName fast path', assert => {
   display.domElement.parentElement!.removeChild( display.domElement );
 } );
 
+QUnit.test( 'accessibleName appendLabel fast path after structural update', assert => {
+  const rootNode = new Node( { tagName: 'div' } );
+  const display = new Display( rootNode );
+  document.body.appendChild( display.domElement );
+
+  const labelNode = new Node( {
+    tagName: 'input',
+    inputType: 'range',
+    labelTagName: 'label'
+  } );
+  labelNode.accessibleNameBehavior = ( node, options, accessibleName ) => {
+    options.labelContent = accessibleName;
+    options.appendLabel = true;
+    return options;
+  };
+  rootNode.addChild( labelNode );
+
+  const getSiblingOrder = () => {
+    const peer = getPDOMPeerByNode( labelNode );
+    const labelSibling = peer.getLabelSibling()!;
+    const primarySibling = peer.getPrimarySibling()!;
+    const parentElement = labelSibling.parentElement!;
+    return {
+      labelIndex: Array.prototype.indexOf.call( parentElement.children, labelSibling ),
+      primaryIndex: Array.prototype.indexOf.call( parentElement.children, primarySibling )
+    };
+  };
+
+  const initialOrder = getSiblingOrder();
+  assert.ok( initialOrder.labelIndex < initialOrder.primaryIndex, 'default label order is before primary sibling' );
+
+  labelNode.accessibleName = 'First label';
+  const afterFirstUpdateOrder = getSiblingOrder();
+  assert.ok( afterFirstUpdateOrder.labelIndex > afterFirstUpdateOrder.primaryIndex, 'appendLabel reorders label sibling after primary' );
+  const labelSiblingAfterFirstUpdate = getPDOMPeerByNode( labelNode ).getLabelSibling();
+
+  labelNode.accessibleName = 'Second label';
+  const labelSiblingAfterSecondUpdate = getPDOMPeerByNode( labelNode ).getLabelSibling();
+  assert.ok( labelSiblingAfterSecondUpdate === labelSiblingAfterFirstUpdate, 'appendLabel updates use fast path after reorder' );
+  assert.ok( labelSiblingAfterSecondUpdate!.textContent === 'Second label', 'appendLabel fast path updates label content' );
+
+  display.dispose();
+  display.domElement.parentElement!.removeChild( display.domElement );
+} );
+
 QUnit.test( 'accessibleName setter transitions between slow and fast paths', assert => {
   const rootNode = new Node( { tagName: 'div' } );
   const display = new Display( rootNode );
@@ -2128,12 +2173,12 @@ QUnit.test( 'accessibleName setter transitions between slow and fast paths', ass
   const transitionNode = new Node( { tagName: 'div', accessibleName: 'initial' } );
   rootNode.addChild( transitionNode );
 
-  const slowAccessibleNameBehavior: AccessibleNameBehaviorFunction = ( node, options, accessibleName ) => {
+  const slowAccessibleNameBehavior: AccessibleNameBehaviorFunction = ( node, options, accessibleName, callbacksForOtherNodes ) => {
     options.labelTagName = 'label';
     options.labelContent = accessibleName;
 
-    // The presence of this option is what should indicate slower behavior
-    options.appendLabel = true;
+    // The presence of this callback is what should indicate slower behavior
+    callbacksForOtherNodes.push( () => { /*nothing*/ } );
     return options;
   };
   const fastAccessibleNameBehavior: AccessibleNameBehaviorFunction = ( node, options, accessibleName ) => {
@@ -2228,6 +2273,131 @@ QUnit.test( 'accessibleHelpText option', assert => {
   assert.ok( bDescriptionElement.textContent === 'overrideThis', 'fall back to descriptionContent when accessibleHelpText is null' );
 
   pdomAuditRootNode( rootNode );
+  display.dispose();
+  display.domElement.parentElement!.removeChild( display.domElement );
+} );
+
+QUnit.test( 'accessibleHelpText fast path', assert => {
+  const rootNode = new Node( { tagName: 'div' } );
+  const display = new Display( rootNode );
+  document.body.appendChild( display.domElement );
+
+  const helpTextProperty = new StringProperty( 'Initial help text' );
+  const helpNode = new Node( {
+    tagName: 'button',
+    descriptionTagName: 'p',
+    accessibleHelpText: helpTextProperty
+  } );
+  helpNode.accessibleHelpTextBehavior = ( node, options, accessibleHelpText ) => {
+    options.descriptionContent = accessibleHelpText;
+    return options;
+  };
+  rootNode.addChild( helpNode );
+
+  const initialDescriptionSibling = getPDOMPeerByNode( helpNode ).getDescriptionSibling();
+  assert.ok( initialDescriptionSibling, 'description sibling exists for fast path updates' );
+
+  helpTextProperty.value = 'Updated help text';
+  const updatedDescriptionSibling = getPDOMPeerByNode( helpNode ).getDescriptionSibling();
+  assert.ok( updatedDescriptionSibling === initialDescriptionSibling, 'description sibling updates without being recreated' );
+  assert.ok( updatedDescriptionSibling!.textContent === 'Updated help text', 'description content updates in place' );
+
+  display.dispose();
+  display.domElement.parentElement!.removeChild( display.domElement );
+} );
+
+QUnit.test( 'accessibleHelpText fast path with matching descriptionTagName', assert => {
+  const rootNode = new Node( { tagName: 'div' } );
+  const display = new Display( rootNode );
+  document.body.appendChild( display.domElement );
+
+  const helpNode = new Node( { tagName: 'div', descriptionTagName: 'p' } );
+  helpNode.accessibleHelpTextBehavior = ( node, options, accessibleHelpText ) => {
+    options.descriptionTagName = 'p';
+    options.descriptionContent = accessibleHelpText;
+    return options;
+  };
+  rootNode.addChild( helpNode );
+
+  helpNode.accessibleHelpText = 'Initial help text';
+  const initialDescriptionSibling = getPDOMPeerByNode( helpNode ).getDescriptionSibling();
+  assert.ok( initialDescriptionSibling, 'description sibling exists for matching tag name updates' );
+
+  helpNode.accessibleHelpText = 'Updated help text';
+  const updatedDescriptionSibling = getPDOMPeerByNode( helpNode ).getDescriptionSibling();
+  assert.ok( updatedDescriptionSibling === initialDescriptionSibling, 'matching descriptionTagName allows fast path updates' );
+  assert.ok( updatedDescriptionSibling!.textContent === 'Updated help text', 'description content updates for matching tag name' );
+
+  display.dispose();
+  display.domElement.parentElement!.removeChild( display.domElement );
+} );
+
+QUnit.test( 'accessibleHelpText clearing restores base description content', assert => {
+  const rootNode = new Node( { tagName: 'div' } );
+  const display = new Display( rootNode );
+  document.body.appendChild( display.domElement );
+
+  const helpNode = new Node( {
+    tagName: 'div',
+    descriptionTagName: 'p',
+    descriptionContent: 'Base description'
+  } );
+  helpNode.accessibleHelpTextBehavior = ( node, options, accessibleHelpText ) => {
+    options.descriptionContent = accessibleHelpText;
+    return options;
+  };
+  rootNode.addChild( helpNode );
+
+  helpNode.accessibleHelpText = 'Help text override';
+  const descriptionSiblingAfterHelp = getPDOMPeerByNode( helpNode ).getDescriptionSibling();
+  assert.ok( descriptionSiblingAfterHelp!.textContent === 'Help text override', 'help text overrides base description' );
+
+  helpNode.accessibleHelpText = null;
+  const descriptionSiblingAfterClear = getPDOMPeerByNode( helpNode ).getDescriptionSibling();
+  assert.ok( descriptionSiblingAfterClear !== descriptionSiblingAfterHelp, 'clearing help text triggers full render' );
+  assert.ok( descriptionSiblingAfterClear!.textContent === 'Base description', 'base description content is restored' );
+
+  display.dispose();
+  display.domElement.parentElement!.removeChild( display.domElement );
+} );
+
+QUnit.test( 'accessibleHelpText appendDescription fast path after structural update', assert => {
+  const rootNode = new Node( { tagName: 'div' } );
+  const display = new Display( rootNode );
+  document.body.appendChild( display.domElement );
+
+  const helpNode = new Node( { tagName: 'div', descriptionTagName: 'p' } );
+  helpNode.accessibleHelpTextBehavior = ( node, options, accessibleHelpText ) => {
+    options.descriptionContent = accessibleHelpText;
+    options.appendDescription = true;
+    return options;
+  };
+  rootNode.addChild( helpNode );
+
+  const getSiblingOrder = () => {
+    const peer = getPDOMPeerByNode( helpNode );
+    const descriptionSibling = peer.getDescriptionSibling()!;
+    const primarySibling = peer.getPrimarySibling()!;
+    const parentElement = descriptionSibling.parentElement!;
+    return {
+      descriptionIndex: Array.prototype.indexOf.call( parentElement.children, descriptionSibling ),
+      primaryIndex: Array.prototype.indexOf.call( parentElement.children, primarySibling )
+    };
+  };
+
+  const initialOrder = getSiblingOrder();
+  assert.ok( initialOrder.descriptionIndex < initialOrder.primaryIndex, 'default description order is before primary sibling' );
+
+  helpNode.accessibleHelpText = 'First help text';
+  const afterFirstUpdateOrder = getSiblingOrder();
+  assert.ok( afterFirstUpdateOrder.descriptionIndex > afterFirstUpdateOrder.primaryIndex, 'appendDescription reorders description sibling' );
+  const descriptionSiblingAfterFirstUpdate = getPDOMPeerByNode( helpNode ).getDescriptionSibling();
+
+  helpNode.accessibleHelpText = 'Second help text';
+  const descriptionSiblingAfterSecondUpdate = getPDOMPeerByNode( helpNode ).getDescriptionSibling();
+  assert.ok( descriptionSiblingAfterSecondUpdate === descriptionSiblingAfterFirstUpdate, 'appendDescription updates use fast path after reorder' );
+  assert.ok( descriptionSiblingAfterSecondUpdate!.textContent === 'Second help text', 'appendDescription fast path updates description content' );
+
   display.dispose();
   display.domElement.parentElement!.removeChild( display.domElement );
 } );
@@ -3148,7 +3318,8 @@ QUnit.test( 'accessibleTemplate - ordering relative to accessibleParagraph', ass
     descriptionTagName: 'span',
     descriptionContent: 'Description',
     accessibleParagraph: 'Paragraph',
-    accessibleTemplate: new Property( html`<div class="template-marker">Template</div>` ),
+    accessibleTemplate: new Property( html`
+      <div class="template-marker">Template</div>` ),
     appendAccessibleTemplate: false
   } );
 
@@ -3187,7 +3358,8 @@ QUnit.test( 'getPlaceableSibling - paragraph and template without tagName', asse
 
   const a = new Node( {
     accessibleParagraph: 'Paragraph',
-    accessibleTemplate: html`<div class="template-marker">Template</div>`
+    accessibleTemplate: html`
+      <div class="template-marker">Template</div>`
   } );
   rootNode.addChild( a );
   display.updateDisplay();
@@ -3213,7 +3385,8 @@ QUnit.test( 'getPlaceableSibling - template only without tagName', assert => {
   document.body.appendChild( display.domElement );
 
   const a = new Node( {
-    accessibleTemplate: html`<div class="template-only">Template</div>`
+    accessibleTemplate: html`
+      <div class="template-only">Template</div>`
   } );
   rootNode.addChild( a );
   display.updateDisplay();
@@ -3291,7 +3464,8 @@ QUnit.test( 'accessibleTemplate - disallow interactive tags', assert => {
   document.body.appendChild( display.domElement );
 
   const a = new Node( {
-    accessibleTemplate: new Property( html`<button>Focusable</button>` )
+    accessibleTemplate: new Property( html`
+      <button>Focusable</button>` )
   } );
 
   window.assert && assert.throws( () => {
@@ -3468,7 +3642,8 @@ QUnit.test( 'accessibleTemplate - render teardown clears content', assert => {
   document.body.appendChild( display.domElement );
 
   const a = new Node( {
-    accessibleTemplate: new Property( html`<div id="template-marker">Template</div>` )
+    accessibleTemplate: new Property( html`
+      <div id="template-marker">Template</div>` )
   } );
   rootNode.addChild( a );
 
@@ -3481,7 +3656,8 @@ QUnit.test( 'accessibleTemplate - render teardown clears content', assert => {
   assert.ok( !document.getElementById( 'template-marker' ), 'template content cleared after teardown' );
 
   // Re-render to ensure the container remains usable
-  peer.renderAccessibleTemplate( html`<div id="template-marker">Again</div>` );
+  peer.renderAccessibleTemplate( html`
+    <div id="template-marker">Again</div>` );
   assert.ok( document.getElementById( 'template-marker' ), 'template content can be re-rendered after teardown' );
 
   display.dispose();

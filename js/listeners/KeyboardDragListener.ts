@@ -235,6 +235,8 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
   public modelDelta: Vector2 = new Vector2( 0, 0 );
 
   // The current drag point in the model coordinate frame.
+  // Note: This is initialized at drag start. If no positionProperty or translateNode is provided, we treat the
+  // currentTarget's translation (parent coordinates) as the starting point and map it into model coordinates.
   public modelPoint: Vector2 = new Vector2( 0, 0 );
 
   // The proposed delta in model coordinates, before mapping or other constraints are applied. If using
@@ -283,7 +285,7 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
       drag: null,
       end: null,
       moveOnHoldDelay: 500,
-      moveOnHoldInterval: 400,
+      moveOnHoldInterval: 50,
       tandem: Tandem.REQUIRED,
 
       // DragListener by default doesn't allow PhET-iO to trigger drag Action events
@@ -351,6 +353,15 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
       }
       else {
         this.computeDeltas( 0 );
+      }
+
+      // Initialize modelPoint so it is meaningful for keyboard drags before any movement occurs.
+      if ( this._positionProperty ) {
+        this.modelPoint = this.mapModelPoint( this._positionProperty.value );
+      }
+      else {
+        const parentPoint = this.getCurrentTarget().translation;
+        this.modelPoint = this.mapModelPoint( this.parentToModelPoint( parentPoint ) );
       }
 
       this._start && this._start( event, this );
@@ -602,7 +613,7 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
   private parentToModelPoint( parentPoint: Vector2 ): Vector2 {
     if ( this.transform ) {
       const transform = this.transform instanceof Transform3 ? this.transform : this.transform.value;
-      return transform.inverseDelta2( parentPoint );
+      return transform.getInverse().multiplyVector2( parentPoint );
     }
     return parentPoint;
   }
