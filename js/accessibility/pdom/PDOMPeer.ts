@@ -1210,8 +1210,8 @@ class PDOMPeer {
           if ( node.constructor && node.constructor.name ) {
             this._primarySibling.setAttribute( 'data-phet-node-type', node.constructor.name );
           }
-           
-          if ( node.phetioID ) {
+
+          if ( node.isPhetioInstrumented() ) {
             this._primarySibling.setAttribute( 'data-phet-io-id', node.phetioID );
           }
         }
