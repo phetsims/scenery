@@ -1200,6 +1200,22 @@ class PDOMPeer {
     if ( this._primarySibling ) {
       this._primarySibling.setAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID, indices );
       this._primarySibling.id = this.getElementId( 'primary', indices );
+
+      // Decorate the primary sibling with the scenery Node's constructor name and phetioID (when available)
+      // so accessibility tools (axe DevTools, CT a11y-audit) can map a flagged element back to its source.
+      // Gated on assert so production builds remain unchanged.
+      if ( assert ) {
+        const node = this.pdomInstance.node;
+        if ( node ) {
+          if ( node.constructor && node.constructor.name ) {
+            this._primarySibling.setAttribute( 'data-phet-node-type', node.constructor.name );
+          }
+           
+          if ( node.phetioID ) {
+            this._primarySibling.setAttribute( 'data-phet-io-id', node.phetioID );
+          }
+        }
+      }
     }
     if ( this._primaryContentWrapper ) {
       this._primaryContentWrapper.setAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID, indices );
