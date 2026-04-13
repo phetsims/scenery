@@ -1190,7 +1190,9 @@ class PDOMPeer {
   /**
    * Set ids on elements so for easy lookup with document.getElementById. Also assign a unique
    * data attribute to the elements so that scenery can look up an element from a Trail (mostly
-   * for input handling).
+   * for input handling). Finally, a data attribute is used to assign debugging information to the
+   * element in development mode to make it easier to identify the Node when fixing problems from
+   * automated tooling.
    *
    * Note that dataset isn't supported by all namespaces (like MathML) so we need to use setAttribute.
    */
@@ -1205,14 +1207,13 @@ class PDOMPeer {
       // so accessibility tools (axe DevTools, CT a11y-audit) can map a flagged element back to its source.
       // Gated on assert so production builds remain unchanged.
       if ( assert ) {
-        const node = this.pdomInstance.node;
-        if ( node ) {
-          if ( node.constructor && node.constructor.name ) {
-            this._primarySibling.setAttribute( 'data-phet-node-type', node.constructor.name );
+        if ( this.node ) {
+          if ( this.node.constructor && this.node.constructor.name ) {
+            this._primarySibling.setAttribute( 'data-phet-node-type', this.node.constructor.name );
           }
 
-          if ( node.isPhetioInstrumented() ) {
-            this._primarySibling.setAttribute( 'data-phet-io-id', node.phetioID );
+          if ( this.node.isPhetioInstrumented() ) {
+            this._primarySibling.setAttribute( 'data-phet-io-id', this.node.phetioID );
           }
         }
       }
