@@ -38,6 +38,7 @@ import ReadingBlockUtterance from '../accessibility/voicing/ReadingBlockUtteranc
 import voicingManager from '../accessibility/voicing/voicingManager.js';
 import type Display from '../display/Display.js';
 import scenery from '../scenery.js';
+import { ACCESSIBLE_FOCUS_OBJECT_RESPONSE_GROUP } from './pdom/ACCESSIBLE_FOCUS_OBJECT_RESPONSE_GROUP.js';
 import { guessVisualTrail } from './pdom/guessVisualTrail.js';
 import { pdomUniqueIdToTrail } from './pdom/pdomUniqueIdToTrail.js';
 import { getPDOMFocusedNode, pdomFocusProperty } from './pdomFocusProperty.js';
@@ -277,16 +278,19 @@ export default class FocusManager {
   public static set pdomFocus( value: Focus | null ) {
     if ( pdomFocusProperty.value !== value ) {
 
-      let previousFocus;
-      if ( pdomFocusProperty.value ) {
-        previousFocus = getPDOMFocusedNode();
-      }
+      const previousFocusedNode = pdomFocusProperty.value ? getPDOMFocusedNode() : null;
 
       pdomFocusProperty.value = value;
 
+      // Whenever global focus changes, clear queued focus-specific object responses so stale delayed responses
+      // are not spoken after focus moves elsewhere.
+      if ( previousFocusedNode ) {
+        previousFocusedNode.clearAccessibleResponseGroups( ACCESSIBLE_FOCUS_OBJECT_RESPONSE_GROUP );
+      }
+
       // if set to null, make sure that the active element is no longer focused
-      if ( previousFocus && !value ) {
-        previousFocus.blur();
+      if ( previousFocusedNode && !value ) {
+        previousFocusedNode.blur();
       }
     }
   }

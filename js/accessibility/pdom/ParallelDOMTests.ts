@@ -3337,6 +3337,46 @@ QUnit.test( 'accessibleFocusObjectResponse', assert => {
   document.body.removeChild( display.domElement );
 } );
 
+QUnit.test( 'accessibleFocusObjectResponse clears when focus moves to node without focus response', assert => {
+  if ( !canRunTests ) {
+    assert.ok( true, 'Skipping test because document does not have focus' );
+    return;
+  }
+
+  const rootNode = new Node( { tagName: 'div' } );
+  const display = new Display( rootNode );
+  display.initializeEvents();
+  document.body.appendChild( display.domElement );
+  display.descriptionUtteranceQueue.announcer.hasSpoken = true;
+
+  // First node has a focus object response.
+  const focusResponseNode = new Node( {
+    tagName: 'button',
+    accessibleFocusObjectResponse: 'focus response to be cleared'
+  } );
+
+  // Second node has no focus object response.
+  const noFocusResponseNode = new Node( {
+    tagName: 'button'
+  } );
+
+  rootNode.addChild( focusResponseNode );
+  rootNode.addChild( noFocusResponseNode );
+
+  // Focus the first node to enqueue the delayed focus object response.
+  focusResponseNode.focus();
+  assert.equal( display.descriptionUtteranceQueue.length, 1, 'focus response enqueued for first focused node' );
+
+  // Move focus to a node without focus response content. This should clear queued focus response groups.
+  noFocusResponseNode.focus();
+  assert.equal( display.descriptionUtteranceQueue.length, 0, 'focus response queue cleared on global focus change' );
+
+  display.dispose();
+  focusResponseNode.dispose();
+  noFocusResponseNode.dispose();
+  document.body.removeChild( display.domElement );
+} );
+
 
 QUnit.test( 'accessibleTemplate - static template', assert => {
   const rootNode = new Node( { tagName: 'div' } );

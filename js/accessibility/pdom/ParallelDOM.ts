@@ -160,6 +160,7 @@ import type Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
 import Trail from '../../util/Trail.js';
 import { Highlight } from '../Highlight.js';
+import { ACCESSIBLE_FOCUS_OBJECT_RESPONSE_GROUP } from './ACCESSIBLE_FOCUS_OBJECT_RESPONSE_GROUP.js';
 import globalDescriptionQueue from './globalDescriptionQueue.js';
 import type { PDOMBehaviorFunction } from './ParallelDOMBehavior.js';
 import { ACCESSIBLE_HELP_TEXT_FAST_PATH_KEYS, ACCESSIBLE_NAME_FAST_PATH_KEYS, ACCESSIBLE_PARAGRAPH_FAST_PATH_KEYS, applyAccessibleHelpTextFastPath, applyAccessibleNameFastPath, applyAccessibleParagraphFastPath, behaviorOptionsRequireRender, evaluateBehaviorOptions, isFastPathSafeAppendDescription, isFastPathSafeAppendLabel, isFastPathSafeDescriptionTagName, isFastPathSafeLabelTagName } from './ParallelDOMBehavior.js';
@@ -3650,7 +3651,7 @@ export default class ParallelDOM extends PhetioObject {
   public addAccessibleFocusObjectResponse( alertable: TAlertable ): void {
     this.addAccessibleObjectResponse( alertable, {
       alertDelay: 1000, // long enough for the user's focus to be considered "stable"
-      responseGroup: 'accessibleFocusObjectResponse'
+      responseGroup: ACCESSIBLE_FOCUS_OBJECT_RESPONSE_GROUP
     } );
   }
 
