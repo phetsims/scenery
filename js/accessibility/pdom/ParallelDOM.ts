@@ -244,6 +244,7 @@ const ACCESSIBILITY_OPTION_KEYS = [
   'accessibleNameBehavior',
   'accessibleHelpText',
   'accessibleHelpTextBehavior',
+  'accessibleFocusObjectResponse',
   'accessibleParagraph',
   'appendAccessibleParagraph',
   'accessibleParagraphBehavior',
@@ -306,6 +307,7 @@ type ParallelDOMSelfOptions = {
   accessibleName?: PDOMValueType; // Sets the accessible name for this Node, see setAccessibleName() for more information.
   accessibleParagraph?: PDOMValueType; // Sets the accessible paragraph for this Node, see setAccessibleParagraph() for more information.
   accessibleHelpText?: PDOMValueType; // Sets the help text for this Node, see setAccessibleHelpText() for more information
+  accessibleFocusObjectResponse?: PDOMValueType; // Sets the object response spoken on focus with focus-stabilized defaults.
 
   /*
    * Lower Level API Functions
@@ -373,7 +375,8 @@ export type RemoveParallelDOMOptions<T extends ParallelDOMOptions> = StrictOmit<
 export type TrimParallelDOMOptions<T extends ParallelDOMSelfOptions> = RemoveParallelDOMOptions<T> &
   PickOptional<ParallelDOMSelfOptions,
     'accessibleName' | 'accessibleNameBehavior' | 'accessibleHelpText' | 'accessibleHelpTextBehavior' |
-    'accessibleParagraph' | 'accessibleHeading' | 'accessibleHeadingIncrement' | 'focusable' | 'accessibleVisible'>;
+    'accessibleParagraph' | 'accessibleHeading' | 'accessibleHeadingIncrement' | 'focusable' | 'accessibleVisible' |
+    'accessibleFocusObjectResponse'>;
 
 type PDOMAttribute = {
   attribute: string;
@@ -682,6 +685,13 @@ export default class ParallelDOM extends PhetioObject {
   // Sets the help text of the Node, this most often corresponds to description text.
   private _accessibleHelpTextBehavior: AccessibleHelpTextBehaviorFunction;
 
+  // Sets the object response that is spoken when this Node receives focus.
+  private _accessibleFocusObjectResponse: PDOMValueType = null;
+
+  // Tracks whether focusedProperty is currently linked for focus object responses, so we can avoid
+  // lazily creating focusedProperty for every Node during disposal.
+  private _isListeningForAccessibleFocusObjectResponse = false;
+
   // Forces an update from the behavior functions in PDOMPeer.
   // (scenery-internal)
   public _accessibleNameDirty = false;
@@ -719,6 +729,7 @@ export default class ParallelDOM extends PhetioObject {
   protected _onAccessibleHelpTextChangeListener: () => void;
   protected _onInnerContentChangeListener: () => void;
   protected _onAccessibleTemplateChangeListener: () => void;
+  protected _onAccessibleFocusObjectResponseFocusedListener: ( focused: boolean ) => void;
   private _isEvaluatingAccessibleNameBehavior = false;
   private _isEvaluatingAccessibleHelpTextBehavior = false;
 
@@ -738,6 +749,7 @@ export default class ParallelDOM extends PhetioObject {
     this._onInnerContentChangeListener = this.onInnerContentPropertyChange.bind( this );
     this._onAccessibleTemplateChangeListener = this.invalidatePeerAccessibleTemplate.bind( this );
     this._onAccessibleRoleDescriptionChangeListener = this.onAccessibleRoleDescriptionChange.bind( this );
+    this._onAccessibleFocusObjectResponseFocusedListener = this.onFocusedForAccessibleFocusObjectResponse.bind( this );
 
     this._tagName = null;
     this._containerTagName = null;
@@ -803,6 +815,12 @@ export default class ParallelDOM extends PhetioObject {
       ParallelDOM.unlinkPDOMValueTypeListeners( this._accessibleHelpText, [ this._onPDOMContentChangeListener, this._onAccessibleHelpTextChangeListener ] );
       this._accessibleHelpText = null;
     }
+
+    if ( this._isListeningForAccessibleFocusObjectResponse ) {
+      ( this as unknown as Node ).focusedProperty.unlink( this._onAccessibleFocusObjectResponseFocusedListener );
+      this._isListeningForAccessibleFocusObjectResponse = false;
+    }
+    this._accessibleFocusObjectResponse = null;
 
     if ( isTReadOnlyProperty( this._accessibleParagraph ) &&
          !this._accessibleParagraph.isDisposed &&
@@ -1500,6 +1518,69 @@ export default class ParallelDOM extends PhetioObject {
    */
   public getAccessibleHelpTextBehavior(): AccessibleHelpTextBehaviorFunction {
     return this._accessibleHelpTextBehavior;
+  }
+
+  /**
+   * Set the object response that is spoken when this Node receives focus.
+   *
+   * This only applies when this specific Node has focus. It does not bubble to ancestors or descendants in the
+   * scene graph.
+   *
+   * If this Node is not focusable (or otherwise has no accessible content that can receive focus), this response is
+   * not used.
+   *
+   * Listening for focus responses links to focusedProperty, which is lazily created by Node. Because of this, Nodes
+   * that use this feature should be disposed when no longer needed.
+   */
+  public setAccessibleFocusObjectResponse( accessibleFocusObjectResponse: PDOMValueType ): void {
+    if ( accessibleFocusObjectResponse !== this._accessibleFocusObjectResponse ) {
+      this._accessibleFocusObjectResponse = accessibleFocusObjectResponse;
+      this.updateAccessibleFocusObjectResponseListener();
+    }
+  }
+
+  public set accessibleFocusObjectResponse( accessibleFocusObjectResponse: PDOMValueType ) {
+    this.setAccessibleFocusObjectResponse( accessibleFocusObjectResponse );
+  }
+
+  public get accessibleFocusObjectResponse(): string | null { return this.getAccessibleFocusObjectResponse(); }
+
+  /**
+   * Get the object response that is spoken when this Node receives focus.
+   */
+  public getAccessibleFocusObjectResponse(): string | null {
+    return unwrapPDOMValueTypeProperty( this._accessibleFocusObjectResponse );
+  }
+
+  /**
+   * Link or unlink focusedProperty depending on whether we have focus response content to speak.
+   */
+  private updateAccessibleFocusObjectResponseListener(): void {
+    const shouldListen = this._accessibleFocusObjectResponse !== null;
+
+    if ( shouldListen !== this._isListeningForAccessibleFocusObjectResponse ) {
+      const thisNode = this as unknown as Node;
+      if ( shouldListen ) {
+        thisNode.focusedProperty.link( this._onAccessibleFocusObjectResponseFocusedListener );
+      }
+      else {
+        thisNode.focusedProperty.unlink( this._onAccessibleFocusObjectResponseFocusedListener );
+      }
+
+      this._isListeningForAccessibleFocusObjectResponse = shouldListen;
+    }
+  }
+
+  /**
+   * Speaks the focus object response when this Node receives focus.
+   */
+  private onFocusedForAccessibleFocusObjectResponse( focused: boolean ): void {
+    if ( focused ) {
+      const focusObjectResponse = this.accessibleFocusObjectResponse;
+      if ( focusObjectResponse !== null ) {
+        this.addAccessibleFocusObjectResponse( focusObjectResponse );
+      }
+    }
   }
 
   /***********************************************************************************************************/
@@ -3558,6 +3639,19 @@ export default class ParallelDOM extends PhetioObject {
    */
   public addAccessibleObjectResponse( alertable: TAlertable, providedOptions?: DescriptionResponseOptions ): void {
     this.addAccessibleResponse( alertable, 'object', providedOptions );
+  }
+
+  /**
+   * Add an object response tailored for focus updates.
+   *
+   * By default, this uses a shared responseGroup and nonzero alertDelay so rapid focus movement replaces older
+   * queued focus responses and only stabilized focus is spoken.
+   */
+  public addAccessibleFocusObjectResponse( alertable: TAlertable ): void {
+    this.addAccessibleObjectResponse( alertable, {
+      alertDelay: 1000, // long enough for the user's focus to be considered "stable"
+      responseGroup: 'accessibleFocusObjectResponse'
+    } );
   }
 
   /**

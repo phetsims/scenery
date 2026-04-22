@@ -3262,6 +3262,81 @@ QUnit.test( 'interruptible response behaviors', assert => {
   }
 } );
 
+QUnit.test( 'accessibleFocusObjectResponse', assert => {
+  if ( !canRunTests ) {
+    assert.ok( true, 'Skipping test because document does not have focus' );
+    return;
+  }
+
+  // Create a Display so focus responses can enqueue to the description utterance queue.
+  const rootNode = new Node( { tagName: 'div' } );
+  const display = new Display( rootNode );
+  document.body.appendChild( display.domElement );
+  display.descriptionUtteranceQueue.announcer.hasSpoken = true;
+
+  // Set up three focusable Nodes: two with string responses and one backed by a Property.
+  const firstFocusNode = new Node( {
+    tagName: 'button',
+    accessibleFocusObjectResponse: 'first focus response'
+  } );
+  const secondFocusNode = new Node( {
+    tagName: 'button',
+    accessibleFocusObjectResponse: 'second focus response'
+  } );
+  const focusResponseProperty = new StringProperty( 'property focus response' );
+  const thirdFocusNode = new Node( {
+    tagName: 'button',
+    accessibleFocusObjectResponse: focusResponseProperty
+  } );
+
+  rootNode.addChild( firstFocusNode );
+  rootNode.addChild( secondFocusNode );
+  rootNode.addChild( thirdFocusNode );
+
+  // Start with an empty queue.
+  assert.equal( display.descriptionUtteranceQueue.length, 0, 'focus response queue starts empty' );
+
+  // Focusing the first Node should enqueue one focus object response.
+  firstFocusNode.focusedProperty.value = true;
+  assert.equal( display.descriptionUtteranceQueue.length, 1, 'focus enqueues first focus response' );
+
+  // Focusing another Node should replace within the shared response group (queue length stays 1).
+  secondFocusNode.focusedProperty.value = true;
+  assert.equal( display.descriptionUtteranceQueue.length, 1, 'focus response group replaces previous focus response' );
+
+  // Property-backed responses should participate in the same grouped behavior.
+  thirdFocusNode.focusedProperty.value = true;
+  assert.equal( display.descriptionUtteranceQueue.length, 1, 'property-backed focus response also participates in focus group' );
+
+  // Manual helper calls should use the same grouped defaults.
+  display.descriptionUtteranceQueue.clear();
+  thirdFocusNode.addAccessibleFocusObjectResponse( 'manual focus object response' );
+  thirdFocusNode.addAccessibleFocusObjectResponse( 'manual focus object response' );
+  assert.equal( display.descriptionUtteranceQueue.length, 1, 'manual focus response helper applies grouped defaults' );
+
+  // Getter should unwrap the latest Property value.
+  focusResponseProperty.value = 'property focus response updated';
+  assert.equal(
+    thirdFocusNode.accessibleFocusObjectResponse,
+    'property focus response updated',
+    'getter reads latest Property value'
+  );
+
+  // Clearing the response should disable focus-triggered alerts.
+  thirdFocusNode.accessibleFocusObjectResponse = null;
+  display.descriptionUtteranceQueue.clear();
+  thirdFocusNode.focusedProperty.value = false;
+  thirdFocusNode.focusedProperty.value = true;
+  assert.equal( display.descriptionUtteranceQueue.length, 0, 'clearing focus response disables focus-triggered alerts' );
+
+  // Clean up the Display and attached DOM element.
+  display.dispose();
+  firstFocusNode.dispose();
+  secondFocusNode.dispose();
+  thirdFocusNode.dispose();
+  document.body.removeChild( display.domElement );
+} );
+
 
 QUnit.test( 'accessibleTemplate - static template', assert => {
   const rootNode = new Node( { tagName: 'div' } );
