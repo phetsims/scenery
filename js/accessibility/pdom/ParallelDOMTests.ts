@@ -3314,19 +3314,12 @@ QUnit.test( 'accessibleFocusObjectResponse', assert => {
   thirdFocusNode.addAccessibleFocusObjectResponse( 'manual focus object response' );
   assert.equal( display.descriptionUtteranceQueue.length, 1, 'manual focus response helper applies grouped defaults' );
 
-  // Getter should return the configured alertable value.
-  assert.equal(
-    thirdFocusNode.accessibleFocusObjectResponse,
-    focusResponseProperty,
-    'getter returns configured alertable'
-  );
-
-  // Property-backed responses can still update through their own Property.
+  // Getter should unwrap the latest Property value.
   focusResponseProperty.value = 'property focus response updated';
   assert.equal(
-    focusResponseProperty.value,
+    thirdFocusNode.accessibleFocusObjectResponse,
     'property focus response updated',
-    'property-backed focus response can update'
+    'getter reads latest Property value'
   );
 
   // Clearing the response should disable focus-triggered alerts.
