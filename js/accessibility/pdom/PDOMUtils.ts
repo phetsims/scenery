@@ -434,6 +434,19 @@ const PDOMUtils = {
   },
 
   /**
+   * Creates text content for use inside accessibleTemplate. Text is set with PDOMUtils.setTextContent, so supported
+   * formatting tags render as markup while disallowed or malformed tags render as text.
+   */
+  createAccessibleTemplateTextContent( textContent: string ): ChildNode[] {
+
+    // We create the content in a span, but return the children so that we don't insert extra spans when usin
+    // this method.
+    const element = document.createElement( 'span' );
+    PDOMUtils.setTextContent( element, textContent );
+    return Array.from( element.childNodes );
+  },
+
+  /**
    * Given a tagName, test if the element will be focusable by default by the browser.
    * Different from isElementFocusable, because this only looks at tags that the browser will automatically put
    * a >=0 tab index on.
