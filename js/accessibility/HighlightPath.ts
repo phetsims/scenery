@@ -29,12 +29,8 @@ const OUTER_FOCUS_COLOR = new Color( 'rgba(212,19,106,0.5)' );
 const INNER_FOCUS_COLOR = new Color( 'rgba(250,40,135,0.9)' );
 
 // default inner and outer strokes for the group focus highlight, typically over Displays with lighter backgrounds
-const INNER_LIGHT_GROUP_FOCUS_COLOR = new Color( 'rgba(233,113,166,1.0)' );
-const OUTER_LIGHT_GROUP_FOCUS_COLOR = new Color( 'rgba(233,113,166,1.0)' );
-
-// default inner and outer strokes for the group  focus highlight, typically over Displays with darker backgrounds
-const INNER_DARK_GROUP_FOCUS_COLOR = new Color( 'rgba(159,15,80,1.0)' );
-const OUTER_DARK_GROUP_FOCUS_COLOR = new Color( 'rgba(159,15,80,1.0)' );
+const INNER_GROUP_FOCUS_COLOR = new Color( 'rgba(233,113,166,1.0)' );
+const OUTER_GROUP_FOCUS_COLOR = new Color( 'rgba(233,113,166,1.0)' );
 
 // Determined by inspection, base widths of focus highlight, transform of shape/bounds will change highlight line width
 const INNER_LINE_WIDTH_BASE = 2.5;
@@ -95,11 +91,8 @@ class HighlightPath extends Path {
   public static readonly OUTER_FOCUS_COLOR = OUTER_FOCUS_COLOR;
   public static readonly INNER_FOCUS_COLOR = INNER_FOCUS_COLOR;
 
-  public static readonly INNER_LIGHT_GROUP_FOCUS_COLOR = INNER_LIGHT_GROUP_FOCUS_COLOR;
-  public static readonly OUTER_LIGHT_GROUP_FOCUS_COLOR = OUTER_LIGHT_GROUP_FOCUS_COLOR;
-
-  public static readonly INNER_DARK_GROUP_FOCUS_COLOR = INNER_DARK_GROUP_FOCUS_COLOR;
-  public static readonly OUTER_DARK_GROUP_FOCUS_COLOR = OUTER_DARK_GROUP_FOCUS_COLOR;
+  public static readonly INNER_GROUP_FOCUS_COLOR = INNER_GROUP_FOCUS_COLOR;
+  public static readonly OUTER_GROUP_FOCUS_COLOR = OUTER_GROUP_FOCUS_COLOR;
 
   public static readonly GROUP_OUTER_LINE_WIDTH = GROUP_OUTER_LINE_WIDTH;
   public static readonly GROUP_INNER_LINE_WIDTH = GROUP_INNER_LINE_WIDTH;

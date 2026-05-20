@@ -21,8 +21,8 @@ class GroupHighlightFromNode extends HighlightFromNode {
   public constructor( node: Node | null, providedOptions?: GroupHighlightFromNodeOptions ) {
 
     const options = optionize<GroupHighlightFromNodeOptions, SelfOptions, HighlightFromNodeOptions>()( {
-      outerStroke: HighlightPath.OUTER_LIGHT_GROUP_FOCUS_COLOR,
-      innerStroke: HighlightPath.INNER_LIGHT_GROUP_FOCUS_COLOR,
+      outerStroke: HighlightPath.OUTER_GROUP_FOCUS_COLOR,
+      innerStroke: HighlightPath.INNER_GROUP_FOCUS_COLOR,
 
       outerLineWidth: HighlightPath.GROUP_OUTER_LINE_WIDTH,
       innerLineWidth: HighlightPath.GROUP_INNER_LINE_WIDTH,

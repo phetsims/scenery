@@ -28,16 +28,8 @@ import type Display from '../display/Display.js';
 import Node from '../nodes/Node.js';
 import type TOverlay from '../overlays/TOverlay.js';
 import scenery from '../scenery.js';
-import TPaint from '../util/TPaint.js';
 import Trail from '../util/Trail.js';
 import TransformTracker from '../util/TransformTracker.js';
-
-// colors for the focus highlights, see the getters below for these values.
-const outerHighlightColor: TPaint = HighlightPath.OUTER_FOCUS_COLOR;
-const innerHighlightColor: TPaint = HighlightPath.INNER_FOCUS_COLOR;
-
-const innerGroupHighlightColor: TPaint = HighlightPath.INNER_LIGHT_GROUP_FOCUS_COLOR;
-const outerGroupHighlightColor: TPaint = HighlightPath.OUTER_LIGHT_GROUP_FOCUS_COLOR;
 
 // Type for the "mode" of a particular highlight, signifying behavior for handling the active highlight.
 type HighlightMode = null | 'bounds' | 'node' | 'shape' | 'invisible';
@@ -609,29 +601,29 @@ export default class HighlightOverlay implements TOverlay {
   private updateHighlightColors(): void {
 
     if ( this.mode === 'shape' ) {
-      if ( this.shapeFocusHighlightPath.innerHighlightColor !== HighlightOverlay.getInnerHighlightColor() ) {
-        this.shapeFocusHighlightPath.setInnerHighlightColor( HighlightOverlay.getInnerHighlightColor() );
+      if ( this.shapeFocusHighlightPath.innerHighlightColor !== HighlightPath.INNER_FOCUS_COLOR ) {
+        this.shapeFocusHighlightPath.setInnerHighlightColor( HighlightPath.INNER_FOCUS_COLOR );
       }
-      if ( this.shapeFocusHighlightPath.outerHighlightColor !== HighlightOverlay.getOuterHighlightColor() ) {
-        this.shapeFocusHighlightPath.setOuterHighlightColor( HighlightOverlay.getOuterHighlightColor() );
+      if ( this.shapeFocusHighlightPath.outerHighlightColor !== HighlightPath.OUTER_FOCUS_COLOR ) {
+        this.shapeFocusHighlightPath.setOuterHighlightColor( HighlightPath.OUTER_FOCUS_COLOR );
       }
     }
     else if ( this.mode === 'bounds' ) {
-      if ( this.boundsFocusHighlightPath.innerHighlightColor !== HighlightOverlay.getInnerHighlightColor() ) {
-        this.boundsFocusHighlightPath.setInnerHighlightColor( HighlightOverlay.getInnerHighlightColor() );
+      if ( this.boundsFocusHighlightPath.innerHighlightColor !== HighlightPath.INNER_FOCUS_COLOR ) {
+        this.boundsFocusHighlightPath.setInnerHighlightColor( HighlightPath.INNER_FOCUS_COLOR );
       }
-      if ( this.boundsFocusHighlightPath.outerHighlightColor !== HighlightOverlay.getOuterHighlightColor() ) {
-        this.boundsFocusHighlightPath.setOuterHighlightColor( HighlightOverlay.getOuterHighlightColor() );
+      if ( this.boundsFocusHighlightPath.outerHighlightColor !== HighlightPath.OUTER_FOCUS_COLOR ) {
+        this.boundsFocusHighlightPath.setOuterHighlightColor( HighlightPath.OUTER_FOCUS_COLOR );
       }
     }
 
-    // if a group focus highlight is active, update strokes
+    // If a group focus highlight is active, update strokes.
     if ( this.groupMode ) {
-      if ( this.groupFocusHighlightPath.innerHighlightColor !== HighlightOverlay.getInnerGroupHighlightColor() ) {
-        this.groupFocusHighlightPath.setInnerHighlightColor( HighlightOverlay.getInnerGroupHighlightColor() );
+      if ( this.groupFocusHighlightPath.innerHighlightColor !== HighlightPath.INNER_GROUP_FOCUS_COLOR ) {
+        this.groupFocusHighlightPath.setInnerHighlightColor( HighlightPath.INNER_GROUP_FOCUS_COLOR );
       }
-      if ( this.groupFocusHighlightPath.outerHighlightColor !== HighlightOverlay.getOuterGroupHighlightColor() ) {
-        this.groupFocusHighlightPath.setOuterHighlightColor( HighlightOverlay.getOuterGroupHighlightColor() );
+      if ( this.groupFocusHighlightPath.outerHighlightColor !== HighlightPath.OUTER_GROUP_FOCUS_COLOR ) {
+        this.groupFocusHighlightPath.setOuterHighlightColor( HighlightPath.OUTER_GROUP_FOCUS_COLOR );
       }
     }
   }
@@ -908,33 +900,6 @@ export default class HighlightOverlay implements TOverlay {
     this.focusDisplay.updateDisplay();
   }
 
-  /**
-   * Get the inner color of all focus highlights.
-   */
-  public static getInnerHighlightColor(): TPaint {
-    return innerHighlightColor;
-  }
-
-  /**
-   * Get the outer color of all focus highlights.
-   */
-  public static getOuterHighlightColor(): TPaint {
-    return outerHighlightColor;
-  }
-
-  /**
-   * Get the inner color of all group focus highlights
-   */
-  public static getInnerGroupHighlightColor(): TPaint {
-    return innerGroupHighlightColor;
-  }
-
-  /**
-   * Get the outer color of all group focus highlights.
-   */
-  public static getOuterGroupHighlightColor(): TPaint {
-    return outerGroupHighlightColor;
-  }
 }
 
 scenery.register( 'HighlightOverlay', HighlightOverlay );
