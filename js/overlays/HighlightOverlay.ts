@@ -32,13 +32,12 @@ import TPaint from '../util/TPaint.js';
 import Trail from '../util/Trail.js';
 import TransformTracker from '../util/TransformTracker.js';
 
-// colors for the focus highlights, can be changed for different application backgrounds or color profiles, see
-// the setters and getters below for these values.
-let outerHighlightColor: TPaint = HighlightPath.OUTER_FOCUS_COLOR;
-let innerHighlightColor: TPaint = HighlightPath.INNER_FOCUS_COLOR;
+// colors for the focus highlights, see the getters below for these values.
+const outerHighlightColor: TPaint = HighlightPath.OUTER_FOCUS_COLOR;
+const innerHighlightColor: TPaint = HighlightPath.INNER_FOCUS_COLOR;
 
-let innerGroupHighlightColor: TPaint = HighlightPath.INNER_LIGHT_GROUP_FOCUS_COLOR;
-let outerGroupHighlightColor: TPaint = HighlightPath.OUTER_LIGHT_GROUP_FOCUS_COLOR;
+const innerGroupHighlightColor: TPaint = HighlightPath.INNER_LIGHT_GROUP_FOCUS_COLOR;
+const outerGroupHighlightColor: TPaint = HighlightPath.OUTER_LIGHT_GROUP_FOCUS_COLOR;
 
 // Type for the "mode" of a particular highlight, signifying behavior for handling the active highlight.
 type HighlightMode = null | 'bounds' | 'node' | 'shape' | 'invisible';
@@ -910,24 +909,10 @@ export default class HighlightOverlay implements TOverlay {
   }
 
   /**
-   * Set the inner color of all focus highlights.
-   */
-  public static setInnerHighlightColor( color: TPaint ): void {
-    innerHighlightColor = color;
-  }
-
-  /**
    * Get the inner color of all focus highlights.
    */
   public static getInnerHighlightColor(): TPaint {
     return innerHighlightColor;
-  }
-
-  /**
-   * Set the outer color of all focus highlights.
-   */
-  public static setOuterHilightColor( color: TPaint ): void {
-    outerHighlightColor = color;
   }
 
   /**
@@ -938,24 +923,10 @@ export default class HighlightOverlay implements TOverlay {
   }
 
   /**
-   * Set the inner color of all group focus highlights.
-   */
-  public static setInnerGroupHighlightColor( color: TPaint ): void {
-    innerGroupHighlightColor = color;
-  }
-
-  /**
    * Get the inner color of all group focus highlights
    */
   public static getInnerGroupHighlightColor(): TPaint {
     return innerGroupHighlightColor;
-  }
-
-  /**
-   * Set the outer color of all group focus highlight.
-   */
-  public static setOuterGroupHighlightColor( color: TPaint ): void {
-    outerGroupHighlightColor = color;
   }
 
   /**
