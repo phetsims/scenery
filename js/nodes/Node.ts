@@ -202,6 +202,7 @@ import type Instance from '../display/Instance.js';
 import Renderer from '../display/Renderer.js';
 import type SVGSelfDrawable from '../display/SVGSelfDrawable.js';
 import type WebGLSelfDrawable from '../display/WebGLSelfDrawable.js';
+import type { AccessibleViewStateNode } from '../accessibility/AccessibleSnapshotTypes.js';
 import type Filter from '../filters/Filter.js';
 import hotkeyManager from '../input/hotkeyManager.js';
 import type Pointer from '../input/Pointer.js';
@@ -1178,6 +1179,21 @@ class Node extends ParallelDOM {
    */
   public getChildren(): Node[] {
     return this._children.slice( 0 ); // create a defensive copy
+  }
+
+  /**
+   * Returns a sparse semantic visual-state fragment for agent-facing accessibility snapshots. Subclasses may override
+   * this when a visual Node carries important state that is not already clear from the PDOM. Return null to omit the
+   * Node.
+   *
+   * Snapshot state should describe meaning, not implementation details. Use semantic keys such as
+   * detectorScreen: { ... } instead of stamping type fields into the object. Do not include bounds or full child lists
+   * by default; include spatial data only when it is intentionally authored and useful for accessibility review.
+   *
+   * @returns authored view state for this Node, or null when this Node should be omitted
+   */
+  public getAccessibleViewState(): AccessibleViewStateNode | null {
+    return null;
   }
 
   /**
