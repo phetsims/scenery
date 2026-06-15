@@ -44,15 +44,7 @@ class ImageCanvasDrawable extends CanvasSelfDrawable {
         wrapper.context.drawImage( canvas, 0, 0, canvas.width * multiplier, canvas.height * multiplier );
       }
       else {
-
-        // Use an explicit destination size so Canvas rendering matches the SVG/DOM drawables, which set explicit
-        // width/height attributes from getImageWidth()/getImageHeight(). For raster images this matches the intrinsic
-        // size, so behavior is the same as in the 3-arg call. For SVG images with a viewBox but no width/height
-        // attributes, the intrinsic size is undefined per the CSS spec and browser-dependent, so the 3-argument
-        // drawImage form could draw the image at a different scale than the Node's bounds (e.g. in screenshots, which
-        // render through this code path).
-        // See https://github.com/phetsims/quantum-wave-interference/issues/226
-        wrapper.context.drawImage( node._image, 0, 0, node.getImageWidth(), node.getImageHeight() );
+        wrapper.context.drawImage( node._image, 0, 0 );
       }
 
       if ( hasImageOpacity ) {
