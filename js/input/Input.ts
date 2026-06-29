@@ -377,7 +377,7 @@ export default class Input extends PhetioObject {
 
     this.mouseDownAction = new PhetioAction( ( id: number, point: Vector2, context: EventContext<MouseEvent> ) => {
       if ( this.interruptMultitouch ) {
-        this.interruptMultitouchPointers( point, context );
+        this.interruptMultitouchPointers( context );
       }
 
       const mouse = this.ensureMouse( point, context );
@@ -977,10 +977,10 @@ export default class Input extends PhetioObject {
     return position;
   }
 
-  private interruptMultitouchPointers( point: Vector2, context: EventContext ): void {
+  private interruptMultitouchPointers( context: EventContext ): void {
     const touchLikePointers = this.pointers.filter( otherPointer => otherPointer.isTouchLike() );
     for ( const otherPointer of touchLikePointers ) {
-      this.cancelEvent( otherPointer, context, point );
+      this.cancelEvent( otherPointer, context, otherPointer.point );
       this.removePointer( otherPointer );
     }
   }
@@ -1004,7 +1004,7 @@ export default class Input extends PhetioObject {
 
     // Interrupt touchlike pointers on a new pointer
     if ( this.interruptMultitouch ) {
-      this.interruptMultitouchPointers( point, context );
+      this.interruptMultitouchPointers( context );
 
       // And if we have a mouse, interrupt listeners on it as well.
       if ( this.mouse ) {
